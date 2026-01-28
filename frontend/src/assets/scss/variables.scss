@@ -11,6 +11,12 @@ $main-color: #305b86;
 $sub-color: #4e769e;
 $sub-color-2: #7eaedf;
 $main-gad: linear-gradient(180deg, #305b86 1.04%, #1e456b 101.04%);
+$bg-op: linear-gradient(
+  131.39deg,
+  rgba(255, 255, 255, 0.1) 13.4%,
+  rgba(255, 255, 255, 0.06) 48.64%
+);
+$stroke-grad: linear-gradient(180deg, #ffffff99 0%, #ffffff66 100%);
 
 // Base Colors
 $white: #ffffff;
