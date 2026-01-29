@@ -12,11 +12,53 @@
     </div>
     <div class="content_list">
       <table>
+        <colgroup>
+          <col style="width: auto" />
+          <col style="width: 220px" />
+          <col style="width: 112px" />
+          <col style="width: 60px" />
+          <col style="width: 112px" />
+          <col style="width: 88px" />
+          <col style="width: 88px" />
+          <col style="width: 88px" />
+          <col style="width: 88px" />
+          <col style="width: 88px" />
+          <col style="width: 60px" />
+        </colgroup>
         <thead>
           <tr>
-            <th></th>
+            <th>환자ID</th>
+            <th>환자명</th>
+            <th>생년월일</th>
+            <th>성별</th>
+            <th>분석일</th>
+            <th>나이</th>
+            <th>뼈나이</th>
+            <th>예측키</th>
+            <th>몸무게</th>
+            <th>담당주치의</th>
+            <th>Report</th>
           </tr>
         </thead>
+        <tbody>
+          <tr v-for="item in userList" :key="item.id">
+            <td>{{ item.id }}</td>
+            <td>{{ item.name }}</td>
+            <td>{{ item.birth }}</td>
+            <td>{{ item.male }}</td>
+            <td>{{ item.analyzeDate }}</td>
+            <td>{{ item.age }}</td>
+            <td>{{ item.boneAge }}</td>
+            <td>{{ item.prdHeight }}</td>
+            <td>{{ item.weight }}</td>
+            <td>{{ item.physician }}</td>
+            <td>
+              <a :href="item.report" download class="btn-report">
+                <img src="/assets/icons/pdf_down.svg" alt="download_icon" />
+              </a>
+            </td>
+          </tr>
+        </tbody>
       </table>
     </div>
   </div>
@@ -30,6 +72,53 @@ import { userList } from '../../../mock';
 .content {
   padding: 42px;
   color: $white;
+
+  .content_list {
+    table {
+      width: 100%;
+      border-collapse: collapse;
+
+      th,
+      td {
+        text-align: center;
+        padding: 12px 8px;
+        @include font-12-regular;
+      }
+
+      thead tr {
+        background: $main-gad;
+        padding: 0 11.5px;
+      }
+
+      th {
+        @include font-14-bold;
+        // border-bottom: 1px solid $dark-line-gray;
+      }
+
+      td {
+        // border-bottom: 1px solid $dark-gray-dark;
+      }
+      tbody tr:nth-child(odd) {
+        background: $bg-op;
+      }
+      tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+
+      .btn-report {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity $transition-fast;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+  }
 
   .content_top {
     display: flex;
