@@ -1,7 +1,7 @@
 <template>
   <div class="content">
     <div class="content_top">
-      <button>신규분석</button>
+      <button @click="modal.open('new_analysis', 'page')">신규분석</button>
       <div class="search_bar">
         <span class="search_icon">
           <img src="/assets/icons/search.svg" alt="search_icon" />
@@ -64,8 +64,10 @@
   </div>
 </template>
 <script setup>
-import { onMounted, ref } from 'vue';
 import { userList } from '../../../mock';
+import { useModalStore } from '@/store/modal';
+
+const modal = useModalStore();
 </script>
 
 <style lang="scss" scoped>
