@@ -1,3 +1,27 @@
-*.md
+# Dependencies
+node_modules/
 */node_modules/
-*/dist
+
+# Build
+dist/
+*/dist/
+
+# Environment
+.env
+*/.env
+backend/.env
+frontend/.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Markdown (README.md 제외)
+*.md
+**/*.md
+!README.md
+!**/README.md

@@ -2,6 +2,9 @@
   "permissions": {
     "additionalDirectories": [
       "d:\\IMMERSE\\03_work\\01_DOING\\07_di_wave\\di_wave_pj\\frontend\\src\\assets\\images\\icons"
+    ],
+    "allow": [
+      "Bash(git rm:*)"
     ]
   }
 }
