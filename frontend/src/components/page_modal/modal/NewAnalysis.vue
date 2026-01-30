@@ -18,7 +18,7 @@
             <button
               type="button"
               class="btn-select-image"
-              @click="triggerFileInput"
+              @click.stop="triggerFileInput"
             >
               사진 선택
             </button>
@@ -134,6 +134,7 @@
             <div class="dual-input">
               <input type="text" v-model="form.currentHeight" placeholder="" />
               <span class="unit">cm</span>
+
               <label class="second-label">
                 <span class="required">*</span>몸무게
               </label>
@@ -174,7 +175,8 @@
             <div class="input-date">
               <div class="single-input-unit">
                 <input
-                  type="text"
+                  type="date"
+                  ref="dateInput"
                   v-model="form.analysisDate"
                   placeholder="YYYY-MM-DD"
                 />
@@ -183,6 +185,7 @@
                 src="/assets/icons/calendar.svg"
                 alt=""
                 class="icon-calendar"
+                @click="dateInput.showPicker()"
               />
             </div>
           </div>
@@ -205,6 +208,7 @@ import { useModalStore } from '@/store/modal';
 
 const modal = useModalStore();
 const fileInput = ref(null);
+const dateInput = ref(null);
 const previewUrl = ref('');
 
 // 오늘 날짜로 분석일 초기화
@@ -474,8 +478,12 @@ const handleSubmit = () => {
 
     .second-label {
       @include font-14-regular;
-      color: $white;
+      color: $sub-color-2;
       margin-left: 16px;
+      max-height: 100%;
+      height: 38px;
+      align-items: center;
+      display: flex;
 
       .required {
         color: $sub-color-2;
@@ -528,6 +536,12 @@ const handleSubmit = () => {
       &:focus {
         border-color: $sub-color-2;
       }
+
+      // 브라우저 기본 달력 아이콘 숨기기
+      &::-webkit-calendar-picker-indicator {
+        display: none;
+        -webkit-appearance: none;
+      }
     }
 
     .icon-calendar {
@@ -538,7 +552,11 @@ const handleSubmit = () => {
       width: 18px;
       height: 18px;
       opacity: 0.6;
-      pointer-events: none;
+      cursor: pointer;
+
+      &:hover {
+        opacity: 1;
+      }
     }
   }
 
