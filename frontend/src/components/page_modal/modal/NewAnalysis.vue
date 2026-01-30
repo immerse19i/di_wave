@@ -189,15 +189,18 @@
               />
             </div>
           </div>
-
-          <div class="form-actions">
-            <button type="button" class="btn-cancel" @click="modal.close">
-              취소
-            </button>
-            <button type="submit" class="btn-submit">분석</button>
-          </div>
         </form>
       </div>
+    </div>
+
+    <!-- 버튼 영역 (모달 중앙) -->
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" @click="modal.close">
+        취소
+      </button>
+      <button type="button" class="btn-submit" @click="handleSubmit">
+        분석
+      </button>
     </div>
   </div>
 </template>
@@ -559,34 +562,35 @@ const handleSubmit = () => {
       }
     }
   }
+}
 
-  .form-actions {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-    margin-top: 32px;
+// 버튼 영역 (모달 중앙)
+.form-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 32px;
 
-    button {
-      width: 140px;
-      padding: 12px;
-      border-radius: $radius-sm;
-      @include font-14-bold;
-      transition: opacity $transition-fast;
+  button {
+    width: 140px;
+    padding: 12px;
+    border-radius: $radius-sm;
+    @include font-14-bold;
+    transition: opacity $transition-fast;
 
-      &:hover {
-        opacity: 0.9;
-      }
+    &:hover {
+      opacity: 0.9;
     }
+  }
 
-    .btn-cancel {
-      background-color: $dark-gray-dark;
-      color: $white;
-    }
+  .btn-cancel {
+    background-color: $dark-gray-dark;
+    color: $white;
+  }
 
-    .btn-submit {
-      background: $main-gad;
-      color: $white;
-    }
+  .btn-submit {
+    background: $main-gad;
+    color: $white;
   }
 }
 </style>
