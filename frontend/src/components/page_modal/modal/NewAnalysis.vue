@@ -15,6 +15,13 @@
           <div v-else class="placeholder">
             <p class="placeholder-title">X-ray 사진을 첨부해 주세요.</p>
             <p class="placeholder-sub">*좌측 X-ray 사진을 첨부해 주세요.</p>
+            <button
+              type="button"
+              class="btn-select-image"
+              @click="triggerFileInput"
+            >
+              사진 선택
+            </button>
           </div>
         </div>
         <input
@@ -25,6 +32,7 @@
           style="display: none"
         />
         <button
+          v-if="previewUrl"
           type="button"
           class="btn-select-image"
           @click="triggerFileInput"
@@ -256,22 +264,22 @@ const handleSubmit = () => {
 
 .modal-body {
   display: flex;
-  gap: 40px;
+  gap: 20px;
   min-width: 952px;
 }
 
 // 왼쪽: 이미지 영역
 .image-section {
-  width: 280px;
+  width: 352px;
   display: flex;
   flex-direction: column;
   gap: 16px;
 
   .image-preview {
     width: 100%;
-    height: 360px;
+    height: 476px;
     background-color: $dark-input;
-    border: 1px dashed $dark-line-gray;
+    border: 1px solid $gray2;
     border-radius: $radius-md;
     display: flex;
     align-items: center;
@@ -298,13 +306,15 @@ const handleSubmit = () => {
       .placeholder-sub {
         @include font-12-regular;
         color: $red;
+        margin-bottom: 20px;
       }
     }
   }
 
   .btn-select-image {
-    width: 100%;
+    width: 136px;
     padding: 12px;
+    margin: auto;
     background: $main-gad;
     color: $white;
     border-radius: $radius-sm;
@@ -327,12 +337,16 @@ const handleSubmit = () => {
     margin-bottom: 16px;
 
     > label {
-      width: 100px;
+      width: 108px;
       flex-shrink: 0;
-      @include font-14-regular;
+      // white-space: nowrap;
+      @include font-14-bold;
       color: $white;
       display: flex;
       align-items: center;
+      &:has(.required) {
+        color: $sub-color-2;
+      }
       .required {
         color: $sub-color-2;
         margin-right: 2px;
@@ -349,7 +363,7 @@ const handleSubmit = () => {
 
     > input {
       flex: 1;
-      padding: 10px 12px;
+      padding: 8px 12px;
       background-color: $dark-input;
       border: 1px solid $dark-line-gray;
       border-radius: $radius-sm;
@@ -375,8 +389,8 @@ const handleSubmit = () => {
     flex: 1;
 
     input {
-      width: 60px;
-      padding: 10px 12px;
+      width: 40px;
+      padding: 8px 12px;
       background-color: $dark-input;
       border: 1px solid $dark-line-gray;
       border-radius: $radius-sm;
@@ -390,12 +404,12 @@ const handleSubmit = () => {
     }
 
     .input-year {
-      width: 70px;
+      width: 60px;
     }
 
     .unit {
-      @include font-14-regular;
-      color: $white;
+      @include font-12-regular;
+      color: $dark-text;
     }
   }
 
@@ -415,7 +429,7 @@ const handleSubmit = () => {
       width: 100px;
       padding: 10px;
       background-color: $dark-gray-dark;
-      color: $white;
+      color: $dark-text;
       border-radius: $radius-sm;
       @include font-14-regular;
       transition: background $transition-fast;
@@ -435,7 +449,7 @@ const handleSubmit = () => {
   // 현재키/몸무게 듀얼 인풋
   .dual-input {
     display: flex;
-    align-items: center;
+    align-items: end;
     gap: 8px;
     flex: 1;
 
@@ -454,8 +468,8 @@ const handleSubmit = () => {
     }
 
     .unit {
-      @include font-14-regular;
-      color: $white;
+      @include font-12-regular;
+      color: $dark-text;
     }
 
     .second-label {
@@ -473,7 +487,7 @@ const handleSubmit = () => {
   // 단일 인풋 + 단위
   .single-input-unit {
     display: flex;
-    align-items: center;
+    align-items: end;
     gap: 8px;
 
     input {
@@ -491,8 +505,8 @@ const handleSubmit = () => {
     }
 
     .unit {
-      @include font-14-regular;
-      color: $white;
+      @include font-12-regular;
+      color: $dark-text;
     }
   }
 
