@@ -93,7 +93,7 @@ const handleLogin = () => {
   // 데모: 바로 대시보드로 이동
   router.push('/main');
 
-  message.show('아이디 또는 비밀번호가 일치하지 않습니다.', 30);
+  // message.show('아이디 또는 비밀번호가 일치하지 않습니다.', 30);
 };
 </script>
 

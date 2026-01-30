@@ -77,7 +77,9 @@ import { userList } from '../../../mock';
     table {
       width: 100%;
       border-collapse: collapse;
-
+      border-top-right-radius: 8px;
+      border-top-left-radius: 8px;
+      overflow: hidden;
       th,
       td {
         text-align: center;
@@ -102,7 +104,7 @@ import { userList } from '../../../mock';
         background: $bg-op;
       }
       tbody tr:hover {
-        background-color: rgba(255, 255, 255, 0.05);
+        // background-color: rgba(255, 255, 255, 0.05);
       }
 
       .btn-report {

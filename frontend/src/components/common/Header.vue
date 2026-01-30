@@ -1,7 +1,9 @@
 <template>
   <header id="header">
     <div class="header_inner">
-      <div class="logo">logo</div>
+      <div class="logo">
+        <img src="/assets/logo/logo.svg" alt="logo" />
+      </div>
       <div class="right_menu">
         <div class="time_text">{{}}</div>
         <div class="user_info">
@@ -47,6 +49,12 @@ const setData = () => {
     align-items: center;
     height: 100%;
     @include font-14-medium;
+    .logo {
+      max-width: 93px;
+      img {
+        width: 100%;
+      }
+    }
 
     .right_menu {
       display: flex;

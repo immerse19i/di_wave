@@ -7,7 +7,7 @@
   >
     <div class="modal-content">
       <!-- 동적 컴포넌트 -->
-      <div class="close-btn">
+      <div class="close-btn" @click="modal.close">
         <img :src="closeIcon" alt="" />
       </div>
       <component :is="currentComponent" />
