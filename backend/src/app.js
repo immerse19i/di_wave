@@ -24,6 +24,12 @@ app.get('/api/health', (req, res) => {
 // app.use('/api/analyses', analysisRoutes);
 // ...
 
+//Routes
+const authRoutes =require('./routes/auth');
+app.use('/api/auth',authRoutes);
+
+
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
