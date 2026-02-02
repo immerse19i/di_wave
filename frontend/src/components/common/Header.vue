@@ -12,17 +12,37 @@
             <img src="/assets/icons/arrow_down.svg" alt="" />
           </button>
         </div>
-        <button class="log_out">로그아웃</button>
+        <button class="log_out" @click="handleLogout">로그아웃</button>
       </div>
     </div>
   </header>
 </template>
 <script setup>
 import { onMounted, ref } from 'vue';
+import {useRouter} from 'vue-router';
+import { authAPI} from '@/api/auth';
+
+const router = useRouter();
+
+
 const demoId = '테스트';
+
 
 const isConnect = ref(false);
 const logUserId = ref(null);
+
+const handleLogout = async () => {
+  try{
+    await authAPI.logout();
+
+  } catch(e){
+    //에러 무시
+  }
+  localStorage.removeItem('token');
+    router.push('/login');
+}
+
+
 
 onMounted(() => {
   setData();

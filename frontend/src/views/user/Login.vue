@@ -69,6 +69,8 @@ import { useRouter } from 'vue-router';
 import { useModalStore } from '@/store/modal';
 import UserModalBody from '@/components/user_modal/UserModalBody.vue';
 import { UseMessageStore } from '@/store/message';
+import {authAPI} from '@/api/auth';
+
 
 const modal = useModalStore();
 const router = useRouter();
@@ -87,14 +89,31 @@ const logoSrc = '/assets/logo/logo.svg';
 const eyeHideIcon = '/assets/icons/eye_hide.svg';
 const eyeShowIcon = '/assets/icons/eye_show.svg';
 
-const handleLogin = () => {
-  // TODO: API 연동
-  console.log('Login:', form.value);
-  // 데모: 바로 대시보드로 이동
-  router.push('/main');
+// const handleLogin = () => {
+//   // TODO: API 연동
+//   console.log('Login:', form.value);
+//   // 데모: 바로 대시보드로 이동
+//   router.push('/main');
 
-  // message.show('아이디 또는 비밀번호가 일치하지 않습니다.', 30);
-};
+//   // message.show('아이디 또는 비밀번호가 일치하지 않습니다.', 30);
+// };
+
+const handleLogin = async () => {
+  try {
+    const {data}= await authAPI.login(form.value.userId, form.value.password);
+
+    //토큰 저장
+    localStorage.setItem('token', data.token);
+    //메인페이지로 이동
+    router.push('/main');
+
+  } catch(error){
+      console.log('Login error:', error.response?.data);
+    message.show('아이디 또는 비밀번호가 일치하지 않습니다.', 3000);
+  }
+}
+
+
 </script>
 
 <style lang="scss" scoped>
