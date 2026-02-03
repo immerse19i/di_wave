@@ -49,6 +49,9 @@
       
       <!-- 컨텐츠 영역 -->
       <main class="content">
+        <div class="content-title">
+          {{ pageTitle }}
+        </div>
         <router-view />
       </main>
     </div>
@@ -57,6 +60,31 @@
 
 <script setup>
 import Header from '@/components/common/Header.vue';
+import {computed} from 'vue';
+import {useRoute} from 'vue-router';
+
+const route = useRoute();
+
+const pageTitle = computed(()=> {
+
+  const titles = {
+        'profile': '프로필',
+      'password-change': '비밀번호 변경',
+      'notice': '공지사항',
+      'inquiry': '문의하기',
+      'credit': '크레딧 관리',
+      'info': '정보'
+  }
+  
+  /** 
+   * @ex user-info/profile -> profile 추출
+   * 
+   * */ 
+    const path = route.path.split('/').pop();
+    return titles[path] || "프로필"
+
+
+})
 </script>
 
 <style lang="scss" scoped>
@@ -111,5 +139,12 @@ import Header from '@/components/common/Header.vue';
 .content {
   flex: 1;
   padding: 24px;
+  padding-top:48px;
+  .content-title{
+    @include font-20-bold;
+    color:$white;
+    text-align: center;
+    margin-bottom:20px;
+  }
 }
 </style>
