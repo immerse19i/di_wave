@@ -4,7 +4,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 const Login = () => import('@/views/user/Login.vue');
 const UserMain = () => import('@/views/user/UserMain.vue');
 const UserList = () => import('@/views/user/page/UserList.vue');
-const UserInfo = () => import('@/views/user/UserInfo.vue');
+const UserInfo = () => import('@/views/user/page/UserInfo.vue');
 const Profile = () => import('@/views/user/page/user-info/Profile.vue');
 const PasswordChange = () => import('@/views/user/page/user-info/PasswordChange.vue');
 const Notice = () => import('@/views/user/page/user-info/Notice.vue');
