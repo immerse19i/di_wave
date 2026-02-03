@@ -4,40 +4,43 @@
     <div class="user-info-container">
       <!-- 사이드바 -->
       <aside class="sidebar">
+        <div class="bar_title">
+          설정/계정
+        </div>
         <ul class="menu_list">
           <li>
             <router-link to="/user-info/profile">
-              <img src="/assets/icons/profile.svg" alt="" />
+              <!-- <img src="/assets/icons/profile.svg" alt="" /> -->
               프로필
             </router-link>
           </li>
           <li>
             <router-link to="/user-info/password-change">
-              <img src="/assets/icons/password.svg" alt="" />
+              <!-- <img src="/assets/icons/password.svg" alt="" /> -->
               비밀번호 변경
             </router-link>
           </li>
           <li>
             <router-link to="/user-info/notice">
-              <img src="/assets/icons/notice.svg" alt="" />
+              <!-- <img src="/assets/icons/notice.svg" alt="" /> -->
               공지사항
             </router-link>
           </li>
           <li>
             <router-link to="/user-info/inquiry">
-              <img src="/assets/icons/inquiry.svg" alt="" />
+              <!-- <img src="/assets/icons/inquiry.svg" alt="" /> -->
               문의하기
             </router-link>
           </li>
           <li>
             <router-link to="/user-info/credit">
-              <img src="/assets/icons/credit.svg" alt="" />
+              <!-- <img src="/assets/icons/credit.svg" alt="" /> -->
               크레딧 관리
             </router-link>
           </li>
           <li>
             <router-link to="/user-info/info">
-              <img src="/assets/icons/info.svg" alt="" />
+              <!-- <img src="/assets/icons/info.svg" alt="" /> -->
               정보
             </router-link>
           </li>
@@ -69,20 +72,31 @@ import Header from '@/components/common/Header.vue';
 
 .sidebar {
   width: 240px;
-  background: $sub-color;
-  padding: 24px 12px;
-  
+  color:$white;
+  // background: $sub-color;
+  padding: 42px 56px;
+  padding-right:0;
+  .bar_title{
+    @include font-20-bold;
+    margin-bottom:16px;
+
+  }
+
   .menu_list {
+    border-top: 1px solid $white;
+    padding-top:16px;
     li a {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 12px 24px;
+      padding: 14.5px 16px;
+
       color: $white;
       border-radius: $radius-md;
-      @include font-14-medium;
+      @include font-16-regular;
       
-      &:hover, &.router-link-active {
+      &.router-link-active {
+        
+        @include font-16-bold;
         background: rgba(255, 255, 255, 0.1);
       }
       
