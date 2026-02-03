@@ -2,7 +2,10 @@
   <header id="header">
     <div class="header_inner">
       <div class="logo">
-        <img src="/assets/logo/logo.svg" alt="logo" />
+        <router-link to="/main">
+
+          <img src="/assets/logo/logo.svg" alt="logo" />
+        </router-link>
       </div>
       <div class="right_menu">
         <div class="time_text">{{}}</div>
