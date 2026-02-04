@@ -36,7 +36,7 @@
           </div>
         </div>
 
-        <p class="validation-alert">
+        <p :class="isPasswordWrong ? 'validation-alert show' : 'validation-alert'">
           아이디 또는 비밀번호가 일치하지 않습니다.
         </p>
         <button type="submit" class="btn-login">로그인</button>
@@ -84,6 +84,7 @@ const form = ref({
 
 const showPassword = ref(false);
 const rememberUserId = ref(false);
+const isPasswordWrong = ref(false);
 
 // public 폴더 경로
 const logoSrc = '/assets/logo/logo.svg';
@@ -111,6 +112,7 @@ const handleLogin = async () => {
   } catch(error){
       console.log('Login error:', error.response?.data);
     message.show('아이디 또는 비밀번호가 일치하지 않습니다.', 3000);
+    isPasswordWrong.value = true;
   }
 }
 
@@ -207,6 +209,10 @@ const handleLogin = async () => {
   @include font-12-regular;
   visibility: hidden;
   color: $red;
+
+  &.show{
+    visibility: visible;
+  }
 }
 .btn-login {
   width: 100%;
