@@ -61,6 +61,7 @@
     </div>
     <UserModalBody v-if="modal.isOpen && modal.role === 'sign'" />
   </div>
+  <LoginFooter/>
 </template>
 
 <script setup>
@@ -70,7 +71,7 @@ import { useModalStore } from '@/store/modal';
 import UserModalBody from '@/components/user_modal/UserModalBody.vue';
 import { UseMessageStore } from '@/store/message';
 import {authAPI} from '@/api/auth';
-
+import LoginFooter from '../../components/common/LoginFooter.vue';
 
 const modal = useModalStore();
 const router = useRouter();
@@ -118,17 +119,20 @@ const handleLogin = async () => {
 
 <style lang="scss" scoped>
 .login-page {
-  min-height: 100vh;
+  min-height: calc(100vh - 157px);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   background-color: $dark-bg;
 }
 
 .login-container {
+  // flex:1;
   width: 100%;
   max-width: 398px;
   padding: $spacing-xl;
+  
 }
 
 .login-logo {
