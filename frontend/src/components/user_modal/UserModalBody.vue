@@ -58,4 +58,7 @@ const components = {
 };
 
 const currentComponent = computed(() => components[modal.type]);
+
+
+
 </script>
