@@ -7,7 +7,7 @@ exports.verifyToken = (req,res, next) => {
   try {
     // 헤더 토큰 추출
     const authHeader = req.headers.authorization;
-    if(!authHeader || !authHeader.startWith('Bearer ')) {
+    if(!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({message : '인중 토큰이 필요 합니다.'});
     }
 
