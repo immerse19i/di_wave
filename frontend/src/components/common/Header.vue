@@ -8,7 +8,7 @@
         </router-link>
       </div>
       <div class="right_menu">
-        <div class="time_text">{{}}</div>
+        <div class="time_text">{{authStore.timeLeftFormatted}}초뒤 자동 로그아웃 됩니다.</div>
         <div class="user_info">
           {{ logUserId }}님
           <button @click="toggleDropdown">
@@ -66,9 +66,12 @@
 import { onMounted, ref ,onUnmounted} from 'vue';
 import { useRouter } from 'vue-router';
 import { authAPI} from '@/api/auth';
+import { useAuthStore } from '../../store/auth';
 
 const router = useRouter();
 const isDropdownOpen = ref(false);
+const authStore =useAuthStore();
+
 
 const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value;
