@@ -3,6 +3,9 @@ const jwt =  require('jsonwebtoken');
 const {pool} = require('../config/database');
 const config = require('../config/config');
 
+// 상수 정의 
+const MAX_LOGIN_ATTEMPTS =5;
+const LOCK_TIME = 30 * 60 * 1000;
 
 //로긩
 exports.login = async (req,res)=> {
@@ -10,19 +13,62 @@ exports.login = async (req,res)=> {
     //id로 사용자 조회
 const { loginId, password } = req.body;
 const [users] = await pool.query(
-  'SELECT * FROM users WHERE login_id = ? AND is_active = 1',
+  'SELECT * FROM users WHERE login_id = ?',
   [loginId]
 );
     if (users.length === 0){
-      return res.status(401).json({message: '이메일 또는 비밀번호가 올바르지 않습니다.'})
+      return res.status(401).json({message: '아이디 또는 비밀번호가 올바르지 않습니다.'})
     }
 
+
+
     const user = users[0];
+
+    // 계정 활성화 체크
+    if(!user.is_active){
+      return res.status(403).json({ message: '비활성화된 계정입니다.'});
+    }
+
+    // 계정 잠금 체크
+    if(user.locked_until && new Date(user.locked_until) > new Date()){
+      const remainingTime = Math.ceil((new Date(user.locked_until) - new Date()) / 60000);
+      return res.status(423).json({
+        message: `계정이 잠겼습니다. ${remainingTime}분 후 다시 시도하세요`,
+        locked : true,
+        remainingMinutes: remainingTime,
+      });
+    }
+
 
     //비밀번호 확인
     const isMatch = await bcrypt.compare(password, user.password);
     if(!isMatch) {
-      return res.status(401).json({message: '이메일 또는 비밀번호가 올바르지 않습니다.'});
+      // 실패 횟수 증가
+      const attempts = (user.login_attempts ||0) + 1;
+
+      if(attempts >= MAX_LOGIN_ATTEMPTS){
+        // 5회 실패 >> 계정잠금
+        await pool.query(
+          'UPDATE users SET login_attempts = ?, locked_until = ? WHERE id = ?',
+          [attempts, new Date(Date.now() + LOCK_TIME), user.id]
+        );
+        return res.status(423).json({
+          message: '5회 로그인 실패로 계정이 30분간 잠겼습니다.',
+          locked: true,
+          remainingMinutes: 30
+        });
+      }else {
+        // 실패 횟수만 증가
+        await pool.query(
+          'UPDATE users SET login_attempts = ? WHERE id = ?',
+          [attempts, user.id]
+        );
+        return res.status(401).json({
+          message: `아이디 또는 비밀번호가 올바르지 않습니다. (${attempts}/${MAX_LOGIN_ATTEMPTS}회 실패)`,
+          attempts: attempts,
+          maxAttempts: MAX_LOGIN_ATTEMPTS
+        })
+      }
     }
 
     //JWT 토큰 생성
@@ -32,9 +78,14 @@ const [users] = await pool.query(
       {expiresIn: config.jwt.expiresIn}
     )
 
+    // 로그인 성공 실패횟수 초기화
+    await pool.query(
+      'UPDATE users SET login_attempts = 0, locked_until = NULL, last_login = NOW() WHERE id = ?',
+      [user.id]
+    )
 
     //마지막 로그인 시간
-    await pool.query('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id])
+    // await pool.query('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id])
 
     res.json({
       token,

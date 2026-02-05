@@ -110,8 +110,10 @@ const handleLogin = async () => {
     router.push('/main');
 
   } catch(error){
-      console.log('Login error:', error.response?.data);
-    message.show('아이디 또는 비밀번호가 일치하지 않습니다.', 3000);
+
+    
+      // console.log('Login error:', error.response?.data);
+    // message.show('아이디 또는 비밀번호가 일치하지 않습니다.', 3000);
     isPasswordWrong.value = true;
   }
 }
