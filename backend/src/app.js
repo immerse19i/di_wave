@@ -24,6 +24,12 @@ app.get('/api/health', (req, res) => {
 // app.use('/api/analyses', analysisRoutes);
 // ...
 
+//Routes
+const authRoutes =require('./routes/auth');
+app.use('/api/auth',authRoutes);
+
+
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
@@ -46,9 +52,10 @@ app.use((req, res) => {
 async function startServer() {
     await testConnection();
 
-    app.listen(config.port, () => {
+    app.listen(config.port, '0.0.0.0', () => {
         console.log(`✓ Server running on port ${config.port}`);
         console.log(`  Environment: ${config.nodeEnv}`);
+        console.log(`  Listening on: 0.0.0.0 (all interfaces)`);
     });
 }
 

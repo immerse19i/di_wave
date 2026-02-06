@@ -10,7 +10,12 @@ dist/
 .env
 */.env
 backend/.env
+backend/.env.development
+backend/.env.production
+
 frontend/.env
+frontend/.env.development
+frontend/.env.production
 
 # IDE
 .vscode/
@@ -25,3 +30,6 @@ Thumbs.db
 **/*.md
 !README.md
 !**/README.md
+
+
+*/pakage-lock.json
