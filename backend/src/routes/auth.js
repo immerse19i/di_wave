@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
-const { verifyToken } = require('../middlewares/auth');
+const { verifyToken , isAdmin } = require('../middlewares/auth');
+
 
 // 로그인
 router.post('/login', authController.login);
@@ -15,5 +16,8 @@ router.get('/me', verifyToken, authController.getMe);
 // 비밀번호 변경
 
 router.put('/password', verifyToken, authController.changePassword);
+
+// 관리자 전용: 계정 잠금 해제
+router.patch('/unlock/:userId', verifyToken, isAdmin, authController.unlockAccount);
 
 module.exports = router;

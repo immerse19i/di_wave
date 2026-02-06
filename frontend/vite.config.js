@@ -12,15 +12,19 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
-        additionalData: `@import "@/assets/scss/variables.scss";`
+        additionalData: `
+        @import "@/assets/scss/variables.scss";
+        @import "@/assets/scss/functions.scss";
+        `
       }
     }
   },
   server: {
-    port: 5173,
+    host: '0.0.0.0',
+    port: 9099,
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:9088',
         changeOrigin: true
       }
     }

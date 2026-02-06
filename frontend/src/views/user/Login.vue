@@ -36,7 +36,7 @@
           </div>
         </div>
 
-        <p class="validation-alert">
+        <p :class="isPasswordWrong ? 'validation-alert show' : 'validation-alert'">
           아이디 또는 비밀번호가 일치하지 않습니다.
         </p>
         <button type="submit" class="btn-login">로그인</button>
@@ -49,7 +49,7 @@
             <span class="checkmark"></span>
             <span class="label-text">아이디저장</span>
           </label>
-          <a @click="modal.open('sign-in', 'sign')">회원가입</a>
+<a @click="router.push('/register')">회원가입</a>
           <a @click="modal.open('find_id', 'sign')">ID찾기</a>
           <a @click="modal.open('find_password', 'sign')">비밀번호찾기</a>
         </div>
@@ -61,6 +61,7 @@
     </div>
     <UserModalBody v-if="modal.isOpen && modal.role === 'sign'" />
   </div>
+  <LoginFooter/>
 </template>
 
 <script setup>
@@ -69,6 +70,8 @@ import { useRouter } from 'vue-router';
 import { useModalStore } from '@/store/modal';
 import UserModalBody from '@/components/user_modal/UserModalBody.vue';
 import { UseMessageStore } from '@/store/message';
+import {authAPI} from '@/api/auth';
+import LoginFooter from '../../components/common/LoginFooter.vue';
 
 const modal = useModalStore();
 const router = useRouter();
@@ -81,35 +84,59 @@ const form = ref({
 
 const showPassword = ref(false);
 const rememberUserId = ref(false);
+const isPasswordWrong = ref(false);
 
 // public 폴더 경로
 const logoSrc = '/assets/logo/logo.svg';
 const eyeHideIcon = '/assets/icons/eye_hide.svg';
 const eyeShowIcon = '/assets/icons/eye_show.svg';
 
-const handleLogin = () => {
-  // TODO: API 연동
-  console.log('Login:', form.value);
-  // 데모: 바로 대시보드로 이동
-  router.push('/main');
+// const handleLogin = () => {
+//   // TODO: API 연동
+//   console.log('Login:', form.value);
+//   // 데모: 바로 대시보드로 이동
+//   router.push('/main');
 
-  // message.show('아이디 또는 비밀번호가 일치하지 않습니다.', 30);
-};
+//   // message.show('아이디 또는 비밀번호가 일치하지 않습니다.', 30);
+// };
+
+const handleLogin = async () => {
+  try {
+    const {data}= await authAPI.login(form.value.userId, form.value.password);
+
+    //토큰 저장
+    localStorage.setItem('token', data.token);
+    //메인페이지로 이동
+    router.push('/main');
+
+  } catch(error){
+
+    
+      // console.log('Login error:', error.response?.data);
+    // message.show('아이디 또는 비밀번호가 일치하지 않습니다.', 3000);
+    isPasswordWrong.value = true;
+  }
+}
+
+
 </script>
 
 <style lang="scss" scoped>
 .login-page {
-  min-height: 100vh;
+  min-height: calc(100vh - 157px);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   background-color: $dark-bg;
 }
 
 .login-container {
+  // flex:1;
   width: 100%;
   max-width: 398px;
   padding: $spacing-xl;
+  
 }
 
 .login-logo {
@@ -184,6 +211,10 @@ const handleLogin = () => {
   @include font-12-regular;
   visibility: hidden;
   color: $red;
+
+  &.show{
+    visibility: visible;
+  }
 }
 .btn-login {
   width: 100%;
