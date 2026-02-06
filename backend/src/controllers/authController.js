@@ -157,3 +157,33 @@ exports.changePassword = async (req,res) => {
   }
 };
 
+exports.unlockAccount = async (req,res) => {
+  try {
+    const { userId} = req.params;
+
+    // 사용자 존재 확인
+    const [users] = await pool.query('SELECT id, login_id FROM users WHERE id = ?', [userId]);
+
+    if(users.length === 0) {
+      return res.status(404).json({message: '사용자를 찾을 수 없습니다.'});
+    }
+
+    // 잠금해제
+    await pool.query(
+      'UPDATE users SET login_attempts = 0, locked_until = NULL WHERE id = ?',
+      [userId]
+    );
+
+    res.json({
+      message: `${users[0].login_id} 계정의 잠금이 해제되었습니다.`
+    });
+
+
+
+
+
+  }catch (error){
+    console.error('UnlockAccount error:', error);
+    res.status(500).json({message: '서버오류가 발생했습니다.'});
+  }
+}
