@@ -13,6 +13,7 @@ const Credit = () => import('@/views/user/page/user-info/Credit.vue');
 const Info = () => import('@/views/user/page/user-info/Info.vue');
 // Admin Views
 const AdminLogin = () => import('@/views/admin/Login.vue');
+const Register = ()=> import('@/views/user/Register.vue');
 
 const routes = [
   // User Routes
@@ -59,6 +60,11 @@ const routes = [
     { path: 'credit', component: Credit },
     { path: 'info', component: Info },
   ],
+},
+{
+  path: '/register',
+  name: 'Register',
+  component: Register,
 },
 ];
 

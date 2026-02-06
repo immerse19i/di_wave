@@ -49,7 +49,7 @@
             <span class="checkmark"></span>
             <span class="label-text">아이디저장</span>
           </label>
-          <a @click="modal.open('sign-in', 'sign')">회원가입</a>
+<a @click="router.push('/register')">회원가입</a>
           <a @click="modal.open('find_id', 'sign')">ID찾기</a>
           <a @click="modal.open('find_password', 'sign')">비밀번호찾기</a>
         </div>
