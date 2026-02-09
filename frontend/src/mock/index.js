@@ -52,3 +52,21 @@ export const userList = [
     report: './download/download.pdf',
   },
 ];
+export const noticeList = [
+  { id: 1, title: '공지사항입니다.', date: '2024.08.01', attachment: '/uploads/notice/file1.pdf' },
+  { id: 2, title: '공지사항입니다.', date: '2024.08.01', attachment: '/uploads/notice/file2.pdf' },
+  { id: 3, title: '공지사항입니다.', date: '2024.08.01', attachment: '/uploads/notice/file3.pdf' },
+  { id: 4, title: '공지사항입니다.', date: '2024.08.01', attachment: '/uploads/notice/file4.pdf' },
+  { id: 5, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+  { id: 6, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+  { id: 7, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+  { id: 8, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+  { id: 9, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+  { id: 10, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+  { id: 11, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+  { id: 12, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+  { id: 13, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+  { id: 14, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+  { id: 15, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+];
+
