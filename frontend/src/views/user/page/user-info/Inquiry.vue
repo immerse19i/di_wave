@@ -8,8 +8,10 @@
     <div class="form-group">
       <label>문의 내용</label>
       <div class="textarea-wrap">
-        <textarea v-model="form.content" placeholder="문의내용을 입력해 주세요"></textarea>
-        <p class="guide-text">문의에 대한 내용은 ID에 사용된 메일로 회신됩니다.</p>
+        <textarea v-model="form.content" placeholder="문의내용을 입력해 주세요
+        
+문의에 대한 내용은 ID에 사용된 메일로 회신됩니다."></textarea>
+        <p class="guide-text"></p>
       </div>
     </div>
 
@@ -117,7 +119,7 @@ const submitInquiry = () => {
 
       textarea {
         width: 100%;
-        min-height: 180px;
+        min-height: 229px;
         padding: 12px;
         padding-bottom: 32px;
         background: $dark-input;
@@ -135,6 +137,10 @@ const submitInquiry = () => {
       }
     }
 
+    &:has(.file-guide){
+        display:flex;
+        gap:12px;
+    }
     .file-guide {
       @include font-12-regular;
       color: $dark-input-gray;
