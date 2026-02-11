@@ -34,6 +34,8 @@ Thumbs.db
 
 */pakage-lock.json
 
+/backend/uploads/*
+
 
 # ai-server
 ai-server/venv/
