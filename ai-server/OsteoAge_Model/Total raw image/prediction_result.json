@@ -1,0 +1,18 @@
+{
+  "PAH_Final": 158.25,
+  "Current_Age": "11Y 11M",
+  "BoneAge": "12Y 8M",
+  "MPH": 154.0,
+  "Height_Score": 73.2,
+  "Potential_Score": 30.8,
+  "Current_Height": 155.0,
+  "Current_Height_Percentile": 73.2,
+  "Genetic_Predicted_Height": 154.0,
+  "MPH_Percentile": 8.5,
+  "Growth_Curve_Predicted_Height": 160.86,
+  "LMS_Percentile": 51.7,
+  "Delta_Genetic": -2.34,
+  "Delta_Maturity": -0.27,
+  "Final_Predicted_Height": 158.25,
+  "PAH_Final_Percentile": 31.4
+}
