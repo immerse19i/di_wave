@@ -3,7 +3,7 @@
     <div class="login-container">
       <div class="login-logo">
         <img :src="logoSrc" alt="OsteoAge" />
-      </div>
+      </div>  
 
       <form class="login-form" @submit.prevent="handleLogin">
         <div class="form-group">
@@ -34,7 +34,7 @@
               />
             </button>
           </div>
-        </div>
+        </div> 
 
         <p :class="isPasswordWrong ? 'validation-alert show' : 'validation-alert'">
           아이디 또는 비밀번호가 일치하지 않습니다.
@@ -279,6 +279,7 @@ const handleLogin = async () => {
     a {
       @include font-14-regular;
       color: $white;
+      cursor:pointer;
       transition: color $transition-fast;
 
       &:hover {

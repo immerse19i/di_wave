@@ -206,13 +206,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { useModalStore } from '@/store/modal';
+import { analysisAPI } from '@/api/analysis';
 
 const modal = useModalStore();
 const fileInput = ref(null);
 const dateInput = ref(null);
 const previewUrl = ref('');
+const selectedFile = ref(null);
+const isLoading = ref(false);
 
 // 오늘 날짜로 분석일 초기화
 const today = new Date();
@@ -240,6 +243,7 @@ const triggerFileInput = () => {
 const handleFileChange = (event) => {
   const file = event.target.files[0];
   if (file) {
+    selectedFile.value = file;
     if (file.type.startsWith('image/')) {
       previewUrl.value = URL.createObjectURL(file);
     } else {
@@ -248,12 +252,53 @@ const handleFileChange = (event) => {
   }
 };
 
-const handleSubmit = () => {
-  // TODO: API 연동
-  console.log('New Analysis:', form.value);
-  modal.close();
+const handleSubmit = async () => {
+  if (!selectedFile.value) {
+    alert('X-ray 이미지를 선택해주세요.');
+    return;
+  }
+  if (!form.value.patientCode || !form.value.patientName || !form.value.gender || !form.value.currentHeight) {
+    alert('필수 항목을 모두 입력해주세요.');
+    return;
+  }
+  if (!form.value.birthYear || !form.value.birthMonth || !form.value.birthDay) {
+    alert('생년월일을 입력해주세요.');
+    return;
+  }
+
+  const birthDate = new Date(form.value.birthYear, form.value.birthMonth - 1, form.value.birthDay);
+  const now = new Date();
+  const ageMonths = (now.getFullYear() - birthDate.getFullYear()) * 12 + (now.getMonth() - birthDate.getMonth());
+
+  const formData = new FormData();
+  formData.append('image', selectedFile.value);
+  formData.append('sex', form.value.gender === 'M' ? 1 : 0);
+  formData.append('height', form.value.currentHeight);
+  formData.append('ageMonths', ageMonths);
+  formData.append('patientId', 1); // TODO: 실제 환자 ID 연동
+
+  if (form.value.fatherHeight) {
+    formData.append('fatherHeight', form.value.fatherHeight);
+  }
+  if (form.value.motherHeight) {
+    formData.append('motherHeight', form.value.motherHeight);
+  }
+
+  try {
+    isLoading.value = true;
+    const response = await analysisAPI.create(formData);
+    console.log('분석 결과:', response.data);
+    alert('분석이 완료되었습니다.');
+    modal.close();
+  } catch (error) {
+    console.error('분석 오류:', error);
+    alert(error.response?.data?.message || '분석 중 오류가 발생했습니다.');
+  } finally {
+    isLoading.value = false;
+  }
 };
 </script>
+
 
 <style lang="scss" scoped>
 .new-analysis {
