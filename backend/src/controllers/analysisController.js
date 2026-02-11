@@ -1,4 +1,4 @@
-const pool = require('../config/database');
+const {pool} = require('../config/database');
 const { predictBoneAge} = require('../services/aiService');
 const config = require('../config/config');
 
