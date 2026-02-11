@@ -20,21 +20,28 @@
       <span class="file-guide">jpg,pjeg,png,pdf 형식의 파일만 등록됩니다. 최대 10mb</span>
     </div>
 
-    <div class="file-upload">
-      <div class="upload-box" @click="openFilePicker">
-        <span class="plus-icon">
-            <img src="/assets/icons/add_icon.svg" alt="add_icon">
+<div class="file-upload">
+  <!-- 첨부된 파일 미리보기 -->
+  <div v-for="(file, index) in files" :key="index" class="file-item">
+    <button class="delete-btn" @click="removeFile(index)">
+      <img src="/assets/icons/delete_icon.svg" alt="delete" width="16" height="16">
+    </button>
+    <!-- 이미지 미리보기 -->
+    <img v-if="isImage(file)" :src="getPreviewUrl(file)" alt="preview" class="preview-img">
+    <!-- PDF는 파일명 표시 -->
+    <span v-else class="pdf-name">{{ file.name }}</span>
+  </div>
 
-        </span>
-        <span>추가하기</span>
-      </div>
-      <!-- 첨부된 파일 미리보기 -->
-      <div v-for="(file, index) in files" :key="index" class="file-item">
-        <span>{{ file.name }}</span>
-        <button @click="removeFile(index)">&times;</button>
-      </div>
-      <input type="file" ref="fileInput" @change="onFileChange" accept=".jpg,.jpeg,.png,.pdf" hidden>
-    </div>
+  <!-- 추가하기 버튼 -->
+  <div class="upload-box" @click="openFilePicker">
+    <span class="plus-icon">
+      <img src="/assets/icons/add_icon.svg" alt="add_icon">
+    </span>
+    <span>추가하기</span>
+  </div>
+  <input type="file" ref="fileInput" @change="onFileChange" accept=".jpg,.jpeg,.png,.pdf" hidden>
+</div>
+
 
     <div class="btn-wrap">
       <button class="submit-btn" @click="submitInquiry">문의하기</button>
@@ -74,6 +81,13 @@ const onFileChange = (e) => {
 const removeFile = (index) => {
   files.value.splice(index, 1);
 };
+const isImage = (file) => {
+  return file.type.startsWith('image/');
+};
+
+const getPreviewUrl = (file) => {
+  return URL.createObjectURL(file);
+};
 
 const submitInquiry = () => {
   if (!form.value.title.trim()) {
@@ -96,12 +110,12 @@ const submitInquiry = () => {
   color: $white;
 
   .form-group {
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 
     label {
-      @include font-14-bold;
+      @include font-16-bold;
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 16px;
     }
 
     input {
@@ -112,6 +126,10 @@ const submitInquiry = () => {
       border-radius: $radius-sm;
       color: $white;
       @include font-14-regular;
+      
+      &::placeholder{
+        color:$dark-input-gray
+      }
     }
 
     .textarea-wrap {
@@ -121,6 +139,8 @@ const submitInquiry = () => {
         width: 100%;
         min-height: 229px;
         padding: 12px;
+
+
         padding-bottom: 32px;
         background: $dark-input;
         border: 1px solid $dark-line-gray;
@@ -128,6 +148,9 @@ const submitInquiry = () => {
         color: $white;
         resize: vertical;
         @include font-14-regular;
+        &::placeholder{
+          color: $dark-input-gray;
+        }
       }
 
       .guide-text {
@@ -154,10 +177,10 @@ const submitInquiry = () => {
     margin-bottom: 24px;
 
     .upload-box {
-      width: 120px;
-      height: 120px;
+      width: 126px;
+      height: 126px;
       border: 2px dashed $white;
-      border-radius: $radius-md;
+      // border-radius: $radius-md;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -181,26 +204,39 @@ const submitInquiry = () => {
     }
 
     .file-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      background: $dark-input;
-      border-radius: $radius-sm;
+  width: 126px;
+  height: 126px;
+  border: 2px dashed $white;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 
-      span {
-        @include font-12-regular;
-      }
+  .delete-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 1;
+    padding: 0;
+    line-height: 0;
+  }
 
-      button {
-        color: $gray;
-        font-size: 16px;
+  .preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 
-        &:hover {
-          color: $red;
-        }
-      }
-    }
+  .pdf-name {
+    @include font-12-regular;
+    color: $white;
+    padding: 8px;
+    word-break: break-all;
+    text-align: center;
+  }
+}
+
   }
 
   .btn-wrap {
