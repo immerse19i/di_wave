@@ -23,8 +23,7 @@ module.exports = {
     },
 
     ai: {
-        pythonPath: process.env.PYTHON_PATH || 'python',
-        scriptPath: process.env.AI_SCRIPT_PATH || './ai/predict.py'
+        serverUrl: process.env.AI_SERVER_URL || 'http://localhost:9079'
     },
 
     credit: {
