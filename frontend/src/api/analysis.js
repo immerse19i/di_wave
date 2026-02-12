@@ -4,7 +4,7 @@ export const analysisAPI = {
     // 분석 요청 (multipart/form-data)
     create: (formData) => api.post('/analyses', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 30000
+        timeout: 120000
     }),
 
     // 분석 목록 조회

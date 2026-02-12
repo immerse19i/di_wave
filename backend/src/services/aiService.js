@@ -24,7 +24,7 @@ async function predictBoneAge(imagePath, patientData){
         form,
         {
             headers: form.getHeaders(),
-            timeout: 30000
+            timeout: 120000
         }
     );
 
