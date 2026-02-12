@@ -24,10 +24,13 @@ app.get('/api/health', (req, res) => {
 // app.use('/api/analyses', analysisRoutes);
 // ...
 
+
 //Routes
 const authRoutes =require('./routes/auth');
 app.use('/api/auth',authRoutes);
 
+const analysisRoutes = require('./routes/analyses');
+app.use('/api/analyses', analysisRoutes);
 
 
 // Error handling middleware
