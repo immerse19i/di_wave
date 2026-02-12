@@ -52,3 +52,35 @@ export const userList = [
     report: './download/download.pdf',
   },
 ];
+export const noticeList = [
+  { id: 1, title: '공지사항입니다.', date: '2024.08.01', attachment: '/uploads/notice/file1.pdf' },
+  { id: 2, title: '공지사항입니다.', date: '2024.08.01', attachment: '/uploads/notice/file2.pdf' },
+  { id: 3, title: '공지사항입니다.', date: '2024.08.01', attachment: '/uploads/notice/file3.pdf' },
+  { id: 4, title: '공지사항입니다.', date: '2024.08.01', attachment: '/uploads/notice/file4.pdf' },
+  { id: 5, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+  { id: 6, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+  { id: 7, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+  { id: 8, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+  { id: 9, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+  { id: 10, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+  { id: 11, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+  { id: 12, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+  { id: 13, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+  { id: 14, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+  { id: 15, title: '공지사항입니다.', date: '2024.08.01', attachment: null },
+];
+
+
+export const creditList = [
+  { id: 1, date: '2024-01-31 17:56:05', patientCode: 'SDLFSDJFLD_지안', patientName: '김환자', doctor: '김치과', detail: '분석', amount: -1, balance: 287, receipt: null },
+  { id: 2, date: '2024-01-31 17:56:05', patientCode: null, patientName: null, doctor: '김치과', detail: '충전', amount: 100, balance: 187, receipt: '/receipts/receipt_002.pdf' },
+  { id: 3, date: '2024-01-28 17:56:05', patientCode: null, patientName: null, doctor: '김치과', detail: '차감(관리자)', amount: -10, balance: 187, receipt: null },
+  { id: 4, date: '2024-01-29 17:56:05', patientCode: null, patientName: null, doctor: '김치과', detail: '지급(관리자)', amount: 10, balance: 189, receipt: null },
+  { id: 5, date: '2024-01-28 17:56:05', patientCode: 'SDLFSDJFLD_지안', patientName: '김환자', doctor: '김치과', detail: '분석', amount: -1, balance: 190, receipt: null },
+  { id: 6, date: '2024-01-27 17:56:05', patientCode: 'SDLFSDJFLD_지안', patientName: '김환자', doctor: '김치과', detail: '분석', amount: -1, balance: 191, receipt: null },
+  { id: 7, date: '2024-01-26 17:56:05', patientCode: 'SDLFSDJFLD_지안', patientName: '김환자', doctor: '김치과', detail: '분석', amount: -1, balance: 192, receipt: null },
+  { id: 8, date: '2024-01-25 17:56:05', patientCode: 'SDLFSDJFLD_지안', patientName: '김환자', doctor: '김치과', detail: '분석', amount: -1, balance: 193, receipt: null },
+  { id: 9, date: '2024-01-24 17:56:05', patientCode: 'SDLFSDJFLD_지안', patientName: '김환자', doctor: '김치과', detail: '분석', amount: -1, balance: 194, receipt: null },
+  { id: 10, date: '2024-01-23 17:56:05', patientCode: 'SDLFSDJFLD_지안', patientName: '김환자', doctor: '김치과', detail: '분석', amount: -1, balance: 195, receipt: null },
+  { id: 11, date: '2024-01-24 17:56:05', patientCode: 'SDLFSDJFLD_지안', patientName: '김환자', doctor: '김치과', detail: '분석', amount: -1, balance: 194, receipt: null },
+];

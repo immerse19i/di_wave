@@ -33,3 +33,12 @@ Thumbs.db
 
 
 */pakage-lock.json
+
+/backend/uploads/*
+
+
+# ai-server
+ai-server/venv/
+ai-server/OsteoAge_Model/Model9_ROI/*.pth
+ai-server/__pycache__/
+ai-server/*.pyc
