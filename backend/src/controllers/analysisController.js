@@ -5,7 +5,8 @@ const config = require('../config/config');
 // 분석 요청
 exports.createAnalysis = async (req, res) => {
     try {
-        const {patientId, height, ageMonths, sex, fatherHeight, motherHeight} = req.body;
+        // 2026.02.19 req.body : weight, physician 추가
+        const { patientId, height, weight, ageMonths, sex, fatherHeight, motherHeight, physician } = req.body;
         const userId = req.user.id;
         const hospitalId = req.user.hospital_id;
         const imagePath = req.file.path;
@@ -23,13 +24,14 @@ exports.createAnalysis = async (req, res) => {
             });
         }
         // 2. 분석 생성 (status: processing)
-        const [result] = await pool.query(
-            `INSERT INTO analyses (hospital_id, patient_id, user_id, image_path,
-            chronological_age_years, chronological_age_months, status)
-            VALUES (?, ?, ?, ?, ?, ?, 'processing')`,
-            [hospitalId, patientId, userId, imagePath ,Math.floor(ageMonths / 12), ageMonths % 12]
-
-        )
+        // 2026.02.19 INSERT 쿼리에 {hegiht, weight,physican} 추가
+const [result] = await pool.query(
+    `INSERT INTO analyses (hospital_id, patient_id, user_id, image_path,
+    chronological_age_years, chronological_age_months, height, weight, physician, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'processing')`,
+    [hospitalId, patientId, userId, imagePath, Math.floor(ageMonths / 12), ageMonths % 12,
+     parseFloat(height), weight ? parseFloat(weight) : null, physician || null]
+);
         const analysisId = result.insertId;
 
         // 3. AI 서버 호출
