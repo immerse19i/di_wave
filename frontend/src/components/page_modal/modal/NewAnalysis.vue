@@ -276,6 +276,8 @@ const handleSubmit = async () => {
   formData.append('height', form.value.currentHeight);
   formData.append('ageMonths', ageMonths);
   formData.append('patientId', 3); // TODO: 실제 환자 ID 연동
+formData.append('weight', form.value.weight);
+formData.append('physician', form.value.physician);
 
   if (form.value.fatherHeight) {
     formData.append('fatherHeight', form.value.fatherHeight);
