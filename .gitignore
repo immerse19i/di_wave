@@ -52,3 +52,7 @@ ai-server/OsteoAge_Model/Model9_ROI/*.pth
 ai-server/__pycache__/
 ai-server/*.pyc
 
+.claude/
+.claude/*
+
+.claude
