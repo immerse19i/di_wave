@@ -127,12 +127,14 @@ exports.getMe = async (req,res) => {
   try{
     const  [users] = await pool.query(
       `SELECT u.id, u.login_id, u.email, u.name, u.role, u.hospital_id, u.last_login,
-              h.name as hospital_name, h.ceo_name, h.phone, 
-              h.address, h.address_detail, h.business_number, 
-              h.business_license_path, h.status as hospital_status
-       FROM users u
-       LEFT JOIN hospitals h ON u.hospital_id = h.id
-       WHERE u.id = ?`,
+       h.name as hospital_name, h.ceo_name, h.phone, 
+       h.address, h.address_detail, h.business_number, 
+       h.business_license_path, h.status as hospital_status,
+       IFNULL(c.balance, 0) as credit_balance
+FROM users u
+LEFT JOIN hospitals h ON u.hospital_id = h.id
+LEFT JOIN credits c ON u.hospital_id = c.hospital_id
+WHERE u.id = ?`,
       [req.user.id]
     );
     if (users.length === 0){
