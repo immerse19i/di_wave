@@ -32,6 +32,8 @@ app.use('/api/auth',authRoutes);
 const analysisRoutes = require('./routes/analyses');
 app.use('/api/analyses', analysisRoutes);
 
+const patientRoutes = require('./routes/patients');
+app.use('/api/patients', patientRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
