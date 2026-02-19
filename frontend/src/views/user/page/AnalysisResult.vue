@@ -245,28 +245,22 @@ const resultData = computed(() => {
 
 // MPH (유전적 예측 키)
 const mphHeight = computed(() => {
-  const data = resultData.value;
-  const fatherH = data?.FatherHeight;
-  const motherH = data?.MotherHeight;
-  if (!fatherH || !motherH) return null;
-  const isMale = analysis.value?.gender === 'M';
-  return Math.round(((fatherH + motherH + (isMale ? 13 : -13)) / 2) * 10) / 10;
+  return resultData.value?.Genetic_Predicted_Height ?? resultData.value?.MPH ?? null;
 });
 
 // AI 결과에서 스코어/예측값 추출
-const heightScore = computed(() => resultData.value?.HeightScore ?? '-');
-const potentialScore = computed(() => resultData.value?.PotentialScore ?? '-');
-const boneAgePredictedHeight = computed(() => resultData.value?.BoneAgePredictedHeight ?? null);
+const heightScore = computed(() => resultData.value?.Height_Score ?? '-');
+const potentialScore = computed(() => resultData.value?.Potential_Score ?? '-');
+const boneAgePredictedHeight = computed(() => resultData.value?.Growth_Curve_Predicted_Height ?? null);
 const geneticCorrection = computed(() => {
-  const val = resultData.value?.GeneticCorrection;
+  const val = resultData.value?.Delta_Genetic;
   return val != null ? (val >= 0 ? '+' : '') + val + 'cm' : '-';
 });
 const maturityCorrection = computed(() => {
-  const val = resultData.value?.MaturityCorrection;
+  const val = resultData.value?.Delta_Maturity;
   return val != null ? (val >= 0 ? '+' : '') + val + 'cm' : '-';
 });
-const finalPredictedHeight = computed(() => resultData.value?.FinalPredictedHeight ?? '-');
-
+const finalPredictedHeight = computed(() => resultData.value?.Final_Predicted_Height ?? '-');
 // 슬라이더 퍼센트 (0~200cm 범위 기준)
 const heightPercent = computed(() => Math.min(100, ((analysis.value?.height || 0) / 200) * 100));
 const mphPercent = computed(() => Math.min(100, ((mphHeight.value || 0) / 200) * 100));
@@ -304,7 +298,7 @@ const drawGrowthChart = () => {
     { key: 'p97', color: 'rgba(255,165,0,0.6)', label: '97th' },
   ];
 
-  const datasets = lines.map((line) => ({
+const datasets = lines.map((line) => ({
     label: line.label,
     data: data.map((d) => ({ x: d.month / 12, y: d[line.key] })),
     borderColor: line.color,
@@ -312,7 +306,8 @@ const drawGrowthChart = () => {
     pointRadius: 0,
     fill: false,
     tension: 0.3,
-  }));
+    showLine: true,    // ← 이거 추가
+}));
 
   // 현재 데이터 포인트 (초록점)
   const ageYears = (analysis.value.chronological_age_years || 0) +
