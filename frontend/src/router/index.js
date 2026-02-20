@@ -14,6 +14,7 @@ const Info = () => import('@/views/user/page/user-info/Info.vue');
 // Admin Views
 const AdminLogin = () => import('@/views/admin/Login.vue');
 const Register = ()=> import('@/views/user/Register.vue');
+const AnalysisResult = () => import('@/views/user/page/AnalysisResult.vue');
 
 const routes = [
   // User Routes
@@ -27,13 +28,16 @@ const routes = [
     component: Login,
     meta: { requiresAuth: false },
   },
-  {
-    path: '/main',
-    name: 'main',
-    component: UserMain,
-    meta: { requiresAuth: true },
-    children: [{ path: '', component: UserList }],
-  },
+{
+  path: '/main',
+  name: 'main',
+  component: UserMain,
+  meta: { requiresAuth: true },
+  children: [
+    { path: '', component: UserList },
+    { path: 'analysis/:id', component: AnalysisResult, props: true },
+  ],
+},
   // Admin Routes
   {
     path: '/admin',
