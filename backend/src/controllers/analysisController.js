@@ -6,7 +6,7 @@ const config = require('../config/config');
 exports.createAnalysis = async (req, res) => {
     try {
         // 2026.02.19 req.body : weight, physician 추가
-        const { patientId, height, weight, ageMonths, sex, fatherHeight, motherHeight, physician } = req.body;
+        const { patientCode, patientName, birthDate, gender, height, weight, ageMonths, sex, fatherHeight, motherHeight, physician } = req.body;
         const userId = req.user.id;
         const hospitalId = req.user.hospital_id;
         const imagePath = req.file.path;
@@ -23,6 +23,24 @@ exports.createAnalysis = async (req, res) => {
                 message: '크레딧이 부족합니다.'
             });
         }
+// 환자 조회/등록
+const [existingPatients] = await pool.query(
+    'SELECT id FROM patients WHERE hospital_id = ? AND patient_code = ? AND name = ?',
+    [hospitalId, patientCode, patientName]
+);
+
+let patientId;
+if (existingPatients.length > 0) {
+    patientId = existingPatients[0].id;
+} else {
+    const [newPatient] = await pool.query(
+        'INSERT INTO patients (hospital_id, patient_code, name, birth_date, gender) VALUES (?, ?, ?, ?, ?)',
+        [hospitalId, patientCode, patientName, birthDate, gender]
+    );
+    patientId = newPatient.insertId;
+}
+
+
         // 2. 분석 생성 (status: processing)
         // 2026.02.19 INSERT 쿼리에 {hegiht, weight,physican} 추가
 const [result] = await pool.query(
