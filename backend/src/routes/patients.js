@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { auth } = require('../middlewares/auth');
-const patientController = require('../controllers/patientController');
+const { verifyToken } = require('../middlewares/auth');
+router.get('/check', verifyToken, patientController.checkPatient);
 
 router.get('/check', auth, patientController.checkPatient);
 
