@@ -72,11 +72,11 @@ import UserModalBody from '@/components/user_modal/UserModalBody.vue';
 import { UseMessageStore } from '@/store/message';
 import {authAPI} from '@/api/auth';
 import LoginFooter from '../../components/common/LoginFooter.vue';
-
+import { useAuthStore } from '@/store/auth';
 const modal = useModalStore();
 const router = useRouter();
 const message = UseMessageStore();
-
+const auth = useAuthStore();
 const form = ref({
   userId: '',
   password: '',
