@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { verifyToken } = require('../middlewares/auth');
-router.get('/check', verifyToken, patientController.checkPatient);
+const patientController = require('../controllers/patientController');
 
-router.get('/check', auth, patientController.checkPatient);
+router.get('/check', verifyToken, patientController.checkPatient);
 
 module.exports = router;
