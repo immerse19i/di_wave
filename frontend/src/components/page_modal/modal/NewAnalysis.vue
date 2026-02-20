@@ -208,9 +208,16 @@
 <script setup>
 import { ref } from 'vue';
 import { useModalStore } from '@/store/modal';
+import { UseMessageStore } from '@/store/message';
+import { useAuthStore } from '@/store/auth';
 import { analysisAPI } from '@/api/analysis';
+import { patientAPI } from '@/api/patient';
+import growthHeightData from '@/data/growth_height.json';
+import growthWeightData from '@/data/growth_weight.json';
 
 const modal = useModalStore();
+const message = UseMessageStore();
+const auth = useAuthStore();
 const fileInput = ref(null);
 const dateInput = ref(null);
 const previewUrl = ref('');
@@ -239,43 +246,162 @@ const form = ref({
 const triggerFileInput = () => {
   fileInput.value.click();
 };
+const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'svg', 'dcm'];
+const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
 
 const handleFileChange = (event) => {
   const file = event.target.files[0];
-  if (file) {
-    selectedFile.value = file;
-    if (file.type.startsWith('image/')) {
-      previewUrl.value = URL.createObjectURL(file);
-    } else {
-      previewUrl.value = '';
-    }
+  if (!file) return;
+
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!ALLOWED_EXTENSIONS.includes(ext)) {
+    message.showAlert('지원하지 않는 파일 형식입니다.');
+    event.target.value = '';
+    return;
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    message.showAlert('용량이 30MB를 초과하였습니다.');
+    event.target.value = '';
+    return;
+  }
+
+  selectedFile.value = file;
+  if (file.type.startsWith('image/')) {
+    previewUrl.value = URL.createObjectURL(file);
+  } else {
+    previewUrl.value = '';
   }
 };
-
-const handleSubmit = async () => {
-  if (!selectedFile.value) {
-    alert('X-ray 이미지를 선택해주세요.');
-    return;
-  }
-  if (!form.value.patientCode || !form.value.patientName || !form.value.gender || !form.value.currentHeight) {
-    alert('필수 항목을 모두 입력해주세요.');
-    return;
-  }
-  if (!form.value.birthYear || !form.value.birthMonth || !form.value.birthDay) {
-    alert('생년월일을 입력해주세요.');
-    return;
-  }
-
+// 키/몸무게 유효성 검사 (성장도표 p3~p97 범위)
+const validateHeightWeight = () => {
+  const genderKey = form.value.gender === 'M' ? 'male' : 'female';
   const birthDate = new Date(form.value.birthYear, form.value.birthMonth - 1, form.value.birthDay);
   const now = new Date();
   const ageMonths = (now.getFullYear() - birthDate.getFullYear()) * 12 + (now.getMonth() - birthDate.getMonth());
 
+  // 해당 월령 데이터 찾기 (가장 가까운 값)
+  const heightData = growthHeightData[genderKey];
+  const weightData = growthWeightData[genderKey];
+  const hRow = heightData.reduce((prev, curr) =>
+    Math.abs(curr.month - ageMonths) < Math.abs(prev.month - ageMonths) ? curr : prev
+  );
+  const wRow = weightData.reduce((prev, curr) =>
+    Math.abs(curr.month - ageMonths) < Math.abs(prev.month - ageMonths) ? curr : prev
+  );
+
+  const h = parseFloat(form.value.currentHeight);
+  const w = parseFloat(form.value.weight);
+
+  if (h < hRow.p3 || h > hRow.p97) return false;
+  if (w && (w < wRow.p3 || w > wRow.p97)) return false;
+
+  // 부모 키 검사 (18세 = 216개월 기준)
+  if (form.value.fatherHeight) {
+    const maleRow = growthHeightData.male.reduce((prev, curr) =>
+      Math.abs(curr.month - 216) < Math.abs(prev.month - 216) ? curr : prev
+    );
+    const fh = parseFloat(form.value.fatherHeight);
+    if (fh < maleRow.p3 || fh > maleRow.p97) return false;
+  }
+  if (form.value.motherHeight) {
+    const femaleRow = growthHeightData.female.reduce((prev, curr) =>
+      Math.abs(curr.month - 216) < Math.abs(prev.month - 216) ? curr : prev
+    );
+    const mh = parseFloat(form.value.motherHeight);
+    if (mh < femaleRow.p3 || mh > femaleRow.p97) return false;
+  }
+
+  return true;
+};
+
+// === 5단계 분석 제출 흐름 ===
+
+// Step 1: 필수항목 체크 → Step 2: 유효성 → Step 3~5
+const handleSubmit = async () => {
+  // Step 1: 필수항목
+  if (!selectedFile.value) {
+    message.showAlert('X-ray 이미지를 선택해주세요.');
+    return;
+  }
+  if (!form.value.patientCode || !form.value.patientName || !form.value.gender || !form.value.currentHeight) {
+    message.showAlert('필수 항목을 모두 입력해주세요.');
+    return;
+  }
+  if (!form.value.birthYear || !form.value.birthMonth || !form.value.birthDay) {
+    message.showAlert('생년월일을 입력해주세요.');
+    return;
+  }
+  if (!form.value.analysisDate) {
+    message.showAlert('분석일을 선택해주세요.');
+    return;
+  }
+
+  // Step 2: 키/몸무게 유효성
+  if (!validateHeightWeight()) {
+    message.showConfirm(
+      '입력한 신장/체중 수치가 표준 범위를 초과하거나 미달합니다.\n오입력 여부를 확인하셨습니까?',
+      () => checkPatientExists(),  // 무시하고 진행
+      null                          // 다시 확인 → 닫기
+    );
+    return;
+  }
+
+  checkPatientExists();
+};
+
+// Step 3: 환자 존재 확인
+const checkPatientExists = async () => {
+  try {
+    const res = await patientAPI.check(form.value.patientCode, form.value.patientName);
+    if (res.data.exists) {
+      // Step 4: 기존 환자 연동 확인
+      message.showConfirm(
+        '환자등록번호, 환자명이 일치하는 기존 정보가 있습니다.\n해당 정보에 기록이 연동됩니다.\n원치 않으실 경우 취소 후 환자등록번호, 환자명을 변경해 주세요.',
+        () => confirmCreditUse(),  // 확인 → 크레딧 확인
+        null                        // 취소 → 닫기
+      );
+    } else {
+      confirmCreditUse();
+    }
+  } catch (error) {
+    message.showAlert('환자 정보 확인 중 오류가 발생했습니다.');
+  }
+};
+
+// Step 4→5: 크레딧 소모 확인
+const confirmCreditUse = () => {
+  message.showConfirm(
+    '크레딧이 소모됩니다',
+    () => checkCreditAndSubmit(),  // 확인
+    null                            // 취소
+  );
+};
+
+// Step 5: 크레딧 잔액 확인 → 분석 실행
+const checkCreditAndSubmit = async () => {
+  const creditBalance = auth.user?.credit_balance || 0;
+  if (creditBalance < 1) {
+    message.showAlert('크레딧이 부족합니다.');
+    return;
+  }
+
+  // 분석 실행
+  const birthDate = new Date(form.value.birthYear, form.value.birthMonth - 1, form.value.birthDay);
+  const now = new Date();
+  const ageMonths = (now.getFullYear() - birthDate.getFullYear()) * 12 + (now.getMonth() - birthDate.getMonth());
+  const birthDateStr = `${form.value.birthYear}-${String(form.value.birthMonth).padStart(2,'0')}-${String(form.value.birthDay).padStart(2,'0')}`;
+
   const formData = new FormData();
   formData.append('image', selectedFile.value);
+  formData.append('patientCode', form.value.patientCode);
+  formData.append('patientName', form.value.patientName);
+  formData.append('birthDate', birthDateStr);
+  formData.append('gender', form.value.gender);
   formData.append('sex', form.value.gender === 'M' ? 1 : 0);
   formData.append('height', form.value.currentHeight);
   formData.append('ageMonths', ageMonths);
-  formData.append('patientId', 3); // TODO: 실제 환자 ID 연동
+  formData.append('weight', form.value.weight);
+  formData.append('physician', form.value.physician);
 
   if (form.value.fatherHeight) {
     formData.append('fatherHeight', form.value.fatherHeight);
@@ -288,15 +414,17 @@ const handleSubmit = async () => {
     isLoading.value = true;
     const response = await analysisAPI.create(formData);
     console.log('분석 결과:', response.data);
-    alert('분석이 완료되었습니다.');
-    modal.close();
+    message.showAlert('분석이 완료되었습니다.', () => {
+      modal.close();
+    });
   } catch (error) {
     console.error('분석 오류:', error);
-    alert(error.response?.data?.message || '분석 중 오류가 발생했습니다.');
+    message.showAlert(error.response?.data?.message || '분석 중 오류가 발생했습니다.');
   } finally {
     isLoading.value = false;
   }
 };
+
 </script>
 
 
