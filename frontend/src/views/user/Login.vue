@@ -102,21 +102,22 @@ const eyeShowIcon = '/assets/icons/eye_show.svg';
 
 const handleLogin = async () => {
   try {
-    const {data}= await authAPI.login(form.value.userId, form.value.password);
-
-    //토큰 저장
-    localStorage.setItem('token', data.token);
-    //메인페이지로 이동
-    router.push('/main');
-
-  } catch(error){
-
+    const {data} = await authAPI.login(form.value.userId, form.value.password);
     
-      // console.log('Login error:', error.response?.data);
-    // message.show('아이디 또는 비밀번호가 일치하지 않습니다.', 3000);
+    // 토큰 저장
+    auth.setToken(data.token);
+    
+    // 유저 정보 조회 → store에 저장
+    const { data: userData } = await authAPI.getMe();
+    auth.setUser(userData);
+    
+    // 메인페이지로 이동
+    router.push('/main');
+  } catch(error) {
     isPasswordWrong.value = true;
   }
 }
+
 
 
 </script>
