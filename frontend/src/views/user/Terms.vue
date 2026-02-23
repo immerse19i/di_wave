@@ -101,9 +101,8 @@ const fetchVersions = async (type) => {
     const res = await termsAPI.getPublicHistory(type)
 
     const history = res.data.data.history || []
-    versionsMap.value[type] = history
-      .filter(h => h.is_public)
-      .map(h => ({
+versionsMap.value[type] = history
+  .map(h => ({
         id: h.id,
         date: formatVersionDate(h.created_at),
         file: termsAPI.getFileUrl(h.id),

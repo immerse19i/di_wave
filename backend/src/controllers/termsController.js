@@ -158,9 +158,9 @@ exports.getPublicHistory = async (req, res) => {
   try {
     const { type } = req.params;
     const [history] = await pool.query(
-      `SELECT id, type, name, file_name, created_at
-       FROM terms WHERE type = ? AND is_public = TRUE AND file_name != ''
-       ORDER BY version DESC`,
+`SELECT id, type, name, file_name, is_public, created_at
+ FROM terms WHERE type = ? AND is_public = TRUE AND file_name != ''
+ ORDER BY version DESC`,
       [type]
     );
     res.json({ success: true, data: { history } });
