@@ -166,3 +166,30 @@ CREATE INDEX idx_usage_logs_created ON usage_logs(created_at);
 -- 기본 관리자 계정 (비밀번호: admin123 -> bcrypt 해시)
 INSERT INTO users (email, password, name, role) VALUES
 ('admin@diwave.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', '관리자', 'admin');
+
+
+-- 이용약관 (terms)
+CREATE TABLE terms (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    type VARCHAR(50) NOT NULL,
+    group_type ENUM('signup', 'credit') NOT NULL,
+    name VARCHAR(200) NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(255) NOT NULL,
+    version INT DEFAULT 1,
+    is_current BOOLEAN DEFAULT TRUE,
+    is_public BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_terms_type ON terms(type);
+CREATE INDEX idx_terms_current ON terms(is_current);
+
+-- 초기 데이터 (약관 6종, 파일 미등록 상태)
+INSERT INTO terms (type, group_type, name, file_name, file_path, version, is_current, is_public) VALUES
+('terms_of_service', 'signup', '서비스 이용약관', '', '', 0, TRUE, TRUE),
+('privacy_collection', 'signup', '서비스 이용을 위한 개인정보 수집 및 이용동의', '', '', 0, TRUE, TRUE),
+('privacy_consignment', 'signup', '개인정보 처리 위탁 동의', '', '', 0, TRUE, TRUE),
+('paid_service', 'credit', '유료서비스 이용약관', '', '', 0, TRUE, TRUE),
+('third_party', 'credit', '개인정보 제3자 제공동의', '', '', 0, TRUE, TRUE),
+('refund_policy', 'credit', '결제 상품 확인 및 취소/환불 규정', '', '', 0, TRUE, TRUE);
