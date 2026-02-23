@@ -55,3 +55,6 @@ ai-server/*.pyc
 .claude/*
 
 .claude
+
+
+frontend/public/pdfjs/

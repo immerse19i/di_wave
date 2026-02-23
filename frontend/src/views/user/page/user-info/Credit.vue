@@ -29,7 +29,7 @@
     <!-- 테이블 영역 -->
     <div class="table-area">
       <div class="table-header">
-        <button class="charge-btn">크레딧 충전</button>
+        <button class="charge-btn" @click="router.push('/user-info/credit-charge')">크레딧 충전</button>
         <div class="balance-box">
           <span class="balance-label">잔여</span>
           <span class="balance-value">{{ currentBalance }}</span>
@@ -93,7 +93,9 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { creditList } from '@/mock';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 // 필터
 const startDate = ref('2024-01-01');
 const endDate = ref('2024-01-07');

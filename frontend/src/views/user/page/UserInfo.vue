@@ -73,6 +73,7 @@ const pageTitle = computed(()=> {
       'notice': '공지사항',
       'inquiry': '문의하기',
       'credit': '크레딧 관리',
+      'credit-charge': '크레딧',
       'info': '정보'
   }
   

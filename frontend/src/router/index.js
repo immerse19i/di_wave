@@ -11,10 +11,15 @@ const Notice = () => import('@/views/user/page/user-info/Notice.vue');
 const Inquiry = () => import('@/views/user/page/user-info/Inquiry.vue');
 const Credit = () => import('@/views/user/page/user-info/Credit.vue');
 const Info = () => import('@/views/user/page/user-info/Info.vue');
+const CreditCharge = () => import('@/views/user/page/user-info/CreditCharge.vue');
+const Terms = () => import('@/views/user/Terms.vue')
+
 // Admin Views
 const AdminLogin = () => import('@/views/admin/Login.vue');
 const Register = ()=> import('@/views/user/Register.vue');
 const AnalysisResult = () => import('@/views/user/page/AnalysisResult.vue');
+const AdminDashboard = () => import('@/views/admin/Approval.vue');
+const AdminMain = () => import('@/views/admin/AdminMain.vue')
 
 const routes = [
   // User Routes
@@ -38,17 +43,30 @@ const routes = [
     { path: 'analysis/:id', component: AnalysisResult, props: true },
   ],
 },
-  // Admin Routes
-  {
-    path: '/admin',
-    redirect: '/admin/login',
-  },
+  
   {
     path: '/admin/login',
     name: 'AdminLogin',
     component: AdminLogin,
     meta: { requiresAuth: false },
   },
+{
+  path: '/admin/dashboard',
+  component: AdminMain,
+  meta: { requiresAuth: true },
+  children: [
+    { path: ''},
+  ],
+},
+{
+  path: '/admin',
+  component: AdminMain,
+  meta: { requiresAuth: true },
+  redirect: '/admin/approval',  // 인증 후 기본 이동
+  children: [
+    { path: 'approval', component: AdminDashboard },
+  ],
+},
   // routes 배열에 추가 (/main 라우트 아래에)
 {
   path: '/user-info',
@@ -62,6 +80,7 @@ const routes = [
     { path: 'notice', component: Notice },
     { path: 'inquiry', component: Inquiry },
     { path: 'credit', component: Credit },
+    { path: 'credit-charge', component: CreditCharge },
     { path: 'info', component: Info },
   ],
 },
@@ -69,6 +88,13 @@ const routes = [
   path: '/register',
   name: 'Register',
   component: Register,
+},
+//약관 페이지
+{
+  path: '/terms',
+  name: 'Terms',
+  component: Terms,
+  meta: { requiresAuth: false },
 },
 ];
 

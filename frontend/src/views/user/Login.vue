@@ -104,6 +104,12 @@ const handleLogin = async () => {
   try {
     const {data} = await authAPI.login(form.value.userId, form.value.password);
     
+    // 관리자 계정은 유저단 로그인 차단
+    if (data.user.role === 'admin') {
+      isPasswordWrong.value = true;
+      return;
+    }
+    
     // 토큰 저장
     auth.setToken(data.token);
     
@@ -117,6 +123,7 @@ const handleLogin = async () => {
     isPasswordWrong.value = true;
   }
 }
+
 
 
 

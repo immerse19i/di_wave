@@ -27,9 +27,9 @@
         </li>
       </ul>
       <div class="terms_copy">
-          <button class="terms">
-            약관 및 정책
-          </button>
+<router-link to="/terms" class="terms">
+  약관 및 정책
+</router-link>
           <div class="copy">
             © DiWAVE Inc. 2026 All Right Reserved
           </div>
@@ -37,6 +37,10 @@
     </div>
   </footer>
 </template>
+<script>
+
+
+</script>
 
 <style lang="scss" scoped>
   footer{
