@@ -25,4 +25,8 @@ export const termsAPI = {
 
   // 이전약관 이력 조회
   getHistory: (type) => api.get(`/terms/admin/${type}/history`),
+
+  // 유저단: 공개 이력 조회 (이전기록 드롭다운)
+getPublicHistory: (type) => api.get(`/terms/public/${type}/history`),
+
 };
