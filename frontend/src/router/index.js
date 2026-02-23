@@ -11,6 +11,8 @@ const Notice = () => import('@/views/user/page/user-info/Notice.vue');
 const Inquiry = () => import('@/views/user/page/user-info/Inquiry.vue');
 const Credit = () => import('@/views/user/page/user-info/Credit.vue');
 const Info = () => import('@/views/user/page/user-info/Info.vue');
+const CreditCharge = () => import('@/views/user/page/user-info/CreditCharge.vue');
+
 // Admin Views
 const AdminLogin = () => import('@/views/admin/Login.vue');
 const Register = ()=> import('@/views/user/Register.vue');
@@ -84,6 +86,7 @@ const routes = [
     { path: 'notice', component: Notice },
     { path: 'inquiry', component: Inquiry },
     { path: 'credit', component: Credit },
+    { path: 'credit-charge', component: CreditCharge },
     { path: 'info', component: Info },
   ],
 },
