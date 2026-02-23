@@ -90,7 +90,7 @@ exports.uploadTermFile = async (req, res) => {
 
     const { name, group_type, version } = current[0];
     const newVersion = version + 1;
-
+const originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
     // 기존 현재 버전 해제
     await pool.query('UPDATE terms SET is_current = FALSE WHERE type = ? AND is_current = TRUE', [type]);
 
@@ -98,13 +98,13 @@ exports.uploadTermFile = async (req, res) => {
     const [result] = await pool.query(
       `INSERT INTO terms (type, group_type, name, file_name, file_path, version, is_current, is_public)
        VALUES (?, ?, ?, ?, ?, ?, TRUE, TRUE)`,
-      [type, group_type, name, req.file.originalname, req.file.filename, newVersion]
+      [type, group_type, name, originalName, req.file.filename, newVersion]
     );
 
     res.json({
       success: true,
       message: '업로드 완료되었습니다.',
-      data: { id: result.insertId, version: newVersion, file_name: req.file.originalname }
+      data: { id: result.insertId, version: newVersion, file_name: originalName }
     });
   } catch (error) {
     console.error('uploadTermFile error:', error);
