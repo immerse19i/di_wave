@@ -274,7 +274,7 @@ onMounted(() => {
   background: $main-gad;
   color: $white;
   border-radius: $radius-sm;
-  @include font-12-medium;
+  @include font-14-medium;
   cursor: pointer;
   border: none;
 
@@ -288,7 +288,7 @@ onMounted(() => {
   background: $main-color;
   color: $white;
   border-radius: $radius-sm;
-  @include font-12-medium;
+  @include font-14-medium;
   cursor: pointer;
   display: inline-block;
 
@@ -303,7 +303,7 @@ onMounted(() => {
   color: $dark-text;
   border: 1px solid $dark-line-gray;
   border-radius: $radius-sm;
-  @include font-12-medium;
+  @include font-14-medium;
   cursor: pointer;
 
   &.active {

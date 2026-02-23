@@ -214,7 +214,7 @@ onMounted(() => {
   color: $dark-text;
   border: 1px solid $dark-line-gray;
   border-radius: $radius-sm;
-  @include font-12-medium;
+  @include font-14-medium;
   cursor: pointer;
 
   &.active {
