@@ -20,6 +20,9 @@ const Register = ()=> import('@/views/user/Register.vue');
 const AnalysisResult = () => import('@/views/user/page/AnalysisResult.vue');
 const AdminDashboard = () => import('@/views/admin/Approval.vue');
 const AdminMain = () => import('@/views/admin/AdminMain.vue')
+const AdminTerms = () => import('@/views/admin/AdminTerms.vue')
+const AdminTermsHistory = () => import('@/views/admin/AdminTermsHistory.vue')
+
 
 const routes = [
   // User Routes
@@ -62,9 +65,11 @@ const routes = [
   path: '/admin',
   component: AdminMain,
   meta: { requiresAuth: true },
-  redirect: '/admin/approval',  // 인증 후 기본 이동
+  redirect: '/admin/approval',
   children: [
     { path: 'approval', component: AdminDashboard },
+    { path: 'terms', component: AdminTerms },
+    { path: 'terms/history/:type', component: AdminTermsHistory },
   ],
 },
   // routes 배열에 추가 (/main 라우트 아래에)
