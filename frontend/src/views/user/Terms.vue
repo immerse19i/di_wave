@@ -65,41 +65,70 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { termsAPI } from '@/api/terms'
+
+
 const route = useRoute()
 
 
-// 약관 목록 (추후 API 연동: GET /api/terms)
-const termsList = ref([
-  { id: 'privacy_collection', name: '서비스 이용을 위한\n개인정보 수집 및 이용 동의' },
-  { id: 'privacy_processing', name: '개인정보 처리 위탁 동의' },
-  { id: 'paid_service', name: '전자상거래관련약관' },
-  { id: 'third_party', name: '전자상거래관련약관' },
-  { id: 'refund_policy', name: '전자상거래관련약관' },
-])
-
-// 약관별 버전 목록 (추후 API 연동: GET /api/terms/:type/history)
-const versionsMap = ref({
-  privacy_collection: [
-    { id: 1, date: '2026.01.07', file: '/assets/terms/privacy_collection.pdf' },
-    { id: 2, date: '2025.06.01', file: '/assets/terms/privacy_collection_v1.pdf' },
-  ],
-  privacy_processing: [
-    { id: 1, date: '2026.01.07', file: '/assets/terms/privacy_processing.pdf' },
-  ],
-  paid_service: [
-    { id: 1, date: '2026.01.07', file: '/assets/terms/paid_service.pdf' },
-  ],
-  third_party: [
-    { id: 1, date: '2026.01.07', file: '/assets/terms/third_party.pdf' },
-  ],
-  refund_policy: [
-    { id: 1, date: '2026.01.07', file: '/assets/terms/refund_policy.pdf' },
-  ],
-})
-
-const selectedTerm = ref('privacy_collection')
-const selectedVersion = ref({ id: 1, date: '2026.01.07', file: '/assets/terms/privacy_collection.pdf' })
+const termsList = ref([])
+const versionsMap = ref({})
+const selectedTerm = ref('')
+const selectedVersion = ref({ id: 0, date: '-', file: '' })
 const isVersionOpen = ref(false)
+
+// API: 공개 약관 목록 조회
+const fetchTerms = async () => {
+  try {
+    const res = await termsAPI.getPublicTerms()
+    const terms = res.data.data
+    termsList.value = terms.map(t => ({ id: t.type, name: t.name, termId: t.id }))
+    
+    if (terms.length > 0) {
+      // URL 파라미터로 초기 탭 설정
+      const tab = route.query.tab
+      const initialType = tab && terms.find(t => t.type === tab) ? tab : terms[0].type
+      selectTerm(initialType)
+    }
+  } catch (e) {
+    console.error('약관 목록 조회 실패:', e)
+  }
+}
+
+// API: 이전기록 목록 조회 (버전 드롭다운용)
+const fetchVersions = async (type) => {
+  try {
+    const res = await termsAPI.getPublicHistory(type)
+
+    const history = res.data.data.history || []
+    versionsMap.value[type] = history
+      .filter(h => h.is_public)
+      .map(h => ({
+        id: h.id,
+        date: formatVersionDate(h.created_at),
+        file: termsAPI.getFileUrl(h.id),
+      }))
+  } catch (e) {
+    // 이력 조회 실패 시 현재 약관만 사용
+    const term = termsList.value.find(t => t.id === type)
+    if (term) {
+      versionsMap.value[type] = [{
+        id: term.termId,
+        date: '-',
+        file: termsAPI.getFileUrl(term.termId),
+      }]
+    }
+  }
+}
+
+// 날짜 포맷 (버전 드롭다운용 - 날짜만)
+const formatVersionDate = (dateStr) => {
+  if (!dateStr) return '-'
+  const d = new Date(dateStr)
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`
+}
+
+
 
 // 현재 선택된 약관의 버전 목록
 const currentTermVersions = computed(() => {
@@ -119,12 +148,19 @@ const viewerUrl = computed(() => {
 })
 
 // 약관 선택
-const selectTerm = (termId) => {
+const selectTerm = async (termId) => {
   selectedTerm.value = termId
+  isVersionOpen.value = false
+
+  // 버전 목록이 없으면 API 호출
+  if (!versionsMap.value[termId]) {
+    await fetchVersions(termId)
+  }
+
   const versions = versionsMap.value[termId] || []
   selectedVersion.value = versions[0] || { id: 0, date: '-', file: '' }
-  isVersionOpen.value = false
 }
+
 
 // 버전 선택
 const selectVersion = (ver) => {
@@ -145,11 +181,7 @@ const closeDropdown = (e) => {
 }
 
 onMounted(() => {
-  // URL 파라미터로 초기 탭 설정
-  const tab = route.query.tab
-  if (tab && termsList.value.find(t => t.id === tab)) {
-    selectTerm(tab)
-  }
+  fetchTerms()
   document.addEventListener('click', closeDropdown)
 })
 

@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
-
+import { useAuthStore } from '@/store/auth'
+import { authAPI } from '@/api/auth'
 // User Views
 const Login = () => import('@/views/user/Login.vue');
 const UserMain = () => import('@/views/user/UserMain.vue');
@@ -20,6 +21,9 @@ const Register = ()=> import('@/views/user/Register.vue');
 const AnalysisResult = () => import('@/views/user/page/AnalysisResult.vue');
 const AdminDashboard = () => import('@/views/admin/Approval.vue');
 const AdminMain = () => import('@/views/admin/AdminMain.vue')
+const AdminTerms = () => import('@/views/admin/AdminTerms.vue')
+const AdminTermsHistory = () => import('@/views/admin/AdminTermsHistory.vue')
+
 
 const routes = [
   // User Routes
@@ -62,9 +66,11 @@ const routes = [
   path: '/admin',
   component: AdminMain,
   meta: { requiresAuth: true },
-  redirect: '/admin/approval',  // 인증 후 기본 이동
+  redirect: '/admin/approval',
   children: [
     { path: 'approval', component: AdminDashboard },
+    { path: 'terms', component: AdminTerms },
+    { path: 'terms/history/:type', component: AdminTermsHistory },
   ],
 },
   // routes 배열에 추가 (/main 라우트 아래에)
@@ -102,5 +108,42 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
 });
+
+
+
+// 라우터 가드 - 인증 체크 + user 데이터 자동 복원
+router.beforeEach(async (to, from, next) => {
+  const auth = useAuthStore()
+
+  // 인증 불필요 페이지는 통과
+  if (to.meta.requiresAuth === false) {
+    return next()
+  }
+
+  // 토큰 없으면 로그인으로
+  if (!auth.token) {
+    const loginPath = to.path.startsWith('/admin') ? '/admin/login' : '/login'
+    return next(loginPath)
+  }
+
+  // 토큰 있는데 user 없으면 getMe로 복원
+  if (!auth.user) {
+    try {
+      const res = await authAPI.getMe()
+      auth.setUser(res.data.user)
+    } catch (e) {
+      // 토큰 만료/무효 → 로그아웃
+      auth.logout()
+      const loginPath = to.path.startsWith('/admin') ? '/admin/login' : '/login'
+      return next(loginPath)
+    }
+  }
+
+  next()
+})
+
+
+
+
 
 export default router;
