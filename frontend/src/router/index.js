@@ -15,6 +15,8 @@ const Info = () => import('@/views/user/page/user-info/Info.vue');
 const AdminLogin = () => import('@/views/admin/Login.vue');
 const Register = ()=> import('@/views/user/Register.vue');
 const AnalysisResult = () => import('@/views/user/page/AnalysisResult.vue');
+const AdminDashboard = () => import('@/views/admin/Dashboard.vue');
+
 
 const routes = [
   // User Routes
@@ -43,12 +45,19 @@ const routes = [
     path: '/admin',
     redirect: '/admin/login',
   },
+  
   {
     path: '/admin/login',
     name: 'AdminLogin',
     component: AdminLogin,
     meta: { requiresAuth: false },
   },
+  {
+  path: '/admin/dashboard',
+  name: 'AdminDashboard',
+  component: AdminDashboard,
+  meta: { requiresAuth: true },
+},
   // routes 배열에 추가 (/main 라우트 아래에)
 {
   path: '/user-info',

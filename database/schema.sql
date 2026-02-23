@@ -8,9 +8,12 @@ USE di_wave;
 CREATE TABLE hospitals (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
+    ceo_name VARCHAR(50),
     business_number VARCHAR(20) UNIQUE,
     phone VARCHAR(20),
     address VARCHAR(255),
+    address_detail VARCHAR(255),
+    business_license_path VARCHAR(255),
     status ENUM('pending', 'approved', 'rejected', 'suspended') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -20,12 +23,15 @@ CREATE TABLE hospitals (
 CREATE TABLE users (
     id INT PRIMARY KEY AUTO_INCREMENT,
     hospital_id INT,
+    login_id VARCHAR(50) UNIQUE,
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     name VARCHAR(50),
     role ENUM('admin', 'hospital') DEFAULT 'hospital',
     is_active BOOLEAN DEFAULT TRUE,
     last_login TIMESTAMP NULL,
+    login_attempts INT DEFAULT 0,
+    locked_until TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (hospital_id) REFERENCES hospitals(id) ON DELETE SET NULL
 );

@@ -25,30 +25,58 @@
           />
         </div>
 
-        <button type="submit" class="btn-login">로그인</button>
+<p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+<button type="submit" class="btn-login">로그인</button>
       </form>
     </div>
   </div>
 </template>
-
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/store/auth'
+import { authAPI } from '@/api/auth'
 
 const router = useRouter()
+const auth = useAuthStore()
 
 const form = ref({
   adminId: '',
   password: ''
 })
 
-const handleLogin = () => {
-  // TODO: API 연동
-  console.log('Admin Login:', form.value)
-  // 데모: 바로 대시보드로 이동
-  // router.push('/admin/dashboard')
+const errorMessage = ref('')
+
+const handleLogin = async () => {
+  try {
+    errorMessage.value = ''
+    const { data } = await authAPI.login(form.value.adminId, form.value.password)
+    
+    // 관리자 권한 체크
+    if (data.user.role !== 'admin') {
+      errorMessage.value = '관리자 권한이 없습니다.'
+      return
+    }
+    
+    // 토큰 저장
+    auth.setToken(data.token)
+    
+    // 유저 정보 조회
+    const { data: userData } = await authAPI.getMe()
+    auth.setUser(userData)
+    
+    // 관리자 대시보드로 이동
+    router.push('/admin/dashboard')
+  } catch (error) {
+    if (error.response?.status === 423) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = '아이디 또는 비밀번호가 올바르지 않습니다.'
+    }
+  }
 }
 </script>
+
 
 <style lang="scss" scoped>
 .admin-login-page {
@@ -126,4 +154,11 @@ const handleLogin = () => {
     background-color: $dark-gray-dark;
   }
 }
+
+.error-message {
+  @include font-12-regular;
+  color: red;
+  margin-bottom: $spacing-sm;
+}
+
 </style>
