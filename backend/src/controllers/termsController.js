@@ -151,3 +151,21 @@ exports.getTermHistory = async (req, res) => {
     res.status(500).json({ success: false, message: '서버 오류' });
   }
 };
+
+
+// 유저단: 특정 약관의 공개 이력 (is_public=TRUE만)
+exports.getPublicHistory = async (req, res) => {
+  try {
+    const { type } = req.params;
+    const [history] = await pool.query(
+      `SELECT id, type, name, file_name, created_at
+       FROM terms WHERE type = ? AND is_public = TRUE AND file_name != ''
+       ORDER BY version DESC`,
+      [type]
+    );
+    res.json({ success: true, data: { history } });
+  } catch (error) {
+    console.error('getPublicHistory error:', error);
+    res.status(500).json({ success: false, message: '서버 오류' });
+  }
+};

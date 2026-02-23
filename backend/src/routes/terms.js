@@ -52,4 +52,8 @@ router.put('/admin/:id/toggle', verifyToken, isAdmin, termsController.toggleTerm
 // 이전약관 이력 조회
 router.get('/admin/:type/history', verifyToken, isAdmin, termsController.getTermHistory);
 
+// 유저단: 특정 약관의 공개 버전 목록 (이전기록 드롭다운용)
+router.get('/public/:type/history', termsController.getPublicHistory);
+
+
 module.exports = router;
