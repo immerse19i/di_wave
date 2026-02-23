@@ -12,6 +12,7 @@ const Inquiry = () => import('@/views/user/page/user-info/Inquiry.vue');
 const Credit = () => import('@/views/user/page/user-info/Credit.vue');
 const Info = () => import('@/views/user/page/user-info/Info.vue');
 const CreditCharge = () => import('@/views/user/page/user-info/CreditCharge.vue');
+const Terms = () => import('@/views/user/Terms.vue')
 
 // Admin Views
 const AdminLogin = () => import('@/views/admin/Login.vue');
@@ -42,11 +43,6 @@ const routes = [
     { path: 'analysis/:id', component: AnalysisResult, props: true },
   ],
 },
-  // Admin Routes
-  {
-    path: '/admin',
-    redirect: '/admin/login',
-  },
   
   {
     path: '/admin/login',
@@ -59,18 +55,16 @@ const routes = [
   component: AdminMain,
   meta: { requiresAuth: true },
   children: [
-    { path: '', redirect: '/admin/approval' },
+    { path: ''},
   ],
 },
 {
   path: '/admin',
   component: AdminMain,
   meta: { requiresAuth: true },
+  redirect: '/admin/approval',  // 인증 후 기본 이동
   children: [
     { path: 'approval', component: AdminDashboard },
-    // 추후 추가
-    // { path: 'accounts', component: AdminAccounts },
-    // { path: 'notices', component: AdminNotices },
   ],
 },
   // routes 배열에 추가 (/main 라우트 아래에)
@@ -94,6 +88,13 @@ const routes = [
   path: '/register',
   name: 'Register',
   component: Register,
+},
+//약관 페이지
+{
+  path: '/terms',
+  name: 'Terms',
+  component: Terms,
+  meta: { requiresAuth: false },
 },
 ];
 

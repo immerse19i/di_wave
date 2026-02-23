@@ -159,8 +159,7 @@ const toggleAll = (e) => {
 }
 
 const openTerms = (termId) => {
-  // TODO: 약관 PDF 뷰어 페이지 새 창 열기
-  window.open(`/terms/${termId}`, '_blank')
+  window.open(`/terms?tab=${termId}`, '_blank')
 }
 
 // 결제 상태
@@ -197,7 +196,7 @@ const goToCreditMain = () => {
 .credit-charge {
   padding: 24px;
   color: $white;
-  max-width: 800px;
+//   max-width: 800px;
   margin: 0 auto;
 }
 
