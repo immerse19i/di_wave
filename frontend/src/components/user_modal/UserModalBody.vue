@@ -69,7 +69,15 @@ const handleClose = () => {
     });
     return;
   }
+  // find_password 모달은 전 단계에서 confirm 팝업
+  if (modal.type === 'find_password' && findPasswordRef.value) {
+    message.showConfirm('비밀번호 찾기를 중단하시겠습니까?', () => {
+      modal.close();
+    });
+    return;
+  }
   // 그 외에는 즉시 닫기
   modal.close();
 };
+
 </script>
