@@ -302,8 +302,20 @@ exports.verifyCode = async (req, res) => {
       return res.status(400).json({ success: false, message: '인증번호가 올바르지 않거나 만료되었습니다.' });
     }
 
-    await pool.query('UPDATE email_verifications SET verified = TRUE WHERE id = ?', [rows[0].id]);
-    res.json({ success: true, message: '인증되었습니다.' });
+   await pool.query('UPDATE email_verifications SET verified = TRUE WHERE id = ?', [rows[0].id]);
+
+if (type === 'find_id') {
+  const [users] = await pool.query(
+    'SELECT login_id FROM users WHERE email = ?',
+    [email]
+  );
+  return res.json({ 
+    success: true, 
+    message: '인증되었습니다.',
+    loginId: users.length > 0 ? users[0].login_id : null
+  });
+}
+res.json({ success: true, message: '인증되었습니다.' });
   } catch (error) {
     console.error('인증 확인 오류:', error);
     res.status(500).json({ success: false, message: '서버 오류' });
@@ -366,5 +378,68 @@ exports.register = async (req, res) => {
   }
 };
 
+
+// POST /api/auth/find-id 아이디 찾기
+exports.findId = async (req, res) => {
+  try {
+    const { email, ceoName } = req.body;
+
+    // users JOIN hospitals: email + ceo_name 매칭
+    const [rows] = await pool.query(
+      `SELECT u.id, u.login_id, u.email 
+       FROM users u 
+       JOIN hospitals h ON u.hospital_id = h.id 
+       WHERE u.email = ? AND h.ceo_name = ?`,
+      [email, ceoName]
+    );
+
+    if (rows.length === 0) {
+      return res.status(400).json({ success: false, message: '일치하는 정보가 없습니다.' });
+    }
+
+    // 인증번호 생성 및 발송 (기존 sendCode 로직 재활용)
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(Date.now() + 10 * 60 * 1000); // 10분
+
+    await pool.query('DELETE FROM email_verifications WHERE email = ? AND type = ?', [email, 'find_id']);
+    await pool.query(
+      'INSERT INTO email_verifications (email, code, type, expires_at) VALUES (?, ?, ?, ?)',
+      [email, code, 'find_id', expires]
+    );
+
+    await transporter.sendMail({
+      from: process.env.MAIL_FROM,
+      to: email,
+      subject: '[DI-WAVE] ID 찾기 인증번호',
+      html: `
+        <div style="max-width:600px; text-align:left; font-family:'Inter',Arial,sans-serif; color:#353535;">
+          <p style="font-size:14px; font-weight:bold;">[OsteoAge]</p>
+          <p style="font-size:14px; line-height:1.6;">
+            ID 찾기를 위해 본인 확인이 필요합니다.<br/>
+            아래의 인증번호를 입력해 주세요.
+          </p>
+          <div style="background-color:#353535; padding:12px 48px; display:inline-block; margin:20px 0;">
+            <p style="font-family:'Inter',Arial,sans-serif; font-weight:500; font-size:36px; line-height:140%; color:#fff; margin:0; text-align:center;">
+              ${code}
+            </p>
+          </div>
+          <p style="font-size:13px; line-height:1.8; color:#353535;">
+            인증번호는 10분 동안 유효합니다.<br/>
+            본인이 요청하지 않았다면 이 이메일을 무시하셔도 됩니다.
+          </p>
+          <p style="font-size:12px; color:#353535; margin-top:24px;">
+            본 메일은 발신전용으로 회신이 불가능합니다.<br/>
+            Copyright © OsteoAge. All rights reserved.
+          </p>
+        </div>
+      `,
+    });
+
+    res.json({ success: true, message: '인증번호를 발송했습니다.' });
+  } catch (error) {
+    console.error('FindId error:', error);
+    res.status(500).json({ success: false, message: '서버 오류' });
+  }
+};
 
 

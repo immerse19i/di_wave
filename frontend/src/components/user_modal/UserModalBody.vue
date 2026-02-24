@@ -1,16 +1,14 @@
 <template>
-  <div
-    id="modal"
-    class="modal-overlay"
-    v-if="modal.isOpen"
-    @click.self="modal.close"
-  >
+  <div id="modal" class="modal-overlay" v-if="modal.isOpen" @click.self="handleClose">
     <div class="modal-content">
-      <!-- 동적 컴포넌트 -->
-      <div class="close-btn" @click="modal.close">
+      <div class="close-btn" @click="handleClose">
         <img :src="closeIcon" alt="" />
       </div>
-      <component :is="currentComponent" />
+      <component 
+        :is="currentComponent" 
+        :ref="modal.type === 'find_id' ? (el) => findIdRef = el : 
+              modal.type === 'find_password' ? (el) => findPasswordRef = el : undefined"
+      />
     </div>
   </div>
 </template>
@@ -41,15 +39,19 @@
 }
 </style>
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useModalStore } from '../../store/modal';
-// 모달목록
+import { UseMessageStore } from '../../store/message';
 import SignIn from './modal/SignIn.vue';
 import FindId from './modal/FindId.vue';
 import FindPassword from './modal/FindPassword.vue';
-const modal = useModalStore();
 
+const modal = useModalStore();
+const message = UseMessageStore();
 const closeIcon = '/assets/icons/close.svg';
+
+const findIdRef = ref(null);
+const findPasswordRef = ref(null);
 
 const components = {
   'sign-in': SignIn,
@@ -59,6 +61,15 @@ const components = {
 
 const currentComponent = computed(() => components[modal.type]);
 
-
-
+const handleClose = () => {
+  // find_id 모달의 1~2단계에서는 confirm 팝업
+  if (modal.type === 'find_id' && findIdRef.value?.step < 3) {
+    message.showConfirm('ID찾기를 중단하시겠습니까?', () => {
+      modal.close();
+    });
+    return;
+  }
+  // 그 외에는 즉시 닫기
+  modal.close();
+};
 </script>

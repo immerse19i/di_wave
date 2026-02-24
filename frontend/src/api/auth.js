@@ -11,6 +11,7 @@ export const authAPI = {
   register: (formData) => api.post('/auth/register', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
+  findId: (email, ceoName) => api.post('/auth/find-id', { email, ceoName }),
 }
 
 
