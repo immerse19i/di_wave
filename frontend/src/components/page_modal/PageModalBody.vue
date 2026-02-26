@@ -19,13 +19,14 @@ import { computed } from 'vue';
 import { useModalStore } from '../../store/modal';
 // 모달목록
 import NewAnalysis from './modal/NewAnalysis.vue';
-
+import EditAnalysis from './modal/EditAnalysis.vue';
 const modal = useModalStore();
 
 const closeIcon = '/assets/icons/close.svg';
 
 const components = {
   new_analysis: NewAnalysis,
+  edit_analysis: EditAnalysis, // 추가
 };
 
 const currentComponent = computed(() => components[modal.type]);

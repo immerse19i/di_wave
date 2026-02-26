@@ -275,8 +275,10 @@
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { analysisAPI } from '@/api/analysis';
+import { useModalStore } from '@/store/modal'; // ← 추가
 import growthHeightData from '@/data/growth_height.json';
 import Chart from 'chart.js/auto';
+const modal = useModalStore(); // ← 추가
 
 const route = useRoute();
 const router = useRouter();
@@ -525,7 +527,7 @@ const goToRecord = (id) => {
 const goToReport = () =>
   router.push(`/main/analysis/${route.params.id}/report`);
 const openEditModal = () => {
-  /* TODO: 정보 수정 모달 */
+  modal.open('edit_analysis', 'page', analysis.value);
 };
 
 // 포맷 헬퍼

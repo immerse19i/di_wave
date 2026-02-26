@@ -245,3 +245,91 @@ exports.updateDoctorBoneAge = async (req, res) => {
     res.status(500).json({ success: false, message: '저장 실패' });
   }
 };
+
+
+// 분석 정보 수정 (재분석 포함)
+exports.updateAnalysisInfo = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const hospitalId = req.user.hospital_id;
+    const {
+      patientCode, patientName, birthDate, gender,
+      height, weight, fatherHeight, motherHeight,
+      physician, ageMonths, sex
+    } = req.body;
+
+    // 1. 기존 분석 조회
+    const [analyses] = await pool.query(
+      'SELECT * FROM analyses WHERE id = ? AND hospital_id = ?',
+      [id, hospitalId]
+    );
+    if (!analyses.length) {
+      return res.status(404).json({ success: false, message: '분석을 찾을 수 없습니다.' });
+    }
+    const analysis = analyses[0];
+
+    // 2. 환자 매칭 로직
+    const [existingPatients] = await pool.query(
+      'SELECT id, gender FROM patients WHERE hospital_id = ? AND patient_code = ? AND name = ?',
+      [hospitalId, patientCode, patientName]
+    );
+
+    let patientId;
+    if (existingPatients.length > 0) {
+      // 기존 환자 존재 → 성별 체크
+      if (existingPatients[0].gender !== gender) {
+        return res.status(400).json({
+          success: false,
+          message: '성별이 일치하지 않아 연동이 불가합니다.'
+        });
+      }
+      patientId = existingPatients[0].id;
+    } else {
+      // 새 환자 생성
+      const [newPatient] = await pool.query(
+        'INSERT INTO patients (hospital_id, patient_code, name, birth_date, gender) VALUES (?, ?, ?, ?, ?)',
+        [hospitalId, patientCode, patientName, birthDate, gender]
+      );
+      patientId = newPatient.insertId;
+    }
+
+    // 3. AI 재분석 (기존 이미지 사용, 크레딧 차감 없음)
+    const aiResult = await predictBoneAge(analysis.image_path, {
+      sex: parseInt(sex),
+      height: parseFloat(height),
+      ageMonths: parseInt(ageMonths),
+      fatherHeight: fatherHeight ? parseFloat(fatherHeight) : null,
+      motherHeight: motherHeight ? parseFloat(motherHeight) : null
+    });
+
+    if (!aiResult.success) {
+      return res.status(500).json({ success: false, message: 'AI 재분석 실패' });
+    }
+
+    // 4. 뼈 나이 파싱
+    const boneAgeMatch = aiResult.data.BoneAge.match(/(\d+)Y\s*(\d+)M/);
+    const boneAgeYears = boneAgeMatch ? parseInt(boneAgeMatch[1]) : null;
+    const boneAgeMonths = boneAgeMatch ? parseInt(boneAgeMatch[2]) : null;
+
+    // 5. analyses 업데이트
+    await pool.query(
+      `UPDATE analyses SET patient_id = ?, height = ?, weight = ?, physician = ?,
+       chronological_age_years = ?, chronological_age_months = ?,
+       bone_age_years = ?, bone_age_months = ?, result_json = ?
+       WHERE id = ? AND hospital_id = ?`,
+      [
+        patientId, parseFloat(height), weight ? parseFloat(weight) : null,
+        physician || null,
+        Math.floor(ageMonths / 12), ageMonths % 12,
+        boneAgeYears, boneAgeMonths, JSON.stringify(aiResult.data),
+        id, hospitalId
+      ]
+    );
+
+    res.json({ success: true, data: { analysisId: id, ...aiResult.data } });
+
+  } catch (error) {
+    console.error('분석 수정 오류:', error);
+    res.status(500).json({ success: false, message: '수정 중 오류가 발생했습니다.' });
+  }
+};
