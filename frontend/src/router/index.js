@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/store/auth'
 import { authAPI } from '@/api/auth'
+import ReportViewer from '../views/user/page/ReportViewer.vue'
+
 // User Views
 const Login = () => import('@/views/user/Login.vue');
 const UserMain = () => import('@/views/user/UserMain.vue');
@@ -45,6 +47,7 @@ const routes = [
   children: [
     { path: '', component: UserList },
     { path: 'analysis/:id', component: AnalysisResult, props: true },
+    { path: 'analysis/:id/report', component: ReportViewer, props: true },
   ],
 },
   

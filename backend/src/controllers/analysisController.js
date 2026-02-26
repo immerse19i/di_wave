@@ -98,7 +98,7 @@ const [updatedCredit] = await pool.query(
 
         await pool.query(
             `INSERT INTO credit_transactions (hospital_id, type, amount, balance_after, description, analysis_id)
-            vALUES (?, 'use' , ?, ?, ?, ?)`,
+            VALUES (?, 'use' , ?, ?, ?, ?)`,
             [hospitalId, config.credit.perAnalysis, updatedCredit[0].balance, '뼈나이 분석', analysisId]
         );
 

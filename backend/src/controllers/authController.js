@@ -302,8 +302,20 @@ exports.verifyCode = async (req, res) => {
       return res.status(400).json({ success: false, message: '인증번호가 올바르지 않거나 만료되었습니다.' });
     }
 
-    await pool.query('UPDATE email_verifications SET verified = TRUE WHERE id = ?', [rows[0].id]);
-    res.json({ success: true, message: '인증되었습니다.' });
+   await pool.query('UPDATE email_verifications SET verified = TRUE WHERE id = ?', [rows[0].id]);
+
+if (type === 'find_id') {
+  const [users] = await pool.query(
+    'SELECT login_id FROM users WHERE email = ?',
+    [email]
+  );
+  return res.json({ 
+    success: true, 
+    message: '인증되었습니다.',
+    loginId: users.length > 0 ? users[0].login_id : null
+  });
+}
+res.json({ success: true, message: '인증되었습니다.' });
   } catch (error) {
     console.error('인증 확인 오류:', error);
     res.status(500).json({ success: false, message: '서버 오류' });
@@ -363,6 +375,175 @@ exports.register = async (req, res) => {
     res.status(500).json({ success: false, message: '서버 오류' });
   } finally {
     conn.release();
+  }
+};
+
+
+// POST /api/auth/find-id 아이디 찾기
+exports.findId = async (req, res) => {
+  try {
+    const { email, ceoName } = req.body;
+
+    // users JOIN hospitals: email + ceo_name 매칭
+    const [rows] = await pool.query(
+      `SELECT u.id, u.login_id, u.email 
+       FROM users u 
+       JOIN hospitals h ON u.hospital_id = h.id 
+       WHERE u.email = ? AND h.ceo_name = ?`,
+      [email, ceoName]
+    );
+
+    if (rows.length === 0) {
+      return res.status(400).json({ success: false, message: '일치하는 정보가 없습니다.' });
+    }
+
+    // 인증번호 생성 및 발송 (기존 sendCode 로직 재활용)
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(Date.now() + 10 * 60 * 1000); // 10분
+
+    await pool.query('DELETE FROM email_verifications WHERE email = ? AND type = ?', [email, 'find_id']);
+    await pool.query(
+      'INSERT INTO email_verifications (email, code, type, expires_at) VALUES (?, ?, ?, ?)',
+      [email, code, 'find_id', expires]
+    );
+
+    await transporter.sendMail({
+      from: process.env.MAIL_FROM,
+      to: email,
+      subject: '[DI-WAVE] ID 찾기 인증번호',
+      html: `
+        <div style="max-width:600px; text-align:left; font-family:'Inter',Arial,sans-serif; color:#353535;">
+          <p style="font-size:14px; line-height:1.6;">
+아이디 찾기를 위한 인증번호가 발급되었습니다.<br/>
+아래 인증번호를 사용하여 아이디 확인을 진행해 주세요.
+          </p>
+          <div style="background-color:#55aba6; padding:12px 48px; display:inline-block; margin:20px 0;">
+            <p style="font-family:'Inter',Arial,sans-serif; font-weight:500; font-size:36px; line-height:140%; color:#fff; margin:0; text-align:center;">
+              ${code}
+            </p>
+          </div>
+          <p style="font-size:13px; line-height:1.8; color:#353535; margin-bottom:32px;">
+           인증번호는 10분 동안 유효합니다. 만료되기 전에 입력해 주시기 바랍니다.<br/>
+           누군가가 잘못된 정보를 입력했을 수 있습니다. 이 경우, 이 이메일을 무시하셔도 됩니다. 다른 사람이 귀하의 계정에 접근할 수 없으므로 안심하셔도 됩니다.
+          </p>
+          <p style="font-size:13px; line-height:1.8; color:#353535; margin-bottom:8px">
+          문의사항이 있을 경우 아래 문의처를 이용해 주시기 바랍니다.
+          </p>
+          <p style="font-size:12px; color:#353535; margin-top:24px;">
+디웨이브주식회사<br/>
+csadmin@diwave.io<br/>
+02-2088-8728 [문의가능시간 : 10:00~17:00 (토 · 일 · 공휴일 휴무)]
+          </p>
+        </div>
+      `,
+    });
+
+    res.json({ success: true, message: '인증번호를 발송했습니다.' });
+  } catch (error) {
+    console.error('FindId error:', error);
+    res.status(500).json({ success: false, message: '서버 오류' });
+  }
+};
+
+// POST /api/auth/find-password 비밀번호 찾기
+exports.findPassword = async (req, res) => {
+  try {
+    const { loginId, email } = req.body;
+
+    // users 테이블에서 login_id + email 매칭
+    const [rows] = await pool.query(
+      'SELECT id, login_id, email FROM users WHERE login_id = ? AND email = ?',
+      [loginId, email]
+    );
+
+    if (rows.length === 0) {
+      return res.status(400).json({ success: false, message: '일치하는 정보가 없습니다.' });
+    }
+
+    // 인증번호 생성 및 발송
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(Date.now() + 10 * 60 * 1000);
+
+    await pool.query('DELETE FROM email_verifications WHERE email = ? AND type = ?', [email, 'find_password']);
+    await pool.query(
+      'INSERT INTO email_verifications (email, code, type, expires_at) VALUES (?, ?, ?, ?)',
+      [email, code, 'find_password', expires]
+    );
+
+    await transporter.sendMail({
+      from: process.env.MAIL_FROM,
+      to: email,
+      subject: '[OsteoAge] 비밀번호 재설정 인증번호 안내',
+      html: `
+        <div style="max-width:600px; text-align:left; font-family:'Inter',Arial,sans-serif; color:#353535;">
+          <p style="font-size:14px; line-height:1.6;">
+            비밀번호 찾기를 위해 본인 확인이 필요합니다.<br/>
+            아래의 인증번호를 입력해 주세요.
+          </p>
+          <div style="background-color:#55aba6; padding:12px 48px; display:inline-block; margin:20px 0;">
+            <p style="font-family:'Inter',Arial,sans-serif; font-weight:500; font-size:36px; line-height:140%; color:#fff; margin:0; text-align:center;">
+              ${code}
+            </p>
+          </div>
+          <p style="font-size:13px; line-height:1.8; color:#353535; margin-bottom:32px">
+            인증번호는 10분 동안 유효합니다. 만료되기 전에 입력해 주시기 바랍니다.<br/>
+            누군가가 잘못된 정보를 입력했을 수 있습니다. 이 경우, 이 이메일을 무시하셔도 됩니다. 다른 사람이 귀하의 계정에 접근할 수 없으므로 안심하셔도 됩니다.
+          </p>
+          <p style="font-size:12px; color:#353535; margin-top:24px;">
+            본 메일은 발신전용으로 회신이 불가능합니다.<br/>
+            Copyright © OsteoAge. All rights reserved.
+            <br/><br/>
+            디웨이브주식회사
+02-2088-8728 [문의가능시간 : 10:00~17:00 (토 · 일 · 공휴일 휴무)]
+          </p>
+        </div>
+      `,
+    });
+
+    res.json({ success: true, message: '인증번호를 발송했습니다.' });
+  } catch (error) {
+    console.error('FindPassword error:', error);
+    res.status(500).json({ success: false, message: '서버 오류' });
+  }
+};
+
+
+// POST /api/auth/reset-password 비밀번호 재설정
+exports.resetPassword = async (req, res) => {
+  try {
+    const { loginId, email, newPassword } = req.body;
+
+    // login_id + email 매칭 확인
+    const [users] = await pool.query(
+      'SELECT id FROM users WHERE login_id = ? AND email = ?',
+      [loginId, email]
+    );
+
+    if (users.length === 0) {
+      return res.status(400).json({ success: false, message: '사용자를 찾을 수 없습니다.' });
+    }
+
+    // 인증 완료 여부 확인 (find_password 타입, verified = TRUE)
+    const [verified] = await pool.query(
+      'SELECT id FROM email_verifications WHERE email = ? AND type = "find_password" AND verified = TRUE',
+      [email]
+    );
+
+    if (verified.length === 0) {
+      return res.status(400).json({ success: false, message: '이메일 인증이 필요합니다.' });
+    }
+
+    // 비밀번호 해시화 후 저장
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await pool.query('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, users[0].id]);
+
+    // 인증 데이터 정리
+    await pool.query('DELETE FROM email_verifications WHERE email = ? AND type = "find_password"', [email]);
+
+    res.json({ success: true, message: '비밀번호가 변경되었습니다.' });
+  } catch (error) {
+    console.error('ResetPassword error:', error);
+    res.status(500).json({ success: false, message: '서버 오류' });
   }
 };
 
