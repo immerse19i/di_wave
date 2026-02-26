@@ -338,6 +338,21 @@ exports.register = async (req, res) => {
       return res.status(400).json({ success: false, message: '이미 사용 중인 ID입니다.' });
     }
 
+    //이메일 중복 화긴
+const [existingEmail] = await conn.query('SELECT id FROM users WHERE email = ?', [email]);
+if (existingEmail.length > 0) {
+  await conn.rollback();
+  return res.status(400).json({ success: false, message: '이미 등록된 이메일입니다.' });
+}
+
+// 사업자번호 중복 확인
+const [existingBiz] = await conn.query('SELECT id FROM hospitals WHERE business_number = ?', [businessNumber]);
+if (existingBiz.length > 0) {
+  await conn.rollback();
+  return res.status(400).json({ success: false, message: '이미 등록된 사업자번호입니다.' });
+}
+
+
     // 이메일 인증 확인
     const [verified] = await conn.query(
       'SELECT id FROM email_verifications WHERE email = ? AND type = "register" AND verified = TRUE',
