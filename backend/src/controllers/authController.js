@@ -547,5 +547,22 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
+// POST /api/auth/verify-password 비밀번호 확인
+exports.verifyPassword = async (req, res) => {
+  try {
+    const { currentPassword } = req.body;
+    const [users] = await pool.query('SELECT password FROM users WHERE id = ?', [req.user.id]);
+    const isMatch = await bcrypt.compare(currentPassword, users[0].password);
+
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: '현재 비밀번호가 올바르지 않습니다.' });
+    }
+
+    res.json({ success: true, message: '비밀번호가 확인되었습니다.' });
+  } catch (error) {
+    console.error('VerifyPassword error:', error);
+    res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
+  }
+};
 
 
