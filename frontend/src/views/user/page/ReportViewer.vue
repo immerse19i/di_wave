@@ -3,7 +3,7 @@
     <!-- 상단 툴바 -->
     <div class="toolbar">
       <button class="btn-back" @click="goBack">
-        <img src="/assets/icons/arrow_left.svg" alt="뒤로" /> 뒤로가기
+        <img src="/assets/icons/arrow_back.svg" alt="뒤로" /> 뒤로가기
       </button>
       <div class="toolbar-right">
         <div class="zoom-controls">
@@ -1154,8 +1154,8 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
-  background: #2a2a2a;
-  border-bottom: 1px solid #444;
+  background: $dark-black;
+  // border-bottom: 1px solid #444;
   color: #fff;
 
   .btn-back {
@@ -1216,7 +1216,7 @@ onUnmounted(() => {
 .preview-area {
   flex: 1;
   overflow: auto;
-  background: #525659;
+  background: $dark-black;
   display: flex;
   justify-content: center;
   padding: 20px;
@@ -1358,6 +1358,7 @@ onUnmounted(() => {
   max-width: 544px;
   margin: auto;
   justify-content: center;
+  word-break: keep-all;
   li {
     display: flex;
     flex-direction: column;
