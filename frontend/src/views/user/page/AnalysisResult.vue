@@ -376,6 +376,19 @@ const finalPercent = computed(() =>
   Math.min(100, ((parseFloat(finalPredictedHeight.value) || 0) / 200) * 100),
 );
 
+// 의사 판독값 변경 시 서버에 저장
+watch([doctorBoneAgeYears, doctorBoneAgeMonths], async ([years, months]) => {
+  if (!analysis.value?.id) return;
+  try {
+    await analysisAPI.updateDoctorBoneAge(analysis.value.id, {
+      bone_age_years: years,
+      bone_age_months: months,
+    });
+  } catch (e) {
+    console.error('의사 뼈나이 저장 오류:', e);
+  }
+});
+
 // 분석 브리핑 텍스트
 const briefingText = computed(() => {
   if (!analysis.value) return '';

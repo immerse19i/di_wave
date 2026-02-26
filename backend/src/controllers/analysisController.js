@@ -229,3 +229,19 @@ exports.getAnalysis = async (req,res) => {
     }
 
 };
+
+exports.updateDoctorBoneAge = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { bone_age_years, bone_age_months } = req.body;
+    
+    await pool.query(
+      'UPDATE analyses SET bone_age_years = ?, bone_age_months = ? WHERE id = ? AND hospital_id = ?',
+      [bone_age_years, bone_age_months, id, req.user.hospital_id]
+    );
+    
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, message: '저장 실패' });
+  }
+};

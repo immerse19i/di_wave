@@ -41,4 +41,8 @@ router.get('/', verifyToken, analysisController.getAnalyses);
 // 상세 조회
 router.get('/:id', verifyToken, analysisController.getAnalysis);
 
+// 예측 수정
+router.patch('/:id/doctor-bone-age', verifyToken, analysisController.updateDoctorBoneAge);
+
+
 module.exports = router;
