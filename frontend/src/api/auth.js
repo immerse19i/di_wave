@@ -11,6 +11,11 @@ export const authAPI = {
   register: (formData) => api.post('/auth/register', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
+  findId: (email, ceoName) => api.post('/auth/find-id', { email, ceoName }),
+  findPassword: (loginId, email) => api.post('/auth/find-password', { loginId, email }),
+  resetPassword: (loginId, email, newPassword) => api.post('/auth/reset-password', { loginId, email, newPassword }),
+
 }
+
 
 

@@ -26,7 +26,9 @@ router.put('/password', verifyToken, authController.changePassword);
 // 관리자 전용: 계정 잠금 해제
 router.patch('/unlock/:userId', verifyToken, isAdmin, authController.unlockAccount);
 
-
+router.post('/find-id', authController.findId);
+router.post('/find-password', authController.findPassword);
+router.post('/reset-password', authController.resetPassword);
 // 회원가입로직
 router.post('/check-id', authController.checkId);
 router.post('/send-code', authController.sendCode);
