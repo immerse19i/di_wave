@@ -97,6 +97,7 @@ const routes = [
   path: '/register',
   name: 'Register',
   component: Register,
+  meta: { requiresAuth: false },
 },
 //약관 페이지
 {
