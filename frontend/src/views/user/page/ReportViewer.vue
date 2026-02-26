@@ -184,7 +184,6 @@
                   <span>큼(100)</span>
                 </div>
               </div>
-              <div class="gauge-range"></div>
             </div>
 
             <!-- 유전 기반 예측 키 -->
@@ -197,10 +196,13 @@
                 cm</span
               >
               <div class="gauge-bar-wrapper">
-                <img
-                  class="dino-small"
-                  src="/assets/report/dino_marker_small.png"
-                />
+                <div class="small_img">
+                  <img
+                    class="dino-small"
+                    src="/assets/report/dino_marker_small.png"
+                  />
+                  <span>작음(0)</span>
+                </div>
                 <div class="gauge-bar">
                   <div
                     class="gauge-fill"
@@ -214,13 +216,13 @@
                     <img src="/assets/report/dino_marker_progress.png" />
                   </div>
                 </div>
-                <img
-                  class="dino-tall"
-                  src="/assets/report/dino_marker_tall.png"
-                />
-              </div>
-              <div class="gauge-range">
-                <span>작음(0)</span><span>큼(100)</span>
+                <div class="tall_img">
+                  <img
+                    class="dino-tall"
+                    src="/assets/report/dino_marker_tall.png"
+                  />
+                  <span>큼(100)</span>
+                </div>
               </div>
             </div>
 
@@ -234,10 +236,13 @@
                 cm</span
               >
               <div class="gauge-bar-wrapper">
-                <img
-                  class="dino-small"
-                  src="/assets/report/dino_marker_small.png"
-                />
+                <div class="small_img">
+                  <img
+                    class="dino-small"
+                    src="/assets/report/dino_marker_small.png"
+                  />
+                  <span>작음(0)</span>
+                </div>
                 <div class="gauge-bar">
                   <div
                     class="gauge-fill"
@@ -251,13 +256,13 @@
                     <img src="/assets/report/dino_marker_progress.png" />
                   </div>
                 </div>
-                <img
-                  class="dino-tall"
-                  src="/assets/report/dino_marker_tall.png"
-                />
-              </div>
-              <div class="gauge-range">
-                <span>작음(0)</span><span>큼(100)</span>
+                <div class="tall_img">
+                  <img
+                    class="dino-tall"
+                    src="/assets/report/dino_marker_tall.png"
+                  />
+                  <span>큼(100)</span>
+                </div>
               </div>
             </div>
 
@@ -284,10 +289,13 @@
                 cm</span
               >
               <div class="gauge-bar-wrapper">
-                <img
-                  class="dino-small"
-                  src="/assets/report/dino_marker_small.png"
-                />
+                <div class="small_img">
+                  <img
+                    class="dino-small"
+                    src="/assets/report/dino_marker_small.png"
+                  />
+                  <span>작음(0)</span>
+                </div>
                 <div class="gauge-bar">
                   <div
                     class="gauge-fill"
@@ -301,13 +309,13 @@
                     <img src="/assets/report/dino_marker_progress.png" />
                   </div>
                 </div>
-                <img
-                  class="dino-tall"
-                  src="/assets/report/dino_marker_tall.png"
-                />
-              </div>
-              <div class="gauge-range">
-                <span>작음(0)</span><span>큼(100)</span>
+                <div class="tall_img">
+                  <img
+                    class="dino-tall"
+                    src="/assets/report/dino_marker_tall.png"
+                  />
+                  <span>큼(100)</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1058,13 +1066,15 @@ const handleDownload = async () => {
 // ===== 마운트 =====
 onMounted(async () => {
   await loadAnalysis();
-  await nextTick();
+  loading.value = false; // ★ 먼저 로딩 해제 → v-else DOM 생성
+  await nextTick(); // ★ DOM 업데이트 대기
   await new Promise((r) => setTimeout(r, 300));
 
   // 차트 그리기
   const gender = analysis.value.gender;
   const gData =
     gender === 'M' ? growthHeightData.male : growthHeightData.female;
+
   const curAgeM = ageMonths.value;
   const curH = parseFloat(analysis.value.height);
   const predicted18 = getCurrentHeightPredicted18();
@@ -1105,7 +1115,12 @@ onMounted(async () => {
     ),
     xLabel: '뼈 나이(세)',
   });
-
+  console.log(
+    'height:',
+    analysis.value.height,
+    'weight:',
+    analysis.value.weight,
+  );
   // 5p: 최종 예측 키
   drawGrowthChart(chartCanvas5.value, {
     genderData: gData,
@@ -1506,6 +1521,19 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 6px;
+
+  .small_img,
+  .tall_img {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0; // ★ 줄어들지 않게 고정
+    span {
+      font-size: 10px;
+      color: #888;
+      white-space: nowrap;
+    }
+  }
   .dino-small {
     width: 32px;
   }
@@ -1537,7 +1565,8 @@ onUnmounted(() => {
       font-weight: 700;
     }
     img {
-      width: 28px;
+      width: 32px;
+      max-width: unset;
     }
   }
 }
