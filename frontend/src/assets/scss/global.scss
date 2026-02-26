@@ -113,3 +113,39 @@ table {
 ::-webkit-scrollbar-thumb:hover {
   background: $dark-gray-dark;
 }
+
+
+.tooltip-wrap {
+  position: relative;
+  display: inline-block;
+  .tooltip-icon {
+    width: 20px;
+    height: 20px;
+    margin-left: 4px;
+    vertical-align: middle;
+    cursor: help;
+  }
+  .tooltip-img {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0px);
+    left: calc(50% + 4px);
+    transform: translateX(-50%);
+    z-index: 100;
+    max-width: none;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+  }
+
+  .tooltip-right {
+    left: auto;
+    right: -16px;
+    transform: none;
+  }
+  .tooltip-left {
+    left: -8px;
+    transform:none;
+  }
+  &:hover .tooltip-img {
+    display: block;
+  }
+}
