@@ -14,6 +14,7 @@ export const authAPI = {
   findId: (email, ceoName) => api.post('/auth/find-id', { email, ceoName }),
   findPassword: (loginId, email) => api.post('/auth/find-password', { loginId, email }),
   resetPassword: (loginId, email, newPassword) => api.post('/auth/reset-password', { loginId, email, newPassword }),
+verifyPassword: (currentPassword) => api.post('/auth/verify-password', { currentPassword }),
 
 }
 
