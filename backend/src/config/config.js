@@ -28,5 +28,8 @@ module.exports = {
 
     credit: {
         perAnalysis: parseInt(process.env.CREDIT_PER_ANALYSIS) || 1
-    }
+    },
+    toss: {
+    secretKey: process.env.TOSS_SECRET_KEY || ''
+}
 };

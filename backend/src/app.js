@@ -38,6 +38,9 @@ app.use('/api/patients', patientRoutes);
 const termsRoutes = require('./routes/terms');
 app.use('/api/terms', termsRoutes);
 
+const paymentRoutes = require('./routes/payments');
+app.use('/api/payments', paymentRoutes);
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
