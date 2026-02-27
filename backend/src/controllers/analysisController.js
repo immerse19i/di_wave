@@ -164,11 +164,11 @@ exports.getAnalyses = async (req, res) => {
         }
 
         const [analyses] = await pool.query(
-            `SELECT a.id, a.status, a.bone_age_years, a.bone_age_months,
-                    a.chronological_age_years, a.chronological_age_months,
-                    a.height, a.weight, a.physician, a.result_json,
-                    a.created_at, p.name as patient_name, p.patient_code,
-                    p.birth_date, p.gender
+`SELECT a.id, a.status, a.bone_age_years, a.bone_age_months,
+        a.chronological_age_years, a.chronological_age_months,
+        a.height, a.weight, a.physician, a.result_json,
+        a.analysis_date, a.created_at, p.name as patient_name, p.patient_code,
+        p.birth_date, p.gender
              FROM analyses a
              JOIN patients p ON a.patient_id = p.id
              WHERE ${whereClause}

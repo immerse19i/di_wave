@@ -68,8 +68,15 @@
             <td>{{ item.patient_name }}</td>
             <td>{{ formatDate(item.birth_date) }}</td>
             <td>{{ item.gender === 'M' ? 'M' : 'F' }}</td>
-            <td>{{ formatDate(item.created_at) }}</td>
-            <td>{{ formatAge(item.chronological_age_years, item.chronological_age_months) }}</td>
+            <td>{{ formatDate(item.analysis_date || item.created_at) }}</td>
+            <td>
+              {{
+                formatAge(
+                  item.chronological_age_years,
+                  item.chronological_age_months,
+                )
+              }}
+            </td>
             <td>{{ formatAge(item.bone_age_years, item.bone_age_months) }}</td>
             <td>{{ item.height ? item.height + 'cm' : '-' }}</td>
             <td>{{ item.weight ? item.weight + 'kg' : '-' }}</td>
