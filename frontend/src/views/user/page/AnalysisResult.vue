@@ -57,21 +57,27 @@
           v-if="isComparing && comparisonRecord"
           class="xray-image comparison-image"
         >
-          <span class="image-date">{{
-            formatDate(comparisonRecord.created_at)
-          }}</span>
-          <button class="btn-close-comparison" @click="closeComparison">
-            <img src="/assets/icons/close_blue.svg" alt="close" />
-          </button>
-          <img
-            :src="getImageUrl(comparisonRecord.image_path)"
-            alt="Previous X-ray"
-          />
+          <div class="img_box">
+            <span class="image-date">{{
+              formatDate(comparisonRecord.created_at)
+            }}</span>
+            <button class="btn-close-comparison" @click="closeComparison">
+              <img src="/assets/icons/close_blue.svg" alt="close" />
+            </button>
+            <img
+              :src="getImageUrl(comparisonRecord.image_path)"
+              alt="Previous X-ray"
+            />
+          </div>
         </div>
         <!-- 현재 이미지 -->
         <div class="xray-image">
-          <span class="image-date">{{ formatDate(analysis.created_at) }}</span>
-          <img :src="getImageUrl(analysis.image_path)" alt="X-ray" />
+          <div class="img_box">
+            <span class="image-date">{{
+              formatDate(analysis.created_at)
+            }}</span>
+            <img :src="getImageUrl(analysis.image_path)" alt="X-ray" />
+          </div>
         </div>
       </div>
 
@@ -738,11 +744,18 @@ watch(
   justify-content: center;
   padding: 20px;
   gap: 8px;
+
   .xray-image {
     position: relative;
     max-width: 100%;
     max-height: 100%;
     flex: 1;
+    display: flex;
+    justify-content: center;
+
+    .img_box {
+      position: relative;
+    }
     .image-date {
       position: absolute;
       top: 12px;
