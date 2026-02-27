@@ -752,11 +752,13 @@ watch(
     flex: 1;
     display: flex;
     justify-content: center;
-
+    height: 100%;
     .img_box {
       position: relative;
-      width: 100%;
+      // width: 100%;
       height: 100%;
+      display: flex;
+      align-items: Center;
     }
     .image-date {
       position: absolute;
@@ -772,6 +774,8 @@ watch(
     img {
       max-width: 100%;
       max-height: 70vh;
+      width: 100%;
+      // height: 100%;
       object-fit: contain;
       object-position: center;
     }
