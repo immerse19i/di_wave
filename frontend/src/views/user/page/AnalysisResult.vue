@@ -51,7 +51,6 @@
     <!-- 메인 컨텐츠 -->
     <div class="main-content">
       <!-- 왼쪽: X-ray 이미지 -->
-      <!-- 왼쪽: X-ray 이미지 -->
       <div class="left-panel" :class="{ 'dual-view': isComparing }">
         <!-- 비교 이미지 (이전 기록) -->
         <div
@@ -62,7 +61,7 @@
             formatDate(comparisonRecord.created_at)
           }}</span>
           <button class="btn-close-comparison" @click="closeComparison">
-            ✕
+            <img src="/assets/icons/close_blue.svg" alt="close" />
           </button>
           <img
             :src="getImageUrl(comparisonRecord.image_path)"
