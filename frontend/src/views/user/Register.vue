@@ -1,17 +1,14 @@
 <template>
   <div class="page_header">
-<div class="logo" @click="router.push('/login')" style="cursor:pointer">
-
+    <div class="logo" @click="router.push('/login')" style="cursor: pointer">
       <img :src="logoSrc" alt="OsteoAge" />
-
     </div>
-        <span class="title">회원가입</span>
+    <span class="title">회원가입</span>
   </div>
   <div class="register-page">
     <div class="register-container">
       <!-- 헤더 -->
       <div class="register-header">
-
         <span class="progress">회원가입 진행도 {{ step }}/2</span>
       </div>
 
@@ -21,20 +18,28 @@
         <div class="form-group">
           <label>ID</label>
           <div class="input-with-btn">
-            <input v-model="form.loginId" 
-       placeholder="6~12자 영문,숫자조합, 가입 후 변경 불가" 
-       @input="validateLoginId" />
+            <input
+              v-model="form.loginId"
+              placeholder="6~12자 영문,숫자조합, 가입 후 변경 불가"
+              @input="validateLoginId"
+            />
             <button type="button" @click="checkDuplicateId">중복 확인</button>
           </div>
-         <div class="validation-text" :class="idMessageType">{{ idMessage }}</div>
+          <div class="validation-text" :class="idMessageType">
+            {{ idMessage }}
+          </div>
         </div>
 
         <!-- 비밀번호 -->
         <div class="form-group">
           <label>비밀번호</label>
           <div class="input-password">
-<input :type="showPw ? 'text' : 'password'" v-model="form.password" 
-       placeholder="비밀번호 (영문/숫자/특수문자 조합 8~15)" @input="validatePassword" />
+            <input
+              :type="showPw ? 'text' : 'password'"
+              v-model="form.password"
+              placeholder="비밀번호 (영문/숫자/특수문자 조합 8~15)"
+              @input="validatePassword"
+            />
             <button type="button" @click="showPw = !showPw">
               <img :src="showPw ? eyeShowIcon : eyeHideIcon" />
             </button>
@@ -46,37 +51,52 @@
         <div class="form-group">
           <label>비밀번호 확인</label>
           <div class="input-password">
-<input :type="showPwConfirm ? 'text' : 'password'" v-model="form.passwordConfirm" 
-       placeholder="비밀번호를 한번 더 입력해 주세요." @input="validatePasswordConfirm" />
+            <input
+              :type="showPwConfirm ? 'text' : 'password'"
+              v-model="form.passwordConfirm"
+              placeholder="비밀번호를 한번 더 입력해 주세요."
+              @input="validatePasswordConfirm"
+            />
             <button type="button" @click="showPwConfirm = !showPwConfirm">
               <img :src="showPwConfirm ? eyeShowIcon : eyeHideIcon" />
             </button>
           </div>
-<div class="validation-text error">{{ pwConfirmMessage }}</div>
-          
+          <div class="validation-text error">{{ pwConfirmMessage }}</div>
         </div>
 
         <!-- 이메일 -->
         <div class="form-group">
           <label>이메일</label>
           <div class="input-with-btn">
-            <input v-model="form.email" placeholder="이메일을 입력해 주세요" @input="validateEmail" />
+            <input
+              v-model="form.email"
+              placeholder="이메일을 입력해 주세요"
+              @input="validateEmail"
+            />
             <button type="button" @click="sendVerificationCode">
-  {{ isCodeSent ? '재전송' : '인증번호 전송' }}
-</button>
+              {{ isCodeSent ? '재전송' : '인증번호 전송' }}
+            </button>
           </div>
-          <div class="validation-text" :class="emailMessageType">{{ emailMessage }}</div>
+          <div class="validation-text" :class="emailMessageType">
+            {{ emailMessage }}
+          </div>
         </div>
 
         <!-- 인증번호 -->
         <div class="form-group">
           <label>인증번호</label>
           <div class="input-with-btn">
-            <input v-model="form.verificationCode" placeholder="인증번호를 입력해 주세요" 
-       @input="validateCode" maxlength="6" />
+            <input
+              v-model="form.verificationCode"
+              placeholder="인증번호를 입력해 주세요"
+              @input="validateCode"
+              maxlength="6"
+            />
             <button type="button" @click="verifyCode">인증번호 확인</button>
           </div>
-          <div class="validation-text" :class="codeMessageType">{{ codeMessage }}</div>
+          <div class="validation-text" :class="codeMessageType">
+            {{ codeMessage }}
+          </div>
         </div>
 
         <button type="submit" class="btn-next" :disabled="!isStep1Valid">
@@ -100,23 +120,32 @@
           <div class="validation-text"></div>
         </div>
 
-<!-- 연락처 -->
-<div class="form-group">
-  <label>연락처</label>
-  <input v-model="form.phone" placeholder="하이픈 '-' 제외 숫자만 입력" 
-         @input="validatePhone" maxlength="11" />
-  <div class="validation-text error">{{ phoneMessage }}</div>
-</div>
+        <!-- 연락처 -->
+        <div class="form-group">
+          <label>연락처</label>
+          <input
+            v-model="form.phone"
+            placeholder="하이픈 '-' 제외 숫자만 입력"
+            @input="validatePhone"
+            maxlength="11"
+          />
+          <div class="validation-text error">{{ phoneMessage }}</div>
+        </div>
 
-<!-- 병원주소 -->
-<div class="form-group">
-  <label>병원주소</label>
-  <div class="input-with-btn">
-    <input v-model="form.address" readonly @click="searchAddress" style="cursor:pointer" />
-    <button type="button" @click="searchAddress">주소 검색</button>
-  </div>
-  <div class="validation-text"></div>
-</div>
+        <!-- 병원주소 -->
+        <div class="form-group">
+          <label>병원주소</label>
+          <div class="input-with-btn">
+            <input
+              v-model="form.address"
+              readonly
+              @click="searchAddress"
+              style="cursor: pointer"
+            />
+            <button type="button" @click="searchAddress">주소 검색</button>
+          </div>
+          <div class="validation-text"></div>
+        </div>
 
         <!-- 상세주소 -->
         <div class="form-group">
@@ -125,26 +154,42 @@
           <div class="validation-text"></div>
         </div>
 
-<!-- 사업자번호 -->
-<div class="form-group">
-  <label>사업자번호</label>
-  <input v-model="form.businessNumber" placeholder="하이픈 '-' 제외 숫자만 입력" 
-         @input="validateBusinessNumber" maxlength="10" />
-  <div class="validation-text error">{{ bizMessage }}</div>
-</div>
+        <!-- 사업자번호 -->
+        <div class="form-group">
+          <label>사업자번호</label>
+          <input
+            v-model="form.businessNumber"
+            placeholder="하이픈 '-' 제외 숫자만 입력"
+            @input="validateBusinessNumber"
+            maxlength="10"
+          />
+          <div class="validation-text error">{{ bizMessage }}</div>
+        </div>
 
-<!-- 사업자등록증 -->
-<div class="form-group">
-  <label>사업자등록증</label>
-  <div class="input-with-btn">
-    <input :value="fileName" readonly placeholder="png,jpg,jpeg,pdf, 최대10mb" 
-           @click="$refs.fileInput.click()" style="cursor:pointer" />
-    <button type="button" @click="$refs.fileInput.click()">파일첨부</button>
-    <input type="file" ref="fileInput" @change="handleFileChange" 
-           accept=".png,.jpg,.jpeg,.pdf" hidden />
-  </div>
-  <div class="validation-text"></div>
-</div>
+        <!-- 사업자등록증 -->
+        <div class="form-group">
+          <label>사업자등록증</label>
+          <div class="input-with-btn">
+            <input
+              :value="fileName"
+              readonly
+              placeholder="png,jpg,jpeg,pdf, 최대10mb"
+              @click="$refs.fileInput.click()"
+              style="cursor: pointer"
+            />
+            <button type="button" @click="$refs.fileInput.click()">
+              파일첨부
+            </button>
+            <input
+              type="file"
+              ref="fileInput"
+              @change="handleFileChange"
+              accept=".png,.jpg,.jpeg,.pdf"
+              hidden
+            />
+          </div>
+          <div class="validation-text"></div>
+        </div>
 
         <!-- 약관 동의 -->
         <div class="terms-group">
@@ -155,25 +200,45 @@
           <hr />
           <label class="checkbox-item">
             <input type="checkbox" v-model="form.agreeTerms" />
-            <span><a href="#">이용약관</a> 동의 (필수)</span>
+            <span
+              ><a href="#" @click.stop.prevent="openTerms('terms_of_service')"
+                >이용약관</a
+              >
+              동의 (필수)</span
+            >
           </label>
           <label class="checkbox-item">
             <input type="checkbox" v-model="form.agreePrivacy" />
-            <span><a href="#">서비스 이용을 위한 개인정보 수집 및 이용</a> 동의 (필수)</span>
+            <span
+              ><a href="#" @click.stop.prevent="openTerms('privacy_collection')"
+                >서비스 이용을 위한 개인정보 수집 및 이용</a
+              >
+              동의 (필수)</span
+            >
           </label>
           <label class="checkbox-item">
             <input type="checkbox" v-model="form.agreeMarketing" />
-            <span><a href="#">회원가입을 위한 개인정보 수집 및 이용</a> 동의 (필수)</span>
+            <span
+              ><a
+                href="#"
+                @click.stop.prevent="openTerms('privacy_consignment')"
+                >회원가입을 위한 개인정보 수집 및 이용</a
+              >
+              동의 (필수)</span
+            >
           </label>
         </div>
 
-<button type="submit" class="btn-submit" :disabled="!isStep2Valid">
-  {{ isStep2Valid ? '가입요청' : '가입 정보를 모두 입력해 주시고 서비스 정책에 동의해 주세요.' }}
-</button>
+        <button type="submit" class="btn-submit" :disabled="!isStep2Valid">
+          {{
+            isStep2Valid
+              ? '가입요청'
+              : '가입 정보를 모두 입력해 주시고 서비스 정책에 동의해 주세요.'
+          }}
+        </button>
       </form>
     </div>
   </div>
-  
 </template>
 
 <script setup>
@@ -201,7 +266,6 @@ const isEmailVerified = ref(false);
 const idMessage = ref('');
 const idMessageType = ref(''); // 'success' or 'error'
 
-
 // 비번 유효성
 const pwMessage = ref('');
 const pwConfirmMessage = ref('');
@@ -210,9 +274,8 @@ const pwConfirmMessage = ref('');
 const emailMessage = ref('');
 const emailMessageType = ref('');
 
-
 //인증번호 부분
-// 인증번호 재전송 
+// 인증번호 재전송
 const isCodeSent = ref(false);
 const cooldown = ref(0);
 let cooldownTimer = null;
@@ -220,8 +283,7 @@ let cooldownTimer = null;
 const codeMessage = ref('');
 const codeMessageType = ref('');
 
-
-//연락처 - 숫자 필터 
+//연락처 - 숫자 필터
 const phoneMessage = ref('');
 const bizMessage = ref('');
 
@@ -247,28 +309,31 @@ const form = ref({
 
 // Step 1 유효성
 const isStep1Valid = computed(() => {
-  return form.value.loginId && 
-         form.value.password && 
-         form.value.passwordConfirm &&
-         form.value.password === form.value.passwordConfirm &&
-         form.value.email &&
-         isIdChecked.value &&
-         isEmailVerified.value;
+  return (
+    form.value.loginId &&
+    form.value.password &&
+    form.value.passwordConfirm &&
+    form.value.password === form.value.passwordConfirm &&
+    form.value.email &&
+    isIdChecked.value &&
+    isEmailVerified.value
+  );
 });
 
 // Step 2 유효성
 const isStep2Valid = computed(() => {
-  return form.value.hospitalName &&
-         form.value.ceoName &&
-         form.value.phone &&
-         form.value.address &&
-         form.value.businessNumber &&
-         selectedFile.value &&
-         form.value.agreeTerms &&
-         form.value.agreePrivacy &&
-         form.value.agreeMarketing;
+  return (
+    form.value.hospitalName &&
+    form.value.ceoName &&
+    form.value.phone &&
+    form.value.address &&
+    form.value.businessNumber &&
+    selectedFile.value &&
+    form.value.agreeTerms &&
+    form.value.agreePrivacy &&
+    form.value.agreeMarketing
+  );
 });
-
 
 function handlePopState(e) {
   if (step.value === 2) {
@@ -278,12 +343,15 @@ function handlePopState(e) {
 
 // 전체동의
 const agreeAll = computed({
-  get: () => form.value.agreeTerms && form.value.agreePrivacy && form.value.agreeMarketing,
+  get: () =>
+    form.value.agreeTerms &&
+    form.value.agreePrivacy &&
+    form.value.agreeMarketing,
   set: (val) => {
     form.value.agreeTerms = val;
     form.value.agreePrivacy = val;
     form.value.agreeMarketing = val;
-  }
+  },
 });
 
 function toggleAll() {
@@ -333,7 +401,8 @@ async function checkDuplicateId() {
       idMessageType.value = 'error';
     }
   } catch (error) {
-    idMessage.value = error.response?.data?.message || 'ID 확인에 실패했습니다.';
+    idMessage.value =
+      error.response?.data?.message || 'ID 확인에 실패했습니다.';
     idMessageType.value = 'error';
   }
 }
@@ -342,7 +411,8 @@ async function checkDuplicateId() {
 
 function validatePassword() {
   const pw = form.value.password;
-  const regex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[a-zA-Z\d!@#$%^&*(),.?":{}|<>]{8,15}$/;
+  const regex =
+    /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[a-zA-Z\d!@#$%^&*(),.?":{}|<>]{8,15}$/;
 
   if (!pw) {
     pwMessage.value = '';
@@ -384,7 +454,6 @@ function validateEmail() {
   }
 }
 
-
 async function sendVerificationCode() {
   // 이메일 유효성 체크
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -396,7 +465,7 @@ async function sendVerificationCode() {
 
   // 30초 쿨다운 체크
   if (cooldown.value > 0) {
-message.showTimer('인증번호 재전송 대기', cooldown.value);
+    message.showTimer('인증번호 재전송 대기', cooldown.value);
     return;
   }
 
@@ -413,17 +482,28 @@ message.showTimer('인증번호 재전송 대기', cooldown.value);
       if (cooldown.value <= 0) clearInterval(cooldownTimer);
     }, 1000);
   } catch (error) {
-    emailMessage.value = error.response?.data?.message || '인증번호 전송에 실패했습니다.';
+    emailMessage.value =
+      error.response?.data?.message || '인증번호 전송에 실패했습니다.';
     emailMessageType.value = 'error';
   }
 }
 
+// 약관 페이지 새 탭 열기
+function openTerms(type) {
+  window.open(`/terms?tab=${type}`, '_blank');
+}
 
 function validateCode() {
   // 숫자만 허용
-  form.value.verificationCode = form.value.verificationCode.replace(/[^0-9]/g, '');
-  
-  if (form.value.verificationCode && !/^\d+$/.test(form.value.verificationCode)) {
+  form.value.verificationCode = form.value.verificationCode.replace(
+    /[^0-9]/g,
+    '',
+  );
+
+  if (
+    form.value.verificationCode &&
+    !/^\d+$/.test(form.value.verificationCode)
+  ) {
     codeMessage.value = '숫자만 입력 가능합니다';
     codeMessageType.value = 'error';
   } else {
@@ -438,7 +518,7 @@ async function verifyCode() {
     const res = await authAPI.verifyCode({
       email: form.value.email,
       code: form.value.verificationCode,
-      type: 'register'
+      type: 'register',
     });
     if (res.data.success) {
       isEmailVerified.value = true;
@@ -451,16 +531,13 @@ async function verifyCode() {
   }
 }
 
-
-
-
 // 주소 검색 (카카오 주소 API)
 function searchAddress() {
   // TODO: 카카오 주소 API
   new daum.Postcode({
-    oncomplete: function(data) {
+    oncomplete: function (data) {
       form.value.address = data.roadAddress;
-    }
+    },
   }).open();
 }
 
@@ -468,7 +545,7 @@ function searchAddress() {
 function validatePhone() {
   const before = form.value.phone;
   form.value.phone = before.replace(/[^0-9]/g, '');
-  
+
   if (before !== form.value.phone) {
     phoneMessage.value = '숫자만 입력 가능합니다';
   } else {
@@ -479,7 +556,7 @@ function validatePhone() {
 function validateBusinessNumber() {
   const before = form.value.businessNumber;
   form.value.businessNumber = before.replace(/[^0-9]/g, '');
-  
+
   if (before !== form.value.businessNumber) {
     bizMessage.value = '숫자만 입력 가능합니다';
   } else {
@@ -525,14 +602,17 @@ async function handleRegister() {
 
   try {
     await authAPI.register(formData);
-    message.showAlert('가입요청이 완료되었습니다.\n관리자 승인 후 사용 가능합니다.', () => {
-      router.push('/login');
-    });
+    message.showAlert(
+      '가입요청이 완료되었습니다.\n관리자 승인 후 사용 가능합니다.',
+      () => {
+        router.push('/login');
+      },
+    );
   } catch (error) {
-    message.showAlert(error.response?.data?.message || '회원가입에 실패했습니다.');
+    message.showAlert(
+      error.response?.data?.message || '회원가입에 실패했습니다.',
+    );
   }
-
-  
 }
 
 onMounted(() => {
@@ -544,23 +624,22 @@ onBeforeUnmount(() => {
 });
 </script>
 <style lang="scss" scoped>
-.page_header{
-  padding:20px 20px 0 20px;
-  position:fixed;
-  top:0;
-  left:0;
-  display:flex;
-  gap:12px;
-  color:$white;
-  align-items:center;
+.page_header {
+  padding: 20px 20px 0 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  gap: 12px;
+  color: $white;
+  align-items: center;
   @include font-20-bold;
-  .logo{
-    padding:16px 18px;
+  .logo {
+    padding: 16px 18px;
   }
-  img{
-    max-width:106px;
+  img {
+    max-width: 106px;
   }
-
 }
 .register-page {
   min-height: 100vh;
@@ -583,7 +662,7 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
-  color : $dark-text;
+  color: $dark-text;
   img {
     height: 32px;
   }
@@ -634,12 +713,16 @@ onBeforeUnmount(() => {
         cursor: default;
       }
     }
-.validation-text {
-  height: 20px;
-  color: $red;
-  &.error { color: $red; }
-  &.success { color: $validation-sucess ; }
-}
+    .validation-text {
+      height: 20px;
+      color: $red;
+      &.error {
+        color: $red;
+      }
+      &.success {
+        color: $validation-sucess;
+      }
+    }
   }
 
   .input-with-btn {
@@ -724,7 +807,7 @@ onBeforeUnmount(() => {
       margin-bottom: 0;
     }
 
-    input[type="checkbox"] {
+    input[type='checkbox'] {
       width: 18px;
       height: 18px;
       min-height: auto;
