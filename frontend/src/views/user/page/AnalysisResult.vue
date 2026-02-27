@@ -755,6 +755,8 @@ watch(
 
     .img_box {
       position: relative;
+      width: 100%;
+      height: 100%;
     }
     .image-date {
       position: absolute;
