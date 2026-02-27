@@ -333,21 +333,11 @@ onMounted(() => {
     gender: data.gender || '',
     currentHeight: data.height ? String(data.height) : '',
     weight: data.weight ? String(data.weight) : '',
-    fatherHeight: '',
-    motherHeight: '',
+    fatherHeight: data.father_height ? String(data.father_height) : '',
+    motherHeight: data.mother_height ? String(data.mother_height) : '',
     physician: data.physician || '',
     analysisDate,
   };
-
-  // result_json에서 부모 키 추출 시도
-  if (data.result_json) {
-    const rj =
-      typeof data.result_json === 'string'
-        ? JSON.parse(data.result_json)
-        : data.result_json;
-    if (rj.Father_Height) formData.fatherHeight = String(rj.Father_Height);
-    if (rj.Mother_Height) formData.motherHeight = String(rj.Mother_Height);
-  }
 
   form.value = { ...formData };
   originalForm.value = { ...formData };

@@ -45,11 +45,15 @@ if (existingPatients.length > 0) {
         // 2026.02.19 INSERT 쿼리에 {hegiht, weight,physican} 추가
 const [result] = await pool.query(
     `INSERT INTO analyses (hospital_id, patient_id, user_id, image_path,
-    chronological_age_years, chronological_age_months, height, weight, physician, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'processing')`,
+    chronological_age_years, chronological_age_months, height, weight, physician,
+    father_height, mother_height, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'processing')`,
     [hospitalId, patientId, userId, imagePath, Math.floor(ageMonths / 12), ageMonths % 12,
-     parseFloat(height), weight ? parseFloat(weight) : null, physician || null]
+     parseFloat(height), weight ? parseFloat(weight) : null, physician || null,
+     fatherHeight ? parseFloat(fatherHeight) : null,
+     motherHeight ? parseFloat(motherHeight) : null]
 );
+
         const analysisId = result.insertId;
 
         // 3. AI 서버 호출
@@ -312,19 +316,23 @@ exports.updateAnalysisInfo = async (req, res) => {
     const boneAgeMonths = boneAgeMatch ? parseInt(boneAgeMatch[2]) : null;
 
     // 5. analyses 업데이트
-    await pool.query(
-      `UPDATE analyses SET patient_id = ?, height = ?, weight = ?, physician = ?,
-       chronological_age_years = ?, chronological_age_months = ?,
-       bone_age_years = ?, bone_age_months = ?, result_json = ?
-       WHERE id = ? AND hospital_id = ?`,
-      [
-        patientId, parseFloat(height), weight ? parseFloat(weight) : null,
-        physician || null,
-        Math.floor(ageMonths / 12), ageMonths % 12,
-        boneAgeYears, boneAgeMonths, JSON.stringify(aiResult.data),
-        id, hospitalId
-      ]
-    );
+await pool.query(
+  `UPDATE analyses SET patient_id = ?, height = ?, weight = ?, physician = ?,
+   father_height = ?, mother_height = ?,
+   chronological_age_years = ?, chronological_age_months = ?,
+   bone_age_years = ?, bone_age_months = ?, result_json = ?
+   WHERE id = ? AND hospital_id = ?`,
+  [
+    patientId, parseFloat(height), weight ? parseFloat(weight) : null,
+    physician || null,
+    fatherHeight ? parseFloat(fatherHeight) : null,
+    motherHeight ? parseFloat(motherHeight) : null,
+    Math.floor(ageMonths / 12), ageMonths % 12,
+    boneAgeYears, boneAgeMonths, JSON.stringify(aiResult.data),
+    id, hospitalId
+  ]
+);
+
 
     res.json({ success: true, data: { analysisId: id, ...aiResult.data } });
 
