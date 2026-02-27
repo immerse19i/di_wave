@@ -97,6 +97,7 @@ const routes = [
   path: '/register',
   name: 'Register',
   component: Register,
+  meta: { requiresAuth: false },
 },
 //약관 페이지
 {
@@ -133,7 +134,7 @@ router.beforeEach(async (to, from, next) => {
   if (!auth.user) {
     try {
       const res = await authAPI.getMe()
-      auth.setUser(res.data.user)
+auth.setUser(res.data) // ← res.data.user는 undefined
     } catch (e) {
       // 토큰 만료/무효 → 로그아웃
       auth.logout()

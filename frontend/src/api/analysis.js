@@ -21,4 +21,8 @@ export const analysisAPI = {
 
     // 분석 상세 조회
     getDetail: (id) => api.get(`/analyses/${id}`),
+    updateDoctorBoneAge: (id, data) => api.patch(`/analyses/${id}/doctor-bone-age`, data),
+// 분석 정보 수정 (재분석)
+updateAnalysisInfo: (id, data) => api.put(`/analyses/${id}`, data),
+
 };

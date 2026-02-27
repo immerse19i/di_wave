@@ -1,5 +1,6 @@
 <template>
   <div class="new-analysis">
+    <FadeLoader v-if="modal.isLoading" />
     <h2 class="modal-title">신규분석</h2>
 
     <div class="modal-body">
@@ -48,11 +49,19 @@
           <div class="form-row">
             <label>
               <span class="required">*</span>환자등록번호
-              <img
-                src="/assets/icons/question.svg"
-                alt=""
-                class="tooltip-icon"
-              />
+              <div class="tootip_wrap">
+                <span class="tooltip-wrap">
+                  <img
+                    src="/assets/icons/question.svg"
+                    alt=""
+                    class="tooltip-icon"
+                  />
+                  <img
+                    class="tooltip-img"
+                    src="/assets/images/tooltip/patient_number.svg"
+                  />
+                </span>
+              </div>
             </label>
             <input
               type="text"
@@ -65,11 +74,19 @@
           <div class="form-row">
             <label>
               <span class="required">*</span>환자명
-              <img
-                src="/assets/icons/question.svg"
-                alt=""
-                class="tooltip-icon"
-              />
+              <div class="tootip_wrap">
+                <span class="tooltip-wrap">
+                  <img
+                    src="/assets/icons/question.svg"
+                    alt=""
+                    class="tooltip-icon"
+                  />
+                  <img
+                    class="tooltip-img"
+                    src="/assets/images/tooltip/patient_name.svg"
+                  />
+                </span>
+              </div>
             </label>
             <input type="text" v-model="form.patientName" placeholder="" />
           </div>
@@ -214,8 +231,11 @@ import { analysisAPI } from '@/api/analysis';
 import { patientAPI } from '@/api/patient';
 import growthHeightData from '@/data/growth_height.json';
 import growthWeightData from '@/data/growth_weight.json';
+import FadeLoader from '@/components/common/FadeLoader.vue';
+import { useRouter } from 'vue-router';
 
 const modal = useModalStore();
+const router = useRouter();
 const message = UseMessageStore();
 const auth = useAuthStore();
 const fileInput = ref(null);
@@ -275,18 +295,28 @@ const handleFileChange = (event) => {
 // 키/몸무게 유효성 검사 (성장도표 p3~p97 범위)
 const validateHeightWeight = () => {
   const genderKey = form.value.gender === 'M' ? 'male' : 'female';
-  const birthDate = new Date(form.value.birthYear, form.value.birthMonth - 1, form.value.birthDay);
+  const birthDate = new Date(
+    form.value.birthYear,
+    form.value.birthMonth - 1,
+    form.value.birthDay,
+  );
   const now = new Date();
-  const ageMonths = (now.getFullYear() - birthDate.getFullYear()) * 12 + (now.getMonth() - birthDate.getMonth());
+  const ageMonths =
+    (now.getFullYear() - birthDate.getFullYear()) * 12 +
+    (now.getMonth() - birthDate.getMonth());
 
   // 해당 월령 데이터 찾기 (가장 가까운 값)
   const heightData = growthHeightData[genderKey];
   const weightData = growthWeightData[genderKey];
   const hRow = heightData.reduce((prev, curr) =>
-    Math.abs(curr.month - ageMonths) < Math.abs(prev.month - ageMonths) ? curr : prev
+    Math.abs(curr.month - ageMonths) < Math.abs(prev.month - ageMonths)
+      ? curr
+      : prev,
   );
   const wRow = weightData.reduce((prev, curr) =>
-    Math.abs(curr.month - ageMonths) < Math.abs(prev.month - ageMonths) ? curr : prev
+    Math.abs(curr.month - ageMonths) < Math.abs(prev.month - ageMonths)
+      ? curr
+      : prev,
   );
 
   const h = parseFloat(form.value.currentHeight);
@@ -298,14 +328,14 @@ const validateHeightWeight = () => {
   // 부모 키 검사 (18세 = 216개월 기준)
   if (form.value.fatherHeight) {
     const maleRow = growthHeightData.male.reduce((prev, curr) =>
-      Math.abs(curr.month - 216) < Math.abs(prev.month - 216) ? curr : prev
+      Math.abs(curr.month - 216) < Math.abs(prev.month - 216) ? curr : prev,
     );
     const fh = parseFloat(form.value.fatherHeight);
     if (fh < maleRow.p3 || fh > maleRow.p97) return false;
   }
   if (form.value.motherHeight) {
     const femaleRow = growthHeightData.female.reduce((prev, curr) =>
-      Math.abs(curr.month - 216) < Math.abs(prev.month - 216) ? curr : prev
+      Math.abs(curr.month - 216) < Math.abs(prev.month - 216) ? curr : prev,
     );
     const mh = parseFloat(form.value.motherHeight);
     if (mh < femaleRow.p3 || mh > femaleRow.p97) return false;
@@ -319,11 +349,18 @@ const validateHeightWeight = () => {
 // Step 1: 필수항목 체크 → Step 2: 유효성 → Step 3~5
 const handleSubmit = async () => {
   // Step 1: 필수항목
+  console.log('auth.user:', auth.user);
+  console.log('credit_balance:', auth.user?.credit_balance);
   if (!selectedFile.value) {
     message.showAlert('X-ray 이미지를 선택해주세요.');
     return;
   }
-  if (!form.value.patientCode || !form.value.patientName || !form.value.gender || !form.value.currentHeight) {
+  if (
+    !form.value.patientCode ||
+    !form.value.patientName ||
+    !form.value.gender ||
+    !form.value.currentHeight
+  ) {
     message.showAlert('필수 항목을 모두 입력해주세요.');
     return;
   }
@@ -340,8 +377,8 @@ const handleSubmit = async () => {
   if (!validateHeightWeight()) {
     message.showConfirm(
       '입력한 신장/체중 수치가 표준 범위를 초과하거나 미달합니다.\n오입력 여부를 확인하셨습니까?',
-      () => checkPatientExists(),  // 무시하고 진행
-      null                          // 다시 확인 → 닫기
+      () => checkPatientExists(), // 무시하고 진행
+      null, // 다시 확인 → 닫기
     );
     return;
   }
@@ -352,13 +389,16 @@ const handleSubmit = async () => {
 // Step 3: 환자 존재 확인
 const checkPatientExists = async () => {
   try {
-    const res = await patientAPI.check(form.value.patientCode, form.value.patientName);
+    const res = await patientAPI.check(
+      form.value.patientCode,
+      form.value.patientName,
+    );
     if (res.data.exists) {
       // Step 4: 기존 환자 연동 확인
       message.showConfirm(
         '환자등록번호, 환자명이 일치하는 기존 정보가 있습니다.\n해당 정보에 기록이 연동됩니다.\n원치 않으실 경우 취소 후 환자등록번호, 환자명을 변경해 주세요.',
-        () => confirmCreditUse(),  // 확인 → 크레딧 확인
-        null                        // 취소 → 닫기
+        () => confirmCreditUse(), // 확인 → 크레딧 확인
+        null, // 취소 → 닫기
       );
     } else {
       confirmCreditUse();
@@ -372,8 +412,8 @@ const checkPatientExists = async () => {
 const confirmCreditUse = () => {
   message.showConfirm(
     '크레딧이 소모됩니다',
-    () => checkCreditAndSubmit(),  // 확인
-    null                            // 취소
+    () => checkCreditAndSubmit(), // 확인
+    null, // 취소
   );
 };
 
@@ -386,10 +426,16 @@ const checkCreditAndSubmit = async () => {
   }
 
   // 분석 실행
-  const birthDate = new Date(form.value.birthYear, form.value.birthMonth - 1, form.value.birthDay);
+  const birthDate = new Date(
+    form.value.birthYear,
+    form.value.birthMonth - 1,
+    form.value.birthDay,
+  );
   const now = new Date();
-  const ageMonths = (now.getFullYear() - birthDate.getFullYear()) * 12 + (now.getMonth() - birthDate.getMonth());
-  const birthDateStr = `${form.value.birthYear}-${String(form.value.birthMonth).padStart(2,'0')}-${String(form.value.birthDay).padStart(2,'0')}`;
+  const ageMonths =
+    (now.getFullYear() - birthDate.getFullYear()) * 12 +
+    (now.getMonth() - birthDate.getMonth());
+  const birthDateStr = `${form.value.birthYear}-${String(form.value.birthMonth).padStart(2, '0')}-${String(form.value.birthDay).padStart(2, '0')}`;
 
   const formData = new FormData();
   formData.append('image', selectedFile.value);
@@ -412,21 +458,25 @@ const checkCreditAndSubmit = async () => {
 
   try {
     isLoading.value = true;
+    modal.isLoading = true; // 추가 (모달 닫기 차단)
     const response = await analysisAPI.create(formData);
-    console.log('분석 결과:', response.data);
+    console.log('response.data:', response.data);
+    const analysisId = response.data.data.analysisId;
     message.showAlert('분석이 완료되었습니다.', () => {
       modal.close();
+      router.push(`/main/analysis/${analysisId}`);
     });
   } catch (error) {
     console.error('분석 오류:', error);
-    message.showAlert(error.response?.data?.message || '분석 중 오류가 발생했습니다.');
+    message.showAlert(
+      error.response?.data?.message || '분석 중 오류가 발생했습니다.',
+    );
   } finally {
     isLoading.value = false;
+    modal.isLoading = false; // 추가 (모달 닫기 허용)
   }
 };
-
 </script>
-
 
 <style lang="scss" scoped>
 .new-analysis {
@@ -530,14 +580,6 @@ const checkCreditAndSubmit = async () => {
       .required {
         color: $sub-color-2;
         margin-right: 2px;
-      }
-
-      .tooltip-icon {
-        width: 20px;
-        height: 20px;
-        margin-left: 4px;
-        vertical-align: middle;
-        cursor: help;
       }
     }
 
