@@ -10,9 +10,9 @@
         <div class="time_text">
           {{ authStore.timeLeftFormatted }}초뒤 자동 로그아웃 됩니다.
         </div>
-        <div class="user_info">
+        <div class="user_info" @click="toggleDropdown">
           {{ logUserId }}님
-          <button @click="toggleDropdown">
+          <button>
             <img src="/assets/icons/arrow_down.svg" alt="arrow_icon" />
           </button>
           <!-- 드롭다운 -->
@@ -142,6 +142,7 @@ onUnmounted(() => {
         gap: 8px;
         position: relative;
         height: 100%;
+        cursor: pointer;
       }
       .dropdown_menu {
         position: absolute;

@@ -11,11 +11,7 @@
     <div class="section">
       <h4 class="section-title">충전 금액 선택</h4>
       <div class="plan-list">
-        <label
-          v-for="plan in plans"
-          :key="plan.credit"
-          class="plan-item"
-        >
+        <label v-for="plan in plans" :key="plan.credit" class="plan-item">
           <input
             type="radio"
             name="plan"
@@ -25,7 +21,8 @@
           <span class="plan-label">
             <strong>{{ plan.credit }} Credit</strong>
             <span class="plan-desc">
-              (1Credit당 {{ plan.unitPrice.toLocaleString() }}원) 총 : {{ plan.totalPrice.toLocaleString() }} (VAT 포함)
+              (1Credit당 {{ plan.unitPrice.toLocaleString() }}원) 총 :
+              {{ plan.totalPrice.toLocaleString() }} (VAT 포함)
             </span>
           </span>
         </label>
@@ -48,27 +45,18 @@
     <div class="section">
       <div class="terms-area">
         <label class="terms-item all">
-          <input
-            type="checkbox"
-            :checked="isAllChecked"
-            @change="toggleAll"
-          />
+          <input type="checkbox" :checked="isAllChecked" @change="toggleAll" />
           <span class="checkmark"></span>
           <span>전체동의</span>
         </label>
         <div class="terms-divider"></div>
-        <label
-          v-for="term in terms"
-          :key="term.id"
-          class="terms-item"
-        >
-          <input
-            type="checkbox"
-            v-model="term.checked"
-          />
+        <label v-for="term in terms" :key="term.id" class="terms-item">
+          <input type="checkbox" v-model="term.checked" />
           <span class="checkmark"></span>
           <span>
-            <a class="terms-link" @click.prevent="openTerms(term.id)">{{ term.name }}</a>
+            <a class="terms-link" @click.prevent="openTerms(term.id)">{{
+              term.name
+            }}</a>
             동의 (필수)
           </span>
         </label>
@@ -87,8 +75,15 @@
 
     <!-- 하단 안내 -->
     <div class="charge-notice">
-      <p>충전된 크레딧은 회원 탈퇴 전까지 별도의 유효기간 제한 없이 무제한으로 사용 가능합니다.</p>
-      <p>구매하신 크레딧은 사용하지 않은 경우에 한해 전자상거래법에 따라 구매일로부터 7일 이내에 청약철회(환불)가 가능합니다. 단, 크레딧의 일부를 사용했거나 구매 후 7일이 경과한 경우에는 청약철회가 제한됩니다.</p>
+      <p>
+        충전된 크레딧은 회원 탈퇴 전까지 별도의 유효기간 제한 없이 무제한으로
+        사용 가능합니다.
+      </p>
+      <p>
+        구매하신 크레딧은 사용하지 않은 경우에 한해 전자상거래법에 따라
+        구매일로부터 7일 이내에 청약철회(환불)가 가능합니다. 단, 크레딧의 일부를
+        사용했거나 구매 후 7일이 경과한 경우에는 청약철회가 제한됩니다.
+      </p>
     </div>
 
     <!-- 결제 진행 대기 팝업 -->
@@ -106,8 +101,8 @@
         <h3 class="modal-title">결제 완료</h3>
         <p>결제가 정상적으로 완료되었습니다.</p>
         <div class="result-info">
-          <p>충전 크레딧 : {{ selectedCredit }} Credit</p>
-          <p>결제 금액 : {{ selectedPlan.totalPrice.toLocaleString() }}원 (VAT 포함)</p>
+          <p>충전 크레딧 : {{ chargedCredit }} Credit</p>
+          <p>결제 금액 : {{ chargedAmount.toLocaleString() }}원 (VAT 포함)</p>
           <p>결제수단 : 신용/체크카드</p>
         </div>
         <button class="btn-confirm" @click="goToCreditMain">확인</button>
@@ -125,78 +120,174 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, reactive, watch, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useAuthStore } from '@/store/auth';
+import { paymentAPI } from '@/api/payment';
 
-const router = useRouter()
+const router = useRouter();
+const route = useRoute();
+const auth = useAuthStore();
+
+// 약관
+const terms = reactive([
+  { id: 'paid_service', name: '유료서비스 이용약관', checked: false },
+  { id: 'third_party', name: '개인정보 제3자 제공', checked: false },
+  {
+    id: 'refund_policy',
+    name: '결제 상품 확인 및 취소/환불 규정',
+    checked: false,
+  },
+]);
+
+const isAllChecked = computed(() => terms.every((t) => t.checked));
+const canPay = computed(() => terms.every((t) => t.checked));
+
+const toggleAll = (e) => {
+  const checked = e.target.checked;
+  terms.forEach((t) => (t.checked = checked));
+};
+
+const openTerms = (termId) => {
+  window.open(`/terms?tab=${termId}`, '_blank');
+};
 
 // 충전 패키지
 const plans = [
   { credit: 30, unitPrice: 8900, totalPrice: 267000 },
   { credit: 50, unitPrice: 7900, totalPrice: 395000 },
   { credit: 100, unitPrice: 7400, totalPrice: 740000 },
-]
+];
 
-const selectedCredit = ref(50) // 기본값 50
-
+const selectedCredit = ref(50);
 const selectedPlan = computed(() => {
-  return plans.find((p) => p.credit === selectedCredit.value) || plans[1]
-})
-
-// 약관
-const terms = reactive([
-  { id: 'paid_service', name: '유료서비스 이용약관', checked: false },
-  { id: 'third_party', name: '개인정보 제3자 제공', checked: false },
-  { id: 'refund_policy', name: '결제 상품 확인 및 취소/환불 규정', checked: false },
-])
-
-const isAllChecked = computed(() => terms.every((t) => t.checked))
-const canPay = computed(() => terms.every((t) => t.checked))
-
-const toggleAll = (e) => {
-  const checked = e.target.checked
-  terms.forEach((t) => (t.checked = checked))
-}
-
-const openTerms = (termId) => {
-  window.open(`/terms?tab=${termId}`, '_blank')
-}
+  return plans.find((p) => p.credit === selectedCredit.value) || plans[1];
+});
 
 // 결제 상태
-const paymentStep = ref('idle') // idle | processing | success | fail
-const failMessage = ref('')
+const paymentStep = ref('idle');
+const failMessage = ref('');
+const chargedCredit = ref(0);
+const chargedAmount = ref(0);
+const widgetReady = ref(false);
 
-const startPayment = () => {
-  paymentStep.value = 'processing'
+// 위젯 인스턴스
+let widgets = null;
 
-  // TODO: 실제 PG 연동 시 아래를 나이스페이 SDK 호출로 교체
-  // 지금은 2초 후 성공 시뮬레이션
-  setTimeout(() => {
-    // 성공 시:
-    paymentStep.value = 'success'
+// ★ 위젯 초기화 + 렌더링
+onMounted(async () => {
+  // 토스 리다이렉트 결과 처리
+  const { paymentKey, orderId, amount, code, message } = route.query;
 
-    // 실패 시:
-    // failMessage.value = '사용자 취소'
-    // paymentStep.value = 'fail'
-  }, 2000)
-}
+  if (code) {
+    failMessage.value = message || '결제가 취소되었습니다.';
+    paymentStep.value = 'fail';
+    router.replace({ path: route.path });
+    return;
+  }
+
+  if (paymentKey && orderId && amount) {
+    paymentStep.value = 'processing';
+    try {
+      const res = await paymentAPI.confirm({
+        paymentKey,
+        orderId,
+        amount: Number(amount),
+      });
+      if (res.data.success) {
+        chargedCredit.value = res.data.data.creditAmount;
+        chargedAmount.value = Number(amount);
+        paymentStep.value = 'success';
+      } else {
+        failMessage.value = res.data.message || '승인 실패';
+        paymentStep.value = 'fail';
+      }
+    } catch (e) {
+      failMessage.value = e.response?.data?.message || '결제 승인 중 오류';
+      paymentStep.value = 'fail';
+    }
+    router.replace({ path: route.path });
+    return;
+  }
+
+  // // 위젯 렌더링
+  // try {
+  //   const clientKey = import.meta.env.VITE_TOSS_CLIENT_KEY;
+  //   const tossPayments = TossPayments(clientKey);
+
+  //   widgets = tossPayments.widgets({ customerKey: TossPayments.ANONYMOUS });
+
+  //   await widgets.setAmount({
+  //     currency: 'KRW',
+  //     value: selectedPlan.value.totalPrice,
+  //   });
+
+  //   await widgets.renderPaymentMethods({
+  //     selector: '#payment-method',
+  //     variantKey: 'DEFAULT',
+  //   });
+
+  //   widgetReady.value = true;
+  // } catch (e) {
+  //   console.error('위젯 초기화 오류:', e);
+  // }
+});
+
+// ★ 플랜 변경 시 금액 업데이트
+watch(selectedCredit, async () => {
+  if (widgets) {
+    await widgets.setAmount({
+      currency: 'KRW',
+      value: selectedPlan.value.totalPrice,
+    });
+  }
+});
+const startPayment = async () => {
+  try {
+    const clientKey = import.meta.env.VITE_TOSS_CLIENT_KEY;
+    const tossPayments = TossPayments(clientKey);
+    const payment = tossPayments.payment({
+      customerKey: TossPayments.ANONYMOUS,
+    });
+
+    await payment.requestPayment({
+      method: 'CARD',
+      amount: {
+        currency: 'KRW',
+        value: selectedPlan.value.totalPrice,
+      },
+      orderId: `DIWAVE_${auth.user.hospital_id}_${Date.now()}`,
+      orderName: `DI-WAVE 크레딧 ${selectedCredit.value}건`,
+      successUrl: `${window.location.origin}/user-info/credit-charge`,
+      failUrl: `${window.location.origin}/user-info/credit-charge`,
+      customerEmail: auth.user.email || undefined,
+      customerName: auth.user.name || undefined,
+    });
+  } catch (error) {
+    if (error.code === 'USER_CANCEL') {
+      paymentStep.value = 'idle';
+    } else {
+      failMessage.value = error.message || '결제 요청 실패';
+      paymentStep.value = 'fail';
+    }
+  }
+};
 
 const cancelPayment = () => {
-  // TODO: PG 결제창 닫기 처리
-  paymentStep.value = 'idle'
-}
+  paymentStep.value = 'idle';
+};
 
 const goToCreditMain = () => {
-  paymentStep.value = 'idle'
-  router.push('/user-info/credit')
-}
+  paymentStep.value = 'idle';
+  router.push('/user-info/credit');
+};
 </script>
 
 <style lang="scss" scoped>
 .credit-charge {
   padding: 24px;
   color: $white;
-//   max-width: 800px;
+  //   max-width: 800px;
   margin: 0 auto;
 }
 
