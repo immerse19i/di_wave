@@ -755,7 +755,7 @@ watch(
 
     .img_box {
       position: relative;
-      width: 100%;
+      // width: 100%;
       height: 100%;
     }
     .image-date {
@@ -772,6 +772,8 @@ watch(
     img {
       max-width: 100%;
       max-height: 70vh;
+      width: 100%;
+      // height: 100%;
       object-fit: contain;
       object-position: center;
     }
