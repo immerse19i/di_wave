@@ -16,13 +16,43 @@
         <form @submit.prevent>
           <!-- 환자등록번호 -->
           <div class="form-row">
-            <label><span class="required">*</span>환자등록번호</label>
+            <label>
+              <span class="required">*</span>환자등록번호
+              <div class="tootip_wrap">
+                <span class="tooltip-wrap">
+                  <img
+                    src="/assets/icons/question.svg"
+                    alt=""
+                    class="tooltip-icon"
+                  />
+                  <img
+                    class="tooltip-img"
+                    src="/assets/images/tooltip/patient_number.svg"
+                  />
+                </span>
+              </div>
+            </label>
             <input type="text" v-model="form.patientCode" />
           </div>
 
           <!-- 환자명 -->
           <div class="form-row">
-            <label><span class="required">*</span>환자명</label>
+            <label>
+              <span class="required">*</span>환자명
+              <div class="tootip_wrap">
+                <span class="tooltip-wrap">
+                  <img
+                    src="/assets/icons/question.svg"
+                    alt=""
+                    class="tooltip-icon"
+                  />
+                  <img
+                    class="tooltip-img"
+                    src="/assets/images/tooltip/patient_name.svg"
+                  />
+                </span>
+              </div>
+            </label>
             <input type="text" v-model="form.patientName" />
           </div>
 
