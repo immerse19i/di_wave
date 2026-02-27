@@ -212,9 +212,11 @@
               <span class="dot gray"></span> 과거
             </div>
 
-            <label class="toggle">
-              비교 <input type="checkbox" v-model="showComparison" />
-            </label>
+            <ToggleSwitch
+              v-model="showComparison"
+              onLabel="비교"
+              offLabel="비교"
+            />
           </div>
           <div class="chart-container">
             <!-- Chart.js 캔버스 -->
@@ -304,6 +306,8 @@ import { analysisAPI } from '@/api/analysis';
 import { useModalStore } from '@/store/modal'; // ← 추가
 import growthHeightData from '@/data/growth_height.json';
 import Chart from 'chart.js/auto';
+import ToggleSwitch from '../../../components/common/ToggleSwitch.vue';
+
 const modal = useModalStore(); // ← 추가
 
 const route = useRoute();

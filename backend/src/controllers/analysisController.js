@@ -6,11 +6,13 @@ const config = require('../config/config');
 exports.createAnalysis = async (req, res) => {
     try {
         // 2026.02.19 req.body : weight, physician 추가
-        const { patientCode, patientName, birthDate, gender, height, weight, ageMonths, sex, fatherHeight, motherHeight, physician } = req.body;
+        // L9: analysisDate 추가
+const { patientCode, patientName, birthDate, gender, height, weight, ageMonths, sex, fatherHeight, motherHeight, physician, analysisDate } = req.body;
+
         const userId = req.user.id;
         const hospitalId = req.user.hospital_id;
         const imagePath = req.file.path;
-
+        
         // 1. 크레딧 확인
         const [credits] = await pool.query(
             `SELECT balance FROM credits WHERE hospital_id = ?`,
@@ -43,16 +45,19 @@ if (existingPatients.length > 0) {
 
         // 2. 분석 생성 (status: processing)
         // 2026.02.19 INSERT 쿼리에 {hegiht, weight,physican} 추가
+// L47~54: INSERT 쿼리에 analysis_date 추가
 const [result] = await pool.query(
     `INSERT INTO analyses (hospital_id, patient_id, user_id, image_path,
     chronological_age_years, chronological_age_months, height, weight, physician,
-    father_height, mother_height, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'processing')`,
+    analysis_date, father_height, mother_height, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'processing')`,
     [hospitalId, patientId, userId, imagePath, Math.floor(ageMonths / 12), ageMonths % 12,
      parseFloat(height), weight ? parseFloat(weight) : null, physician || null,
+     analysisDate || null,
      fatherHeight ? parseFloat(fatherHeight) : null,
      motherHeight ? parseFloat(motherHeight) : null]
 );
+
 
         const analysisId = result.insertId;
 
@@ -256,11 +261,11 @@ exports.updateAnalysisInfo = async (req, res) => {
   try {
     const { id } = req.params;
     const hospitalId = req.user.hospital_id;
-    const {
-      patientCode, patientName, birthDate, gender,
-      height, weight, fatherHeight, motherHeight,
-      physician, ageMonths, sex
-    } = req.body;
+const {
+  patientCode, patientName, birthDate, gender,
+  height, weight, fatherHeight, motherHeight,
+  physician, ageMonths, sex, analysisDate
+} = req.body;
 
     // 1. 기존 분석 조회
     const [analyses] = await pool.query(
@@ -318,13 +323,14 @@ exports.updateAnalysisInfo = async (req, res) => {
     // 5. analyses 업데이트
 await pool.query(
   `UPDATE analyses SET patient_id = ?, height = ?, weight = ?, physician = ?,
-   father_height = ?, mother_height = ?,
+   analysis_date = ?, father_height = ?, mother_height = ?,
    chronological_age_years = ?, chronological_age_months = ?,
    bone_age_years = ?, bone_age_months = ?, result_json = ?
    WHERE id = ? AND hospital_id = ?`,
   [
     patientId, parseFloat(height), weight ? parseFloat(weight) : null,
     physician || null,
+    analysisDate || null,
     fatherHeight ? parseFloat(fatherHeight) : null,
     motherHeight ? parseFloat(motherHeight) : null,
     Math.floor(ageMonths / 12), ageMonths % 12,
