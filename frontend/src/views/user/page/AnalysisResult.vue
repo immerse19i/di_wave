@@ -51,7 +51,25 @@
     <!-- 메인 컨텐츠 -->
     <div class="main-content">
       <!-- 왼쪽: X-ray 이미지 -->
-      <div class="left-panel">
+      <!-- 왼쪽: X-ray 이미지 -->
+      <div class="left-panel" :class="{ 'dual-view': isComparing }">
+        <!-- 비교 이미지 (이전 기록) -->
+        <div
+          v-if="isComparing && comparisonRecord"
+          class="xray-image comparison-image"
+        >
+          <span class="image-date">{{
+            formatDate(comparisonRecord.created_at)
+          }}</span>
+          <button class="btn-close-comparison" @click="closeComparison">
+            ✕
+          </button>
+          <img
+            :src="getImageUrl(comparisonRecord.image_path)"
+            alt="Previous X-ray"
+          />
+        </div>
+        <!-- 현재 이미지 -->
         <div class="xray-image">
           <span class="image-date">{{ formatDate(analysis.created_at) }}</span>
           <img :src="getImageUrl(analysis.image_path)" alt="X-ray" />
@@ -184,8 +202,11 @@
           <div class="chart-header">
             <div class="legend">
               <span class="dot green"></span> 현재
+              <span v-if="isComparing" class="dot red"></span>
+              <span v-if="isComparing">비교사진</span>
               <span class="dot gray"></span> 과거
             </div>
+
             <label class="toggle">
               비교 <input type="checkbox" v-model="showComparison" />
             </label>
@@ -292,6 +313,9 @@ const activeTab = ref('growth');
 const showComparison = ref(true);
 const growthChartRef = ref(null);
 let growthChart = null;
+//비교 모드
+const comparisonRecord = ref(null);
+const isComparing = ref(false);
 
 // 의사 판독값
 const doctorBoneAgeYears = ref(0);
@@ -450,6 +474,21 @@ const drawGrowthChart = () => {
     showLine: false,
   });
 
+  // 비교 사진 (빨간점)
+  if (isComparing.value && comparisonRecord.value) {
+    const compAge =
+      (comparisonRecord.value.chronological_age_years || 0) +
+      (comparisonRecord.value.chronological_age_months || 0) / 12;
+    datasets.push({
+      label: '비교사진',
+      data: [{ x: compAge, y: parseFloat(comparisonRecord.value.height) || 0 }],
+      backgroundColor: '#ff1744',
+      borderColor: '#ff1744',
+      pointRadius: 6,
+      showLine: false,
+    });
+  }
+
   // 이전기록 (회색점)
   if (showComparison.value && previousRecords.value.length > 0) {
     const prevPoints = previousRecords.value
@@ -520,10 +559,24 @@ const goBack = () => router.push('/main');
 const toggleHistory = () => {
   showHistory.value = !showHistory.value;
 };
-const goToRecord = (id) => {
+const goToRecord = async (id) => {
   showHistory.value = false;
-  router.push(`/main/analysis/${id}`);
+  try {
+    const res = await analysisAPI.getDetail(id);
+    comparisonRecord.value = res.data.data;
+    isComparing.value = true;
+    nextTick(() => drawGrowthChart());
+  } catch (e) {
+    console.error('비교 기록 조회 오류:', e);
+  }
 };
+
+const closeComparison = () => {
+  comparisonRecord.value = null;
+  isComparing.value = false;
+  nextTick(() => drawGrowthChart());
+};
+
 const goToReport = () =>
   router.push(`/main/analysis/${route.params.id}/report`);
 const openEditModal = () => {
@@ -685,12 +738,12 @@ watch(
   align-items: center;
   justify-content: center;
   padding: 20px;
-
+  gap: 8px;
   .xray-image {
     position: relative;
     max-width: 100%;
     max-height: 100%;
-
+    flex: 1;
     .image-date {
       position: absolute;
       top: 12px;
@@ -710,6 +763,33 @@ watch(
   }
 }
 
+.comparison-image {
+  position: relative;
+
+  .btn-close-comparison {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    color: $white;
+    @include font-14-bold;
+    cursor: pointer;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background: rgba(255, 0, 0, 0.6);
+    }
+  }
+}
+.dot.red {
+  background: #ff1744;
+}
 // 오른쪽: 결과
 .right-panel {
   width: 55%;
