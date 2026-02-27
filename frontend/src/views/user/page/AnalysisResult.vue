@@ -19,7 +19,7 @@
               :key="record.id"
               @click="goToRecord(record.id)"
             >
-              {{ formatDate(record.created_at) }}
+              {{ formatDate(record.analysis_date || record.created_at) }}
             </li>
           </ul>
         </div>
@@ -39,7 +39,10 @@
           ><b>키</b> {{ analysis.height ? analysis.height + 'cm' : '-' }}</span
         >
         <span><b>생년월일</b> {{ formatDate(analysis.birth_date) }}</span>
-        <span><b>분석일</b> {{ formatDate(analysis.created_at) }}</span>
+        <span
+          ><b>분석일</b>
+          {{ formatDate(analysis.analysis_date || analysis.created_at) }}</span
+        >
       </div>
 
       <!-- 정보 수정 버튼 -->
@@ -59,7 +62,7 @@
         >
           <div class="img_box">
             <span class="image-date">{{
-              formatDate(comparisonRecord.created_at)
+              formatDate(record.analysis_date || record.created_at)
             }}</span>
             <button class="btn-close-comparison" @click="closeComparison">
               <img src="/assets/icons/close_blue.svg" alt="close" />
@@ -73,9 +76,9 @@
         <!-- 현재 이미지 -->
         <div class="xray-image">
           <div class="img_box">
-            <span class="image-date">{{
-              formatDate(analysis.created_at)
-            }}</span>
+            <span class="image-date">
+              {{ formatDate(record.analysis_date || record.created_at) }}
+            </span>
             <img :src="getImageUrl(analysis.image_path)" alt="X-ray" />
           </div>
         </div>
