@@ -759,6 +759,7 @@ watch(
       max-width: 100%;
       max-height: 70vh;
       object-fit: contain;
+      object-position: center;
     }
   }
 }
