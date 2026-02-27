@@ -306,6 +306,7 @@ const submitUpdate = async () => {
         physician: form.value.physician,
         ageMonths,
         sex: form.value.gender === 'M' ? 1 : 0,
+        analysisDate: form.value.analysisDate, // 분석일 추가
       },
     );
 
@@ -349,11 +350,15 @@ onMounted(() => {
 
   // 분석일 파싱
   let analysisDate = '';
-  if (data.created_at) {
+  // 분석일 파싱 — created_at 대신 analysis_date 사용
+  if (data.analysis_date) {
+    const d = new Date(data.analysis_date);
+    analysisDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  } else if (data.created_at) {
+    // fallback (기존 데이터 호환)
     const d = new Date(data.created_at);
     analysisDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
-
   const formData = {
     patientCode: data.patient_code || '',
     patientName: data.patient_name || '',
