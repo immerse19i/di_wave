@@ -448,6 +448,7 @@ const checkCreditAndSubmit = async () => {
   formData.append('ageMonths', ageMonths);
   formData.append('weight', form.value.weight);
   formData.append('physician', form.value.physician);
+  formData.append('analysisDate', form.value.analysisDate);
 
   if (form.value.fatherHeight) {
     formData.append('fatherHeight', form.value.fatherHeight);
