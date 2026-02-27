@@ -1,4 +1,4 @@
-const pool = require('../config/database')
+const { pool } = require('../config/database')
 const config = require('../config/config')
 
 exports.confirmPayment = async (req, res) => {
