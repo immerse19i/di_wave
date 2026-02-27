@@ -61,9 +61,13 @@
           class="xray-image comparison-image"
         >
           <div class="img_box">
-            <span class="image-date">{{
-              formatDate(record.analysis_date || record.created_at)
-            }}</span>
+            <span class="image-date">
+              {{
+                formatDate(
+                  comparisonRecord.analysis_date || comparisonRecord.created_at,
+                )
+              }}
+            </span>
             <button class="btn-close-comparison" @click="closeComparison">
               <img src="/assets/icons/close_blue.svg" alt="close" />
             </button>
@@ -77,7 +81,7 @@
         <div class="xray-image">
           <div class="img_box">
             <span class="image-date">
-              {{ formatDate(record.analysis_date || record.created_at) }}
+              {{ formatDate(analysis.analysis_date || analysis.created_at) }}
             </span>
             <img :src="getImageUrl(analysis.image_path)" alt="X-ray" />
           </div>
