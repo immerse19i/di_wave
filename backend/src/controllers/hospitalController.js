@@ -1,4 +1,4 @@
-const pool = require('../../config/database');
+const { pool } = require('../config/database');
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
@@ -16,13 +16,16 @@ exports.getHospitals = async (req, res) => {
   try {
     const { status, search, sortField, sortOrder, page = 1, limit = 12 } = req.query;
 
-    let where = 'WHERE 1=1';
-    const params = [];
+let where = 'WHERE 1=1';
+const params = [];
 
-    if (status && status !== 'all') {
-      where += ' AND h.status = ?';
-      params.push(status);
-    }
+if (status && status !== 'all') {
+  where += ' AND h.status = ?';
+  params.push(status);
+} else {
+  // 승인관리 목록에서는 승인완료된 병원 제외
+  where += " AND h.status != 'approved'";
+}
 
     if (search && search.length >= 2) {
       where += ' AND h.name LIKE ?';
@@ -95,7 +98,9 @@ exports.approveHospital = async (req, res) => {
   try {
     const { id } = req.params;
 
-    await pool.query('UPDATE hospitals SET status = ? WHERE id = ?', ['approved', id]);
+   await pool.query('UPDATE hospitals SET status = ? WHERE id = ?', ['approved', id]);
+await pool.query('UPDATE users SET is_active = TRUE WHERE hospital_id = ? AND role = ?', [id, 'hospital']);
+
 
     const [rows] = await pool.query(
       `SELECT h.name, u.email, u.login_id
@@ -157,6 +162,8 @@ exports.rejectHospital = async (req, res) => {
     const { reason, comment } = req.body;
 
     await pool.query('UPDATE hospitals SET status = ? WHERE id = ?', ['rejected', id]);
+await pool.query('UPDATE users SET is_active = FALSE WHERE hospital_id = ? AND role = ?', [id, 'hospital']);
+
 
     const [rows] = await pool.query(
       `SELECT h.name, u.email, u.login_id

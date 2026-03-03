@@ -25,7 +25,7 @@ const AdminDashboard = () => import('@/views/admin/Approval.vue');
 const AdminMain = () => import('@/views/admin/AdminMain.vue')
 const AdminTerms = () => import('@/views/admin/AdminTerms.vue')
 const AdminTermsHistory = () => import('@/views/admin/AdminTermsHistory.vue')
-
+const ApprovalDetail = () => import('@/views/admin/ApprovalDetail.vue')
 
 const routes = [
   // User Routes
@@ -74,6 +74,7 @@ const routes = [
     { path: 'approval', component: AdminDashboard },
     { path: 'terms', component: AdminTerms },
     { path: 'terms/history/:type', component: AdminTermsHistory },
+    { path: 'approval/:id', component: ApprovalDetail, props: true },  // ← 추가
   ],
 },
   // routes 배열에 추가 (/main 라우트 아래에)
