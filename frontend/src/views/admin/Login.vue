@@ -3,9 +3,9 @@
     <div class="login-container">
       <div class="login-logo">
         <img :src="logoSrc" alt="OsteoAge" />
-      </div> 
+      </div>
       <h3 class="page-title">관리자페이지</h3>
-      
+
       <form class="login-form" @submit.prevent="handleLogin">
         <div class="form-group">
           <input
@@ -35,9 +35,13 @@
               />
             </button>
           </div>
-        </div> 
+        </div>
 
-        <p :class="isPasswordWrong ? 'validation-alert show' : 'validation-alert'">
+        <p
+          :class="
+            isPasswordWrong ? 'validation-alert show' : 'validation-alert'
+          "
+        >
           아이디 또는 비밀번호가 일치하지 않습니다.
         </p>
         <button type="submit" class="btn-login">로그인</button>
@@ -50,7 +54,6 @@
             <span class="checkmark"></span>
             <span class="label-text">아이디저장</span>
           </label>
-        
         </div>
       </div>
 
@@ -62,61 +65,62 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/store/auth'
-import { authAPI } from '@/api/auth'
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/store/auth';
+import { authAPI } from '@/api/auth';
 
-const router = useRouter()
-const auth = useAuthStore()
+const router = useRouter();
+const auth = useAuthStore();
 
 const form = ref({
-  userId: '',    // adminId → userId로 변경
-  password: ''
-})
+  userId: '', // adminId → userId로 변경
+  password: '',
+});
 
-const errorMessage = ref('')
+const errorMessage = ref('');
 const logoSrc = '/assets/logo/logo.svg';
 const eyeHideIcon = '/assets/icons/eye_hide.svg';
 const eyeShowIcon = '/assets/icons/eye_show.svg';
-
 
 const showPassword = ref(false);
 const rememberUserId = ref(false);
 const isPasswordWrong = ref(false);
 
-
 const handleLogin = async () => {
   try {
-    errorMessage.value = ''
-    const { data } = await authAPI.login(form.value.userId, form.value.password)
-    
+    errorMessage.value = '';
+    const { data } = await authAPI.login(
+      form.value.userId,
+      form.value.password,
+    );
+
     // 관리자 권한 체크
     if (data.user.role !== 'admin') {
-      errorMessage.value = '관리자 권한이 없습니다.'
-      isPasswordWrong.value =true;
-      return
+      errorMessage.value = '관리자 권한이 없습니다.';
+      isPasswordWrong.value = true;
+      return;
     }
-    
+
     // 토큰 저장
-    auth.setToken(data.token)
-    
+    auth.setToken(data.token);
+
     // 유저 정보 조회
-    const { data: userData } = await authAPI.getMe()
-    auth.setUser(userData)
-    
+    const { data: userData } = await authAPI.getMe();
+    auth.setUser(userData);
+
     // 관리자 대시보드로 이동
-    router.push('/admin/approval')
+    router.push('/admin/approval');
   } catch (error) {
     if (error.response?.status === 423) {
-      errorMessage.value = error.response.data.message
-      isPasswordWrong.value =true;
+      errorMessage.value = error.response.data.message;
+      isPasswordWrong.value = true;
     } else {
-      errorMessage.value = '아이디 또는 비밀번호가 올바르지 않습니다.'
-      isPasswordWrong.value =true;
+      errorMessage.value = '아이디 또는 비밀번호가 올바르지 않습니다.';
+      isPasswordWrong.value = true;
     }
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>
@@ -144,12 +148,11 @@ const handleLogin = async () => {
   }
 }
 
-.page-title{
+.page-title {
   @include font-20-bold;
   margin-bottom: 56px;
-  color:$white;
+  color: $white;
   text-align: center;
-
 }
 
 .login-form {
@@ -214,7 +217,7 @@ const handleLogin = async () => {
   visibility: hidden;
   color: $red;
 
-  &.show{
+  &.show {
     visibility: visible;
   }
 }
@@ -280,7 +283,7 @@ const handleLogin = async () => {
     a {
       @include font-14-regular;
       color: $white;
-      cursor:pointer;
+      cursor: pointer;
       transition: color $transition-fast;
 
       &:hover {

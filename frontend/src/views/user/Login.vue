@@ -3,7 +3,7 @@
     <div class="login-container">
       <div class="login-logo">
         <img :src="logoSrc" alt="OsteoAge" />
-      </div>  
+      </div>
 
       <form class="login-form" @submit.prevent="handleLogin">
         <div class="form-group">
@@ -34,9 +34,13 @@
               />
             </button>
           </div>
-        </div> 
+        </div>
 
-        <p :class="isPasswordWrong ? 'validation-alert show' : 'validation-alert'">
+        <p
+          :class="
+            isPasswordWrong ? 'validation-alert show' : 'validation-alert'
+          "
+        >
           아이디 또는 비밀번호가 일치하지 않습니다.
         </p>
         <button type="submit" class="btn-login">로그인</button>
@@ -49,7 +53,7 @@
             <span class="checkmark"></span>
             <span class="label-text">아이디저장</span>
           </label>
-<a @click="router.push('/register')">회원가입</a>
+          <a @click="router.push('/register')">회원가입</a>
           <a @click="modal.open('find_id', 'sign')">ID찾기</a>
           <a @click="modal.open('find_password', 'sign')">비밀번호찾기</a>
         </div>
@@ -61,7 +65,7 @@
     </div>
     <UserModalBody v-if="modal.isOpen && modal.role === 'sign'" />
   </div>
-  <LoginFooter/>
+  <LoginFooter />
 </template>
 
 <script setup>
@@ -70,7 +74,7 @@ import { useRouter } from 'vue-router';
 import { useModalStore } from '@/store/modal';
 import UserModalBody from '@/components/user_modal/UserModalBody.vue';
 import { UseMessageStore } from '@/store/message';
-import {authAPI} from '@/api/auth';
+import { authAPI } from '@/api/auth';
 import LoginFooter from '../../components/common/LoginFooter.vue';
 import { useAuthStore } from '@/store/auth';
 const modal = useModalStore();
@@ -102,31 +106,32 @@ const eyeShowIcon = '/assets/icons/eye_show.svg';
 
 const handleLogin = async () => {
   try {
-    const {data} = await authAPI.login(form.value.userId, form.value.password);
-    
-    // 관리자 계정은 유저단 로그인 차단
+    isPasswordWrong.value = false;
+    const { data } = await authAPI.login(
+      form.value.userId,
+      form.value.password,
+    );
+
     if (data.user.role === 'admin') {
       isPasswordWrong.value = true;
       return;
     }
-    
-    // 토큰 저장
+
     auth.setToken(data.token);
-    
-    // 유저 정보 조회 → store에 저장
     const { data: userData } = await authAPI.getMe();
     auth.setUser(userData);
-    
-    // 메인페이지로 이동
     router.push('/main');
-  } catch(error) {
-    isPasswordWrong.value = true;
+  } catch (error) {
+    const code = error.response?.data?.code;
+    if (code === 'PENDING_APPROVAL' || code === 'REJECTED') {
+      message.showAlert(
+        '아직 가입 승인 대기 중입니다.\n승인 완료 후 이메일로 안내해 드립니다.',
+      );
+    } else {
+      isPasswordWrong.value = true;
+    }
   }
-}
-
-
-
-
+};
 </script>
 
 <style lang="scss" scoped>
@@ -144,7 +149,6 @@ const handleLogin = async () => {
   width: 100%;
   max-width: 398px;
   padding: $spacing-xl;
-  
 }
 
 .login-logo {
@@ -220,7 +224,7 @@ const handleLogin = async () => {
   visibility: hidden;
   color: $red;
 
-  &.show{
+  &.show {
     visibility: visible;
   }
 }
@@ -287,7 +291,7 @@ const handleLogin = async () => {
     a {
       @include font-14-regular;
       color: $white;
-      cursor:pointer;
+      cursor: pointer;
       transition: color $transition-fast;
 
       &:hover {
