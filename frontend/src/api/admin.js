@@ -25,5 +25,26 @@ getAccounts(params) {
   return api.get('/admin/hospitals/accounts', { params })
 },
 
+// 가입계정 상세
+getAccountDetail(id) {
+  return api.get(`/admin/hospitals/accounts/${id}`)
+},
+
+// 기본 정보 수정
+updateAccountInfo(id, data) {
+  return api.put(`/admin/hospitals/accounts/${id}`, data)
+},
+
+// 로그인 제한 해제
+unlockAccount(id) {
+  return api.patch(`/admin/hospitals/accounts/${id}/unlock`)
+},
+
+uploadBusinessLicense(id, formData) {
+  return api.post(`/admin/hospitals/accounts/${id}/license`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+},
+
 
 }

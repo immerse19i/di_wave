@@ -7,8 +7,22 @@ const hospitalController = require('../controllers/hospitalController');
 router.use(verifyToken, isAdmin);
 
 // 목록
+const multer = require('multer');
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'uploads/business/'),
+  filename: (req, file, cb) => {
+    const original = Buffer.from(file.originalname, 'latin1').toString('utf8');
+    cb(null, `${Date.now()}_${original}`);
+  }
+});
+const upload = multer({ storage });
+
+
 
 router.get('/', hospitalController.getHospitals);
+
+
+
 
 // 가입계정 목록
 router.get('/accounts', hospitalController.getAccounts);
@@ -28,5 +42,10 @@ router.patch('/:id/approve', hospitalController.approveHospital);
 
 // 반려
 router.patch('/:id/reject', hospitalController.rejectHospital);
+
+
+// 사업자등록증 업로드
+router.post('/accounts/:id/license', upload.single('file'), hospitalController.uploadBusinessLicense);
+
 
 module.exports = router;

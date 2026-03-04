@@ -379,3 +379,20 @@ exports.unlockAccount = async (req, res) => {
     res.status(500).json({ success: false, message: '서버 오류' });
   }
 };
+
+
+// POST /api/admin/hospitals/accounts/:id/license - 사업자등록증 변경
+exports.uploadBusinessLicense = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: '파일이 없습니다.' });
+    }
+    const filePath = `/uploads/business/${req.file.filename}`;
+    await pool.query('UPDATE hospitals SET business_license_path = ? WHERE id = ?', [filePath, id]);
+    res.json({ success: true, data: { path: filePath } });
+  } catch (error) {
+    console.error('UploadBusinessLicense error:', error);
+    res.status(500).json({ success: false, message: '서버 오류' });
+  }
+};
