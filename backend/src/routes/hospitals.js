@@ -7,7 +7,11 @@ const hospitalController = require('../controllers/hospitalController');
 router.use(verifyToken, isAdmin);
 
 // 목록
+
 router.get('/', hospitalController.getHospitals);
+
+// 가입계정 목록
+router.get('/accounts', hospitalController.getAccounts);
 
 // 상세
 router.get('/:id', hospitalController.getHospitalDetail);

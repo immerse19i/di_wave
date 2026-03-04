@@ -20,4 +20,10 @@ export const adminAPI = {
   rejectHospital(id, data) {
     return api.patch(`/admin/hospitals/${id}/reject`, data)
   },
+// 가입계정 목록
+getAccounts(params) {
+  return api.get('/admin/hospitals/accounts', { params })
+},
+
+
 }

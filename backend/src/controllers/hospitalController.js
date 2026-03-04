@@ -221,3 +221,91 @@ await pool.query('UPDATE users SET is_active = FALSE WHERE hospital_id = ? AND r
     res.status(500).json({ success: false, message: '서버 오류' });
   }
 };
+
+
+// GET /api/admin/hospitals/accounts - 가입계정 목록
+exports.getAccounts = async (req, res) => {
+  try {
+    const { 
+      accountStatus, search, sortField, sortOrder, 
+      page = 1, limit = 12,
+      startDate, endDate 
+    } = req.query;
+
+    let where = "WHERE h.status IN ('approved', 'suspended')";
+    const params = [];
+
+    // 계정상태 필터 (쉼표 구분: "active,inactive")
+    if (accountStatus && accountStatus !== 'all') {
+      const statuses = accountStatus.split(',');
+      const conditions = [];
+      if (statuses.includes('active')) conditions.push('u.is_active = TRUE');
+      if (statuses.includes('inactive')) conditions.push('u.is_active = FALSE');
+      if (conditions.length > 0) {
+        where += ` AND (${conditions.join(' OR ')})`;
+      }
+    }
+
+    // 가입일 필터
+    if (startDate) {
+      where += ' AND DATE(h.created_at) >= ?';
+      params.push(startDate);
+    }
+    if (endDate) {
+      where += ' AND DATE(h.created_at) <= ?';
+      params.push(endDate);
+    }
+
+    // 검색 (병원명 OR 사업자번호, 하이픈 제거)
+    if (search) {
+      const cleaned = search.replace(/-/g, '');
+      where += ' AND (h.name LIKE ? OR REPLACE(h.business_number, "-", "") LIKE ?)';
+      params.push(`%${search}%`, `%${cleaned}%`);
+    }
+
+    const [countResult] = await pool.query(
+      `SELECT COUNT(*) as total 
+       FROM hospitals h 
+       LEFT JOIN users u ON u.hospital_id = h.id AND u.role = 'hospital'
+       ${where}`,
+      params
+    );
+    const total = countResult[0].total;
+
+    const allowedFields = {
+      login_id: 'u.login_id',
+      name: 'h.name',
+      email: 'u.email',
+      phone: 'h.phone',
+      created_at: 'h.created_at',
+    };
+    let orderBy = 'ORDER BY h.created_at DESC';
+    if (sortField && allowedFields[sortField] && sortOrder) {
+      orderBy = `ORDER BY ${allowedFields[sortField]} ${sortOrder === 'ASC' ? 'ASC' : 'DESC'}`;
+    }
+
+    const offset = (page - 1) * limit;
+
+    const [rows] = await pool.query(
+      `SELECT h.id, h.name, h.phone, h.status, h.created_at,
+              u.login_id, u.email, u.is_active
+       FROM hospitals h
+       LEFT JOIN users u ON u.hospital_id = h.id AND u.role = 'hospital'
+       ${where}
+       ${orderBy}
+       LIMIT ? OFFSET ?`,
+      [...params, Number(limit), offset]
+    );
+
+    res.json({
+      success: true,
+      data: rows,
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: Number(page),
+    });
+  } catch (error) {
+    console.error('GetAccounts error:', error);
+    res.status(500).json({ success: false, message: '서버 오류' });
+  }
+};
