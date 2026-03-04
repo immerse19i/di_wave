@@ -232,7 +232,8 @@ exports.getAccounts = async (req, res) => {
       startDate, endDate 
     } = req.query;
 
-    let where = "WHERE h.status IN ('approved', 'suspended')";
+    let where = "WHERE h.status IN ('approved', 'suspended', 'withdrawn')";
+
     const params = [];
 
     // 계정상태 필터 (쉼표 구분: "active,inactive")
@@ -393,6 +394,85 @@ exports.uploadBusinessLicense = async (req, res) => {
     res.json({ success: true, data: { path: filePath } });
   } catch (error) {
     console.error('UploadBusinessLicense error:', error);
+    res.status(500).json({ success: false, message: '서버 오류' });
+  }
+};
+
+
+// PATCH /api/admin/hospitals/accounts/:id/status - 계정상태 변경
+exports.changeAccountStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, reason } = req.body;
+
+    const validStatuses = ['active', 'suspended', 'withdrawn'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ success: false, message: '유효하지 않은 상태값입니다.' });
+    }
+
+    // 상태 매핑
+    const hospitalStatus = status === 'active' ? 'approved' : status;
+    const isActive = status === 'active';
+
+    await pool.query('UPDATE hospitals SET status = ? WHERE id = ?', [hospitalStatus, id]);
+    await pool.query(
+      'UPDATE users SET is_active = ? WHERE hospital_id = ? AND role = ?',
+      [isActive, id, 'hospital']
+    );
+
+    // 안내 메일 발송
+    const [rows] = await pool.query(
+      `SELECT h.name, u.email, u.login_id
+       FROM hospitals h
+       LEFT JOIN users u ON u.hospital_id = h.id AND u.role = 'hospital'
+       WHERE h.id = ?`,
+      [id]
+    );
+
+    const statusLabels = { active: '정상', suspended: '정지', withdrawn: '탈퇴' };
+
+    if (rows.length > 0 && rows[0].email) {
+      await transporter.sendMail({
+        from: process.env.MAIL_FROM,
+        to: rows[0].email,
+        subject: '[OsteoAge] 계정 상태 변경 안내',
+        html: `
+          <div style="max-width:600px; font-family:'Inter',Arial,sans-serif; color:#353535;">
+            <p style="font-size:14px; line-height:1.6;">
+              안녕하세요, <strong>${rows[0].name}</strong>님.<br/>
+              계정 상태가 변경되었습니다.
+            </p>
+            <table style="border-collapse:collapse; width:100%; margin:20px 0;">
+              <tr>
+                <td style="padding:8px 12px; background:#f5f5f5; border:1px solid #ddd; font-weight:bold;">병원명</td>
+                <td style="padding:8px 12px; border:1px solid #ddd;">${rows[0].name}</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 12px; background:#f5f5f5; border:1px solid #ddd; font-weight:bold;">ID</td>
+                <td style="padding:8px 12px; border:1px solid #ddd;">${rows[0].login_id}</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 12px; background:#f5f5f5; border:1px solid #ddd; font-weight:bold;">변경상태</td>
+                <td style="padding:8px 12px; border:1px solid #ddd; font-weight:bold;">${statusLabels[status]}</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 12px; background:#f5f5f5; border:1px solid #ddd; font-weight:bold;">사유</td>
+                <td style="padding:8px 12px; border:1px solid #ddd;">${reason || '-'}</td>
+              </tr>
+            </table>
+            <p style="font-size:12px; color:#353535; margin-top:24px;">
+              디웨이브주식회사<br/>
+              csadmin@diwave.io<br/>
+              02-2088-8728 [문의가능시간 : 10:00~17:00 (토·일·공휴일 휴무)]
+            </p>
+          </div>
+        `,
+      });
+    }
+
+    res.json({ success: true, message: '계정상태가 변경되었습니다.' });
+  } catch (error) {
+    console.error('ChangeAccountStatus error:', error);
     res.status(500).json({ success: false, message: '서버 오류' });
   }
 };

@@ -39,27 +39,42 @@ const [users] = await pool.query(
     // 계정 활성화 체크
 // 계정 활성화 체크
 if(!user.is_active){
-  // 병원 사용자인 경우 승인 상태 확인
   if(user.role === 'hospital' && user.hospital_id) {
     const [hospitals] = await pool.query(
       'SELECT status FROM hospitals WHERE id = ?', 
       [user.hospital_id]
     );
-    if(hospitals.length > 0 && hospitals[0].status === 'pending') {
-      return res.status(403).json({ 
-        code: 'PENDING_APPROVAL',
-        message: '아직 가입 승인 대기 중입니다. 승인 완료 후 이메일로 안내해 드립니다.'
-      });
-    }
-    if(hospitals.length > 0 && hospitals[0].status === 'rejected') {
-      return res.status(403).json({ 
-        code: 'REJECTED',
-        message: '가입이 반려되었습니다. 사유 확인 후 재신청이 가능합니다.'
-      });
+    if(hospitals.length > 0) {
+      const hStatus = hospitals[0].status;
+      if(hStatus === 'pending') {
+        return res.status(403).json({ 
+          code: 'PENDING_APPROVAL',
+          message: '아직 가입 승인 대기 중입니다. 승인 완료 후 이메일로 안내해 드립니다.'
+        });
+      }
+      if(hStatus === 'rejected') {
+        return res.status(403).json({ 
+          code: 'REJECTED',
+          message: '가입이 반려되었습니다. 사유 확인 후 재신청이 가능합니다.'
+        });
+      }
+      if(hStatus === 'suspended') {
+        return res.status(403).json({ 
+          code: 'SUSPENDED',
+          message: '정지된 계정입니다. 관리자에게 문의해 주세요.'
+        });
+      }
+      if(hStatus === 'withdrawn') {
+        // 탈퇴 사실 미고지 — 일반 로그인 실패와 동일 메시지
+        return res.status(401).json({ 
+          message: '아이디 또는 비밀번호가 올바르지 않습니다.'
+        });
+      }
     }
   }
   return res.status(403).json({ message: '비활성화된 계정입니다.' });
 }
+
 
 
     // 계정 잠금 체크

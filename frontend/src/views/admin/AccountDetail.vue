@@ -152,6 +152,54 @@
           </div>
         </div>
       </div>
+      <!-- 계정상태변경 팝업 -->
+      <div
+        class="popup-overlay"
+        v-if="showStatusPopup"
+        @click.self="closeStatusPopup"
+      >
+        <div class="popup-box">
+          <h3 class="popup-title">계정상태변경</h3>
+          <p class="popup-hospital">{{ account.name }}</p>
+
+          <div class="status-radios">
+            <label :class="{ selected: statusForm.status === 'active' }">
+              <input type="radio" v-model="statusForm.status" value="active" />
+              정상
+            </label>
+            <label :class="{ selected: statusForm.status === 'suspended' }">
+              <input
+                type="radio"
+                v-model="statusForm.status"
+                value="suspended"
+              />
+              정지
+            </label>
+            <label :class="{ selected: statusForm.status === 'withdrawn' }">
+              <input
+                type="radio"
+                v-model="statusForm.status"
+                value="withdrawn"
+              />
+              탈퇴
+            </label>
+          </div>
+
+          <p class="reason-label">사유를 작성해 주세요</p>
+          <textarea
+            v-model="statusForm.reason"
+            class="reason-textarea"
+            placeholder=""
+          ></textarea>
+
+          <div class="popup-buttons">
+            <button class="btn-cancel" @click="closeStatusPopup">취소</button>
+            <button class="btn-confirm" @click="handleStatusChange">
+              확인
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -165,6 +213,10 @@ import { UseMessageStore } from '@/store/message';
 const props = defineProps({ id: [String, Number] });
 const router = useRouter();
 const message = UseMessageStore();
+
+// 상태변경 팝업
+const showStatusPopup = ref(false);
+const statusForm = ref({ status: 'active', reason: '' });
 
 const account = ref(null);
 const form = ref({
@@ -187,7 +239,10 @@ const hasChanges = computed(
 // 계정 상태 라벨
 const accountStatusLabel = computed(() => {
   if (!account.value) return '';
-  if (!account.value.is_active) return '탈퇴';
+  const s = account.value.status;
+  if (s === 'approved') return '정상';
+  if (s === 'suspended') return '정지';
+  if (s === 'withdrawn') return '탈퇴';
   return '정상';
 });
 
@@ -332,8 +387,41 @@ const handleUnlock = async () => {
   });
 };
 
-// TODO: 계정상태변경 팝업
-const openStatusChange = () => {};
+const openStatusChange = () => {
+  // 현재 상태를 기본값으로
+  const s = account.value.status;
+  statusForm.value = {
+    status:
+      s === 'approved'
+        ? 'active'
+        : s === 'suspended'
+          ? 'suspended'
+          : 'withdrawn',
+    reason: '',
+  };
+  showStatusPopup.value = true;
+};
+
+const closeStatusPopup = () => {
+  showStatusPopup.value = false;
+};
+const handleStatusChange = async () => {
+  try {
+    await adminAPI.changeAccountStatus(props.id, statusForm.value);
+    // 로컬 상태 즉시 반영
+    const statusMap = {
+      active: 'approved',
+      suspended: 'suspended',
+      withdrawn: 'withdrawn',
+    };
+    account.value.status = statusMap[statusForm.value.status];
+    account.value.is_active = statusForm.value.status === 'active';
+    showStatusPopup.value = false;
+    message.showAlert('계정상태가 변경되었습니다.');
+  } catch (e) {
+    message.showAlert('상태 변경에 실패했습니다.');
+  }
+};
 
 // TODO: 크레딧 조회 이동
 const goToCreditHistory = () => {};
@@ -561,6 +649,111 @@ const formatShortDate = (dateStr) => {
   cursor: pointer;
   &:hover {
     background: $sub-color;
+  }
+}
+// 상태변경 팝업
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.popup-box {
+  background: $dark-bg;
+  border: 1px solid $dark-line-gray;
+  border-radius: $radius-md;
+  padding: 32px 40px;
+  min-width: 480px;
+  max-width: 560px;
+}
+
+.popup-title {
+  @include font-16-bold;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.popup-hospital {
+  @include font-14-regular;
+  text-align: center;
+  color: $dark-text;
+  margin-bottom: 24px;
+}
+
+.status-radios {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 24px;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    @include font-14-regular;
+    cursor: pointer;
+    color: $dark-text;
+
+    &.selected {
+      color: $white;
+    }
+
+    input[type='radio'] {
+      accent-color: $main-color;
+    }
+  }
+}
+
+.reason-label {
+  @include font-14-medium;
+  color: $main-color;
+  margin-bottom: 8px;
+}
+
+.reason-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px 16px;
+  background: $dark-input;
+  border: 1px solid $dark-line-gray;
+  border-radius: $radius-sm;
+  color: $white;
+  @include font-14-regular;
+  resize: vertical;
+
+  &:focus {
+    border-color: $main-color;
+    outline: none;
+  }
+}
+
+.popup-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+
+  .btn-cancel,
+  .btn-confirm {
+    flex: 1;
+    padding: 12px;
+    border-radius: $radius-sm;
+    @include font-14-medium;
+    cursor: pointer;
+  }
+
+  .btn-cancel {
+    background: $dark-input;
+    color: $white;
+    border: 1px solid $dark-line-gray;
+  }
+
+  .btn-confirm {
+    background: $main-color;
+    color: $white;
   }
 }
 </style>

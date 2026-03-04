@@ -127,6 +127,9 @@ const handleLogin = async () => {
       message.showAlert(
         '아직 가입 승인 대기 중입니다.\n승인 완료 후 이메일로 안내해 드립니다.',
       );
+    } else if (code === 'SUSPENDED') {
+      message.showAlert('정지된 계정입니다.\n관리자에게 문의해 주세요.');
+      return;
     } else {
       isPasswordWrong.value = true;
     }

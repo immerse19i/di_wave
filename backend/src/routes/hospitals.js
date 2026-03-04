@@ -31,6 +31,7 @@ router.get('/accounts', hospitalController.getAccounts);
 router.get('/accounts/:id', hospitalController.getAccountDetail);
 router.put('/accounts/:id', hospitalController.updateAccountInfo);
 router.patch('/accounts/:id/unlock', hospitalController.unlockAccount);
+router.patch('/accounts/:id/status', hospitalController.changeAccountStatus);
 
 // 상세
 router.get('/:id', hospitalController.getHospitalDetail);

@@ -45,6 +45,8 @@ uploadBusinessLicense(id, formData) {
     headers: { 'Content-Type': 'multipart/form-data' }
   })
 },
-
+changeAccountStatus(id, data) {
+  return api.patch(`/admin/hospitals/accounts/${id}/status`, data)
+},
 
 }
