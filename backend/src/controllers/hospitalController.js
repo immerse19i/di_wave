@@ -309,3 +309,73 @@ exports.getAccounts = async (req, res) => {
     res.status(500).json({ success: false, message: '서버 오류' });
   }
 };
+
+// GET /api/admin/hospitals/accounts/:id - 계정 상세
+exports.getAccountDetail = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [rows] = await pool.query(
+      `SELECT h.id, h.name, h.ceo_name, h.business_number, h.phone,
+              h.address, h.address_detail, h.business_license_path, h.status, h.created_at,
+              u.login_id, u.email, u.is_active, u.locked_until, u.login_attempts,
+              COALESCE(c.balance, 0) as credit_balance
+       FROM hospitals h
+       LEFT JOIN users u ON u.hospital_id = h.id AND u.role = 'hospital'
+       LEFT JOIN credits c ON c.hospital_id = h.id
+       WHERE h.id = ?`,
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: '병원을 찾을 수 없습니다.' });
+    }
+
+    res.json({ success: true, data: rows[0] });
+  } catch (error) {
+    console.error('GetAccountDetail error:', error);
+    res.status(500).json({ success: false, message: '서버 오류' });
+  }
+};
+
+// PUT /api/admin/hospitals/accounts/:id - 기본 정보 수정
+exports.updateAccountInfo = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, ceo_name, phone, email, address, address_detail, business_number } = req.body;
+
+    await pool.query(
+      `UPDATE hospitals SET name = ?, ceo_name = ?, phone = ?, address = ?, address_detail = ?, business_number = ?
+       WHERE id = ?`,
+      [name, ceo_name, phone, address, address_detail, business_number, id]
+    );
+
+    // 이메일은 users 테이블
+    await pool.query(
+      `UPDATE users SET email = ? WHERE hospital_id = ? AND role = 'hospital'`,
+      [email, id]
+    );
+
+    res.json({ success: true, message: '저장되었습니다.' });
+  } catch (error) {
+    console.error('UpdateAccountInfo error:', error);
+    res.status(500).json({ success: false, message: '서버 오류' });
+  }
+};
+
+// PATCH /api/admin/hospitals/accounts/:id/unlock - 로그인 제한 해제
+exports.unlockAccount = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await pool.query(
+      `UPDATE users SET locked_until = NULL, login_attempts = 0 WHERE hospital_id = ? AND role = 'hospital'`,
+      [id]
+    );
+
+    res.json({ success: true, message: '로그인 제한이 해제되었습니다.' });
+  } catch (error) {
+    console.error('UnlockAccount error:', error);
+    res.status(500).json({ success: false, message: '서버 오류' });
+  }
+};

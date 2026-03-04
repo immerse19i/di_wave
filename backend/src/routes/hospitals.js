@@ -13,8 +13,15 @@ router.get('/', hospitalController.getHospitals);
 // 가입계정 목록
 router.get('/accounts', hospitalController.getAccounts);
 
+// 가입계정 상세 (accounts/:id 는 /:id 보다 위에!)
+router.get('/accounts/:id', hospitalController.getAccountDetail);
+router.put('/accounts/:id', hospitalController.updateAccountInfo);
+router.patch('/accounts/:id/unlock', hospitalController.unlockAccount);
+
 // 상세
 router.get('/:id', hospitalController.getHospitalDetail);
+
+
 
 // 승인
 router.patch('/:id/approve', hospitalController.approveHospital);
