@@ -156,6 +156,8 @@ CREATE TABLE popups (
     display_start DATE DEFAULT NULL,
     display_end DATE DEFAULT NULL,
     is_always BOOLEAN DEFAULT FALSE,
+    popup_width INT DEFAULT 500,
+    popup_height INT DEFAULT 400,
     author_id INT,
     author_name VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
