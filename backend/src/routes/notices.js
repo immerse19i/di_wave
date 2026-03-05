@@ -21,12 +21,8 @@ router.get('/', noticeController.getNotices)
 // 상세 조회
 router.get('/:id', noticeController.getNoticeDetail)
 
-// 생성
-router.post('/', upload.single('attachment'), noticeController.createNotice)
-
-// 수정
-router.put('/:id', upload.single('attachment'), noticeController.updateNotice)
-
+router.post('/', upload.array('attachments', 5), noticeController.createNotice)
+router.put('/:id', upload.array('attachments', 5), noticeController.updateNotice)
 // 삭제 (상태변경)
 router.patch('/:id/delete', noticeController.deleteNotice)
 

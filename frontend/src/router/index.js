@@ -16,6 +16,7 @@ const Credit = () => import('@/views/user/page/user-info/Credit.vue');
 const Info = () => import('@/views/user/page/user-info/Info.vue');
 const CreditCharge = () => import('@/views/user/page/user-info/CreditCharge.vue');
 const Terms = () => import('@/views/user/Terms.vue')
+const AdminNoticeWrite = () => import('@/views/admin/AdminNoticeWrite.vue')
 
 // Admin Views
 const AdminLogin = () => import('@/views/admin/Login.vue');
@@ -81,6 +82,8 @@ const routes = [
     { path: 'accounts', component: AccountList },
     { path: 'accounts/:id', component: AccountDetail, props: true },
     { path: 'notices', component: AdminNotice },
+    { path: 'notices/write', component: AdminNoticeWrite },
+{ path: 'notices/:id', component: AdminNoticeWrite, props: true },
 
   ],
 },
