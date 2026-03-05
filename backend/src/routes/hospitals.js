@@ -31,6 +31,7 @@ router.get('/accounts', hospitalController.getAccounts);
 router.get('/accounts/:id', hospitalController.getAccountDetail);
 router.put('/accounts/:id', hospitalController.updateAccountInfo);
 router.get('/accounts/:id/logs', hospitalController.getAccountLogs);
+router.get('/accounts/:id/credit-history', hospitalController.getCreditHistory);
 router.patch('/accounts/:id/unlock', hospitalController.unlockAccount);
 router.patch('/accounts/:id/status', hospitalController.changeAccountStatus);
 router.patch('/accounts/:id/credit', hospitalController.adjustCredit);
