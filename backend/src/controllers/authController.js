@@ -95,16 +95,24 @@ if(!user.is_active){
       const attempts = (user.login_attempts ||0) + 1;
 
       if(attempts >= MAX_LOGIN_ATTEMPTS){
-        // 5회 실패 >> 계정잠금
-        await pool.query(
-          'UPDATE users SET login_attempts = ?, locked_until = ? WHERE id = ?',
-          [attempts, new Date(Date.now() + LOCK_TIME), user.id]
-        );
-        return res.status(423).json({
-          message: '5회 로그인 실패로 계정이 30분간 잠겼습니다.',
-          locked: true,
-          remainingMinutes: 30
-        });
+    // 5회 실패 >> 계정잠금
+  await pool.query(
+    'UPDATE users SET login_attempts = ?, locked_until = ? WHERE id = ?',
+    [attempts, new Date(Date.now() + LOCK_TIME), user.id]
+  );
+
+  // 계정 잠금 시 시스템 로그
+  await pool.query(
+    `INSERT INTO admin_logs (hospital_id, target_type, target_id, category, details, operator, actor_type)
+     VALUES (?, 'account', ?, '로그인 제한 상태', '-', '-', 'system')`,
+    [user.hospital_id, user.hospital_id]
+  );
+
+  return res.status(423).json({
+    message: '5회 로그인 실패로 계정이 30분간 잠겼습니다.',
+    locked: true,
+    remainingMinutes: 30
+  });
       }else {
         // 실패 횟수만 증가
         await pool.query(

@@ -48,5 +48,8 @@ uploadBusinessLicense(id, formData) {
 changeAccountStatus(id, data) {
   return api.patch(`/admin/hospitals/accounts/${id}/status`, data)
 },
+getAccountLogs(id) {
+  return api.get(`/admin/hospitals/accounts/${id}/logs`)
+},
 
 }

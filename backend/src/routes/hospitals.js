@@ -30,6 +30,7 @@ router.get('/accounts', hospitalController.getAccounts);
 // 가입계정 상세 (accounts/:id 는 /:id 보다 위에!)
 router.get('/accounts/:id', hospitalController.getAccountDetail);
 router.put('/accounts/:id', hospitalController.updateAccountInfo);
+router.get('/accounts/:id/logs', hospitalController.getAccountLogs);
 router.patch('/accounts/:id/unlock', hospitalController.unlockAccount);
 router.patch('/accounts/:id/status', hospitalController.changeAccountStatus);
 

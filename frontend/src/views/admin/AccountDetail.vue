@@ -200,12 +200,114 @@
           </div>
         </div>
       </div>
+      <!-- 기록보기 팝업 -->
+      <div
+        class="popup-overlay"
+        v-if="showLogPopup"
+        @click.self="closeLogPopup"
+      >
+        <div class="log-popup-box">
+          <h3 class="log-popup-title">
+            <strong>{{ account.name }}({{ account.login_id }})</strong> 계정
+            기록 내역
+          </h3>
+          <table class="log-table">
+            <colgroup>
+              <col style="width: 20%" />
+              <col style="width: 22%" />
+              <col style="width: 44%" />
+              <col style="width: 14%" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>일시</th>
+                <th>구분</th>
+                <th>상세내역</th>
+                <th>작업자</th>
+              </tr>
+            </thead>
+          </table>
+          <div class="log-body" ref="logBodyRef">
+            <table class="log-table">
+              <colgroup>
+                <col style="width: 20%" />
+                <col style="width: 22%" />
+                <col style="width: 44%" />
+                <col style="width: 14%" />
+              </colgroup>
+              <tbody>
+                <tr v-for="log in currentPageLogs" :key="log.id">
+                  <td>{{ formatLogDate(log.created_at) }}</td>
+                  <td>{{ log.category }}</td>
+                  <td
+                    class="detail-cell"
+                    v-html="formatDetails(log.details)"
+                  ></td>
+                  <td>{{ log.operator }}</td>
+                </tr>
+                <tr v-if="currentPageLogs.length === 0">
+                  <td colspan="4" class="empty-message">기록이 없습니다.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pagination" v-if="logTotalPages > 1">
+            <button
+              class="page-btn"
+              :disabled="logPage <= 1"
+              @click="logPage = 1"
+            >
+              &laquo;
+            </button>
+            <button
+              class="page-btn"
+              :disabled="logPage <= 1"
+              @click="logPage--"
+            >
+              &lt;
+            </button>
+            <button
+              v-for="p in logVisiblePages"
+              :key="p"
+              :class="['page-btn', { active: p === logPage }]"
+              @click="logPage = p"
+            >
+              {{ p }}
+            </button>
+            <button
+              class="page-btn"
+              :disabled="logPage >= logTotalPages"
+              @click="logPage++"
+            >
+              &gt;
+            </button>
+            <button
+              class="page-btn"
+              :disabled="logPage >= logTotalPages"
+              @click="logPage = logTotalPages"
+            >
+              &raquo;
+            </button>
+          </div>
+
+          <button class="btn-log-confirm" @click="closeLogPopup">확인</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+// import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import {
+  ref,
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  watch,
+  nextTick,
+} from 'vue';
 import { useRouter, onBeforeRouteLeave } from 'vue-router';
 import { adminAPI } from '@/api/admin';
 import { UseMessageStore } from '@/store/message';
@@ -430,7 +532,100 @@ const goToCreditHistory = () => {};
 const openCreditManage = () => {};
 
 // TODO: 계정기록 이동
-const goToAccountLog = () => {};
+// 기록보기
+const showLogPopup = ref(false);
+const logList = ref([]);
+const logPage = ref(1);
+const logPages = ref([]);
+const logBodyRef = ref(null);
+
+const logTotalPages = computed(() => logPages.value.length);
+const currentPageLogs = computed(() => logPages.value[logPage.value - 1] || []);
+
+const logVisiblePages = computed(() => {
+  const total = logTotalPages.value;
+  const current = logPage.value;
+  let start = Math.max(1, current - 4);
+  let end = Math.min(total, start + 9);
+  start = Math.max(1, end - 9);
+  const pages = [];
+  for (let i = start; i <= end; i++) pages.push(i);
+  return pages;
+});
+
+const goToAccountLog = async () => {
+  try {
+    const res = await adminAPI.getAccountLogs(props.id);
+    logList.value = res.data.data;
+    showLogPopup.value = true;
+    logPage.value = 1;
+    await nextTick();
+    splitLogPages();
+  } catch (e) {
+    message.showAlert('기록 조회에 실패했습니다.');
+  }
+};
+
+const splitLogPages = () => {
+  const MAX_HEIGHT = 366;
+  const pages = [];
+  let currentPage = [];
+  let currentHeight = 0;
+
+  const container = document.createElement('div');
+  container.style.cssText =
+    'position:absolute;visibility:hidden;width:' +
+    (logBodyRef.value?.offsetWidth || 800) +
+    'px;';
+  document.body.appendChild(container);
+
+  const table = document.createElement('table');
+  table.className = 'log-table';
+  table.style.width = '100%';
+  container.appendChild(table);
+
+  logList.value.forEach((log) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="width:20%;padding:12px 8px">${formatLogDate(log.created_at)}</td>
+      <td style="width:22%;padding:12px 8px">${log.category}</td>
+      <td style="width:44%;padding:12px 8px;white-space:pre-line">${log.details || '-'}</td>
+      <td style="width:14%;padding:12px 8px">${log.operator}</td>
+    `;
+    table.appendChild(tr);
+    const rowHeight = tr.offsetHeight;
+    table.removeChild(tr);
+
+    if (currentHeight + rowHeight > MAX_HEIGHT && currentPage.length > 0) {
+      pages.push(currentPage);
+      currentPage = [];
+      currentHeight = 0;
+    }
+    currentPage.push(log);
+    currentHeight += rowHeight;
+  });
+
+  if (currentPage.length > 0) pages.push(currentPage);
+  document.body.removeChild(container);
+
+  logPages.value = pages.length > 0 ? pages : [[]];
+};
+
+const closeLogPopup = () => {
+  showLogPopup.value = false;
+};
+
+const formatLogDate = (dateStr) => {
+  if (!dateStr) return '-';
+  const d = new Date(dateStr);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+};
+
+const formatDetails = (details) => {
+  if (!details || details === '-') return '-';
+  return details.replace(/\n/g, '<br>');
+};
 
 const formatShortDate = (dateStr) => {
   if (!dateStr) return '';
@@ -755,5 +950,75 @@ const formatShortDate = (dateStr) => {
     background: $main-color;
     color: $white;
   }
+}
+
+// 기록보기 팝업
+.log-popup-box {
+  background: $dark-bg;
+  border: 1px solid $dark-line-gray;
+  border-radius: $radius-md;
+  padding: 32px 40px;
+  width: 900px;
+  max-width: 90vw;
+}
+
+.log-popup-title {
+  @include font-16-bold;
+  margin-bottom: 20px;
+  color: $dark-text;
+  strong {
+    color: $white;
+  }
+}
+
+.log-body {
+  max-height: 366px;
+  overflow: hidden;
+}
+
+.log-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 12px 8px;
+    @include font-12-regular;
+    text-align: center;
+    vertical-align: top;
+  }
+
+  thead tr {
+    background: $main-gad;
+    th {
+      @include font-14-bold;
+    }
+  }
+
+  tbody tr:nth-child(odd) {
+    background: $bg-op;
+  }
+
+  .detail-cell {
+    white-space: pre-line;
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  .empty-message {
+    padding: 60px 0;
+    color: $dark-text;
+  }
+}
+
+.btn-log-confirm {
+  display: block;
+  margin: 20px auto 0;
+  padding: 12px 60px;
+  background: $main-color;
+  color: $white;
+  border-radius: $radius-sm;
+  @include font-14-medium;
+  cursor: pointer;
 }
 </style>
