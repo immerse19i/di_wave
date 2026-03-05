@@ -85,11 +85,11 @@ deleteNotice(id) {
 },
 
 // ===== 안내팝업 =====
-getPopups: (params) => api.get('/api/admin/popups', { params }),
-getPopupDetail: (id) => api.get(`/api/admin/popups/${id}`),
-createPopup: (data) => api.post('/api/admin/popups', data),
-updatePopup: (id, data) => api.put(`/api/admin/popups/${id}`, data),
-deletePopup: (id) => api.patch(`/api/admin/popups/${id}/delete`),
+getPopups: (params) => api.get('/admin/popups', { params }),
+getPopupDetail: (id) => api.get(`/admin/popups/${id}`),
+createPopup: (data) => api.post('/admin/popups', data),
+updatePopup: (id, data) => api.put(`/admin/popups/${id}`, data),
+deletePopup: (id) => api.patch(`/admin/popups/${id}/delete`),
 
 
 

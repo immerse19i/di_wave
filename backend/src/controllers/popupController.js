@@ -91,19 +91,21 @@ exports.getPopupDetail = async (req, res) => {
 // ============ 생성 ============
 exports.createPopup = async (req, res) => {
   try {
-    const { title, content, status, display_start, display_end, is_always } = req.body
+    const { title, content, status, display_start, display_end, is_always, popup_width, popup_height } = req.body
     const authorId = req.user.id
     const authorName = req.user.name || req.user.login_id
     const isAlways = is_always === 'true' || is_always === true ? 1 : 0
     const publishedAt = status === 'published' ? new Date() : null
 
     const [result] = await pool.query(
-      `INSERT INTO popups (title, content, status, display_start, display_end, is_always, author_id, author_name, published_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO popups (title, content, status, display_start, display_end, is_always, popup_width, popup_height, author_id, author_name, published_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [title, content || '', status || 'draft',
        isAlways ? null : (display_start || null),
        isAlways ? null : (display_end || null),
-       isAlways, authorId, authorName, publishedAt]
+       isAlways,
+       popup_width || 500, popup_height || 400,
+       authorId, authorName, publishedAt]
     )
 
     res.json({ success: true, data: { id: result.insertId } })
@@ -113,11 +115,12 @@ exports.createPopup = async (req, res) => {
   }
 }
 
+
 // ============ 수정 ============
 exports.updatePopup = async (req, res) => {
   try {
     const { id } = req.params
-    const { title, content, status, display_start, display_end, is_always } = req.body
+    const { title, content, status, display_start, display_end, is_always, popup_width, popup_height } = req.body
     const isAlways = is_always === 'true' || is_always === true ? 1 : 0
 
     const [existing] = await pool.query(`SELECT published_at FROM popups WHERE id = ?`, [id])
@@ -132,12 +135,15 @@ exports.updatePopup = async (req, res) => {
 
     await pool.query(
       `UPDATE popups SET title = ?, content = ?, status = ?,
-              display_start = ?, display_end = ?, is_always = ?, published_at = ?
+              display_start = ?, display_end = ?, is_always = ?,
+              popup_width = ?, popup_height = ?, published_at = ?
        WHERE id = ?`,
       [title, content || '', status || 'draft',
        isAlways ? null : (display_start || null),
        isAlways ? null : (display_end || null),
-       isAlways, publishedAt, id]
+       isAlways,
+       popup_width || 500, popup_height || 400,
+       publishedAt, id]
     )
 
     res.json({ success: true })
@@ -146,6 +152,7 @@ exports.updatePopup = async (req, res) => {
     res.status(500).json({ success: false, message: '팝업 수정 실패' })
   }
 }
+
 
 // ============ 삭제 (소프트) ============
 exports.deletePopup = async (req, res) => {
