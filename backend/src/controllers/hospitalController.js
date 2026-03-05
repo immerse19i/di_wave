@@ -476,3 +476,20 @@ exports.changeAccountStatus = async (req, res) => {
     res.status(500).json({ success: false, message: '서버 오류' });
   }
 };
+// GET /api/admin/hospitals/accounts/:id/logs
+exports.getAccountLogs = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await pool.query(
+      `SELECT id, category, details, operator, created_at
+       FROM admin_logs
+       WHERE hospital_id = ?
+       ORDER BY created_at DESC`,
+      [id]
+    );
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    console.error('GetAccountLogs error:', error);
+    res.status(500).json({ success: false, message: '서버 오류' });
+  }
+};
