@@ -55,4 +55,34 @@ getAccountLogs(id) {
 adjustCredit(id, data) {
   return api.patch(`/admin/hospitals/accounts/${id}/credit`, data)
 },
+// 크레딧 이력 조회
+getCreditHistory(id, params) {
+  return api.get(`/admin/hospitals/accounts/${id}/credit-history`, { params })
+},
+// 공지사항 목록
+getNotices(params) {
+  return api.get('/admin/notices', { params })
+},
+// 공지사항 상세
+getNoticeDetail(id) {
+  return api.get(`/admin/notices/${id}`)
+},
+// 공지사항 생성
+createNotice(formData) {
+  return api.post('/admin/notices', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+},
+// 공지사항 수정
+updateNotice(id, formData) {
+  return api.put(`/admin/notices/${id}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+},
+// 공지사항 삭제
+deleteNotice(id) {
+  return api.patch(`/admin/notices/${id}/delete`)
+},
+
+
 }
