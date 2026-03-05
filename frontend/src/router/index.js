@@ -28,7 +28,7 @@ const AdminTermsHistory = () => import('@/views/admin/AdminTermsHistory.vue')
 const ApprovalDetail = () => import('@/views/admin/ApprovalDetail.vue')
 const AccountList = () => import('@/views/admin/AccountList.vue')
 const AccountDetail = () => import('@/views/admin/AccountDetail.vue')
-
+const AdminNotice = () => import('@/views/admin/AdminNotice.vue')
 
 const routes = [
   // User Routes
@@ -80,6 +80,7 @@ const routes = [
     { path: 'approval/:id', component: ApprovalDetail, props: true },  // ← 추가
     { path: 'accounts', component: AccountList },
     { path: 'accounts/:id', component: AccountDetail, props: true },
+    { path: 'notices', component: AdminNotice },
 
   ],
 },
