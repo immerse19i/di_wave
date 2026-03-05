@@ -30,6 +30,7 @@ const ApprovalDetail = () => import('@/views/admin/ApprovalDetail.vue')
 const AccountList = () => import('@/views/admin/AccountList.vue')
 const AccountDetail = () => import('@/views/admin/AccountDetail.vue')
 const AdminNotice = () => import('@/views/admin/AdminNotice.vue')
+const AdminPopup = () => import('@/views/admin/AdminPopup.vue')
 
 const routes = [
   // User Routes
@@ -84,6 +85,7 @@ const routes = [
     { path: 'notices', component: AdminNotice },
     { path: 'notices/write', component: AdminNoticeWrite },
 { path: 'notices/:id', component: AdminNoticeWrite, props: true },
+{ path: 'popups', component: AdminPopup },
 
   ],
 },
