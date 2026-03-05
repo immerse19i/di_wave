@@ -582,3 +582,69 @@ exports.getAccountLogs = async (req, res) => {
     res.status(500).json({ success: false, message: '서버 오류' });
   }
 };
+
+
+// PATCH /api/admin/hospitals/accounts/:id/credit - 크레딧 수동 조정
+exports.adjustCredit = async (req, res) => {
+  const conn = await pool.getConnection();
+  try {
+    const { id } = req.params; // hospital_id
+    const { type, amount, reason } = req.body;
+
+    if (!['charge', 'deduct'].includes(type)) {
+      return res.status(400).json({ success: false, message: '유효하지 않은 조정 유형입니다.' });
+    }
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ success: false, message: '크레딧 양을 입력해 주세요.' });
+    }
+
+    await conn.beginTransaction();
+
+    // 현재 잔액 조회 (없으면 생성)
+    const [creditRows] = await conn.query('SELECT balance FROM credits WHERE hospital_id = ?', [id]);
+    let currentBalance = 0;
+    if (creditRows.length === 0) {
+      await conn.query('INSERT INTO credits (hospital_id, balance) VALUES (?, 0)', [id]);
+    } else {
+      currentBalance = creditRows[0].balance;
+    }
+
+    // 잔액 계산
+    const newBalance = type === 'charge'
+      ? currentBalance + Number(amount)
+      : currentBalance - Number(amount);
+
+    if (newBalance < 0) {
+      await conn.rollback();
+      return res.status(400).json({ success: false, message: '차감 후 잔액이 0 미만이 됩니다.' });
+    }
+
+    // credits 업데이트
+    await conn.query('UPDATE credits SET balance = ? WHERE hospital_id = ?', [newBalance, id]);
+
+    // credit_transactions 기록
+    const txType = type === 'charge' ? 'charge' : 'use';
+    await conn.query(
+      `INSERT INTO credit_transactions (hospital_id, type, amount, balance_after, description)
+       VALUES (?, ?, ?, ?, ?)`,
+      [id, txType, Number(amount), newBalance, reason]
+    );
+
+    // admin_logs 기록
+    const typeLabel = type === 'charge' ? '지급' : '차감';
+    await conn.query(
+      `INSERT INTO admin_logs (hospital_id, target_type, target_id, category, details, operator, actor_type)
+       VALUES (?, 'account', ?, '크레딧 수동 관리', ?, ?, 'admin')`,
+      [id, id, `${typeLabel} : ${amount} / 사유 : [${reason}]`, req.user.name || 'admin']
+    );
+
+    await conn.commit();
+    res.json({ success: true, data: { balance: newBalance } });
+  } catch (error) {
+    await conn.rollback();
+    console.error('AdjustCredit error:', error);
+    res.status(500).json({ success: false, message: '서버 오류' });
+  } finally {
+    conn.release();
+  }
+};

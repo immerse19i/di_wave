@@ -33,6 +33,7 @@ router.put('/accounts/:id', hospitalController.updateAccountInfo);
 router.get('/accounts/:id/logs', hospitalController.getAccountLogs);
 router.patch('/accounts/:id/unlock', hospitalController.unlockAccount);
 router.patch('/accounts/:id/status', hospitalController.changeAccountStatus);
+router.patch('/accounts/:id/credit', hospitalController.adjustCredit);
 
 // 상세
 router.get('/:id', hospitalController.getHospitalDetail);
