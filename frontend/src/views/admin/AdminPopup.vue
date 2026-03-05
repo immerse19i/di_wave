@@ -8,7 +8,7 @@
     <!-- ① 검색 -->
     <div class="search-row">
       <div class="search-box">
-        <span class="search-icon">🔍</span>
+        <img src="/assets/icons/search.svg" alt="검색" class="search-icon" />
         <input
           v-model="searchText"
           type="text"
@@ -96,15 +96,17 @@
               </span>
             </td>
             <td class="td-edit" @click.stop="goToEdit(item)">
-              <button class="btn-edit-icon">✏️</button>
+              <button class="btn-edit-icon">
+                <img src="/assets/icons/edit.svg" alt="수정" class="icon-img" />
+              </button>
             </td>
             <td class="td-delete">
-              <button
-                v-if="item.status !== 'deleted'"
-                class="btn-delete-icon"
-                @click.stop="handleDelete(item)"
-              >
-                🗑
+              <button class="btn-delete-icon" @click.stop="handleDelete(item)">
+                <img
+                  src="/assets/icons/delete_icon.svg"
+                  alt="삭제"
+                  class="icon-img"
+                />
               </button>
             </td>
           </tr>
