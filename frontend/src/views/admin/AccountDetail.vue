@@ -294,6 +294,79 @@
           <button class="btn-log-confirm" @click="closeLogPopup">확인</button>
         </div>
       </div>
+      <!-- 크레딧 수동 관리 팝업 -->
+      <div
+        class="popup-overlay"
+        v-if="showCreditPopup"
+        @click.self="closeCreditPopup"
+      >
+        <div class="popup-box credit-popup">
+          <h3 class="popup-title">크레딧 수동 관리</h3>
+          <p class="popup-hospital">
+            {{ account.name }}({{ account.login_id }})
+          </p>
+
+          <div class="credit-form">
+            <div class="credit-row">
+              <span class="credit-label">조정 유형</span>
+              <div class="credit-radios">
+                <label :class="{ selected: creditForm.type === 'charge' }">
+                  <input
+                    type="radio"
+                    v-model="creditForm.type"
+                    value="charge"
+                  />
+                  지급
+                </label>
+                <label :class="{ selected: creditForm.type === 'deduct' }">
+                  <input
+                    type="radio"
+                    v-model="creditForm.type"
+                    value="deduct"
+                  />
+                  차감
+                </label>
+              </div>
+            </div>
+
+            <div class="credit-row">
+              <span class="credit-label">크레딧 양</span>
+              <input
+                type="number"
+                v-model.number="creditForm.amount"
+                class="credit-input"
+                min="0"
+                @input="onCreditAmountInput"
+              />
+            </div>
+
+            <div class="credit-row">
+              <span class="credit-label">변경 후 크레딧</span>
+              <span class="credit-after">{{ creditAfterBalance }}</span>
+            </div>
+          </div>
+
+          <p class="reason-label">사유</p>
+          <textarea
+            v-model="creditForm.reason"
+            class="reason-textarea"
+            placeholder=""
+          ></textarea>
+
+          <div class="popup-buttons">
+            <button class="btn-cancel" @click="closeCreditPopup">취소</button>
+            <button class="btn-confirm" @click="handleCreditSubmit">
+              {{
+                creditForm.type === 'charge'
+                  ? '지급'
+                  : creditForm.type === 'deduct'
+                    ? '차감'
+                    : '확인'
+              }}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -528,8 +601,58 @@ const handleStatusChange = async () => {
 // TODO: 크레딧 조회 이동
 const goToCreditHistory = () => {};
 
-// TODO: 크레딧 관리 팝업
-const openCreditManage = () => {};
+// 크레딧 수동 관리 팝업
+const showCreditPopup = ref(false);
+const creditForm = ref({ type: '', amount: null, reason: '' });
+
+const creditAfterBalance = computed(() => {
+  const current = account.value?.credit_balance || 0;
+  const amt = creditForm.value.amount || 0;
+  if (creditForm.value.type === 'charge') return current + amt;
+  if (creditForm.value.type === 'deduct') return current - amt;
+  return current;
+});
+
+const onCreditAmountInput = (e) => {
+  // 음수 방지
+  if (creditForm.value.amount < 0) creditForm.value.amount = 0;
+};
+
+const openCreditManage = () => {
+  creditForm.value = { type: '', amount: null, reason: '' };
+  showCreditPopup.value = true;
+};
+
+const closeCreditPopup = () => {
+  showCreditPopup.value = false;
+};
+
+const handleCreditSubmit = async () => {
+  if (!creditForm.value.type) {
+    message.showAlert('조정유형을 선택해 주세요');
+    return;
+  }
+  if (!creditForm.value.amount || creditForm.value.amount <= 0) {
+    message.showAlert('크레딧 양을 입력해 주세요');
+    return;
+  }
+  if (!creditForm.value.reason.trim()) {
+    message.showAlert('사유를 작성해 주세요');
+    return;
+  }
+
+  try {
+    const res = await adminAPI.adjustCredit(props.id, creditForm.value);
+    account.value.credit_balance = res.data.data.balance;
+    showCreditPopup.value = false;
+    const label = creditForm.value.type === 'charge' ? '지급' : '차감';
+    message.showAlert(`크레딧이 ${label}되었습니다.`);
+  } catch (e) {
+    message.showAlert(
+      e.response?.data?.message || '크레딧 조정에 실패했습니다.',
+    );
+  }
+};
 
 // TODO: 계정기록 이동
 // 기록보기
@@ -1020,5 +1143,75 @@ const formatShortDate = (dateStr) => {
   border-radius: $radius-sm;
   @include font-14-medium;
   cursor: pointer;
+}
+
+// 크레딧 수동 관리 팝업
+.credit-popup {
+  min-width: 520px;
+  max-width: 620px;
+}
+
+.credit-form {
+  margin-bottom: 20px;
+
+  .credit-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .credit-label {
+    min-width: 120px;
+    @include font-14-medium;
+  }
+
+  .credit-radios {
+    display: flex;
+    gap: 20px;
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      @include font-14-regular;
+      cursor: pointer;
+      color: $dark-text;
+
+      &.selected {
+        color: $white;
+      }
+
+      input[type='radio'] {
+        accent-color: $main-color;
+      }
+    }
+  }
+
+  .credit-input {
+    width: 100px;
+    padding: 8px 12px;
+    background: $dark-input;
+    border: 1px solid $dark-line-gray;
+    border-radius: $radius-sm;
+    color: $white;
+    @include font-14-regular;
+
+    &:focus {
+      border-color: $main-color;
+      outline: none;
+    }
+
+    // 스피너 숨기기
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    -moz-appearance: textfield;
+  }
+
+  .credit-after {
+    @include font-14-medium;
+  }
 }
 </style>

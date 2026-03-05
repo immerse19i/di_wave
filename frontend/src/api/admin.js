@@ -51,5 +51,8 @@ changeAccountStatus(id, data) {
 getAccountLogs(id) {
   return api.get(`/admin/hospitals/accounts/${id}/logs`)
 },
-
+// 크레딧 수동 조정
+adjustCredit(id, data) {
+  return api.patch(`/admin/hospitals/accounts/${id}/credit`, data)
+},
 }
