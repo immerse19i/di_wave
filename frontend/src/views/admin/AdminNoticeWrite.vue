@@ -187,16 +187,46 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter, useRoute, onBeforeRouteLeave } from 'vue-router';
 import { adminAPI } from '@/api/admin';
 import { UseMessageStore } from '@/store/message';
-
+import { Ckeditor as CkeditorComponent } from '@ckeditor/ckeditor5-vue';
 // CKEditor
-import { ClassicEditor } from 'ckeditor5';
-import { Ckeditor } from '@ckeditor/ckeditor5-vue';
+import {
+  ClassicEditor,
+  Essentials,
+  Paragraph,
+  Heading,
+  Bold,
+  Italic,
+  Underline,
+  List,
+  Alignment,
+  Link,
+  FontColor,
+  FontBackgroundColor,
+  FontSize,
+  FontFamily,
+} from 'ckeditor5';
 import 'ckeditor5/ckeditor5.css';
 
+const ckeditor = CkeditorComponent;
 // CKEditor 에디터 설정
-const ckeditor = Ckeditor;
 const editor = ClassicEditor;
 const editorConfig = {
+  licenseKey: 'GPL',
+  plugins: [
+    Essentials,
+    Paragraph,
+    Heading,
+    Bold,
+    Italic,
+    Underline,
+    List,
+    Alignment,
+    Link,
+    FontColor,
+    FontBackgroundColor,
+    FontSize,
+    FontFamily,
+  ],
   toolbar: [
     'heading',
     '|',
@@ -204,20 +234,25 @@ const editorConfig = {
     'italic',
     'underline',
     '|',
+    'fontSize',
+    'fontFamily',
+    '|',
+    'fontColor',
+    'fontBackgroundColor',
+    '|',
     'bulletedList',
     'numberedList',
     '|',
     'alignment',
     '|',
     'link',
-    'insertImage',
-    '|',
-    'fontColor',
-    'fontBackgroundColor',
     '|',
     'undo',
     'redo',
   ],
+  fontSize: {
+    options: [9, 11, 13, 'default', 17, 19, 21, 27, 35],
+  },
   language: 'ko',
 };
 
@@ -529,11 +564,30 @@ const goBack = () => {
 };
 </script>
 <style lang="scss" scoped>
+.page-wrap {
+  padding: 32px 42px;
+  color: $white;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  .page-title {
+    @include font-20-bold;
+  }
+  .breadcrumb {
+    @include font-12-regular;
+    color: $dark-text;
+  }
+}
+
 .btn-back {
   background: none;
   border: none;
-  color: #ccc;
-  font-size: 14px;
+  color: $dark-text;
+  @include font-14-regular;
   cursor: pointer;
   padding: 8px 0;
   margin-bottom: 16px;
@@ -541,7 +595,7 @@ const goBack = () => {
     margin-right: 4px;
   }
   &:hover {
-    color: #fff;
+    color: $white;
   }
 }
 
@@ -550,30 +604,30 @@ const goBack = () => {
   text-align: right;
   margin-bottom: 16px;
   .date-info {
-    font-size: 13px;
-    color: #aaa;
+    @include font-12-regular;
+    color: $dark-text;
     line-height: 1.6;
   }
   .deleted-notice {
     color: #e57373;
-    font-size: 13px;
+    @include font-12-regular;
     margin-top: 4px;
   }
 }
 .view-title {
-  background: #2a2f3a;
+  background: $bg-op;
   padding: 12px 16px;
-  border-radius: 4px;
+  border-radius: $radius-sm;
   margin-bottom: 12px;
-  font-size: 15px;
-  color: #ddd;
+  @include font-14-medium;
+  color: $white;
 }
 .view-content {
-  background: #1e2330;
+  background: $dark-input;
   padding: 20px;
-  border-radius: 4px;
+  border-radius: $radius-sm;
   min-height: 200px;
-  color: #ccc;
+  color: $dark-text;
   line-height: 1.6;
 }
 
@@ -586,34 +640,34 @@ const goBack = () => {
   margin-bottom: 20px;
 }
 .status-msg {
-  font-size: 13px;
+  @include font-12-regular;
   &.error {
     color: #e57373;
   }
   &.success {
-    color: #aaa;
+    color: $dark-text;
   }
 }
 .btn-draft,
 .btn-publish {
   padding: 8px 28px;
   border: none;
-  border-radius: 4px;
+  border-radius: $radius-sm;
   cursor: pointer;
-  font-size: 14px;
+  @include font-14-medium;
 }
 .btn-draft {
-  background: #4a5568;
-  color: #fff;
+  background: $dark-line-gray;
+  color: $white;
   &:hover {
-    background: #5a6578;
+    opacity: 0.85;
   }
 }
 .btn-publish {
-  background: #3b82c4;
-  color: #fff;
+  background: $main-color;
+  color: $white;
   &:hover {
-    background: #2a6ba3;
+    background: $sub-color;
   }
 }
 
@@ -625,20 +679,19 @@ const goBack = () => {
 }
 .form-label {
   min-width: 70px;
-  font-size: 14px;
-  font-weight: bold;
-  color: #ddd;
+  @include font-14-bold;
+  color: $white;
 }
 .title-input {
   flex: 1;
   padding: 10px 12px;
-  background: #1e2330;
-  border: 1px solid #3a4050;
-  border-radius: 4px;
-  color: #fff;
-  font-size: 14px;
+  background: $dark-input;
+  border: 1px solid $dark-line-gray;
+  border-radius: $radius-sm;
+  color: $white;
+  @include font-14-regular;
   &:focus {
-    border-color: #3b82c4;
+    border-color: $main-color;
     outline: none;
   }
 }
@@ -656,26 +709,99 @@ const goBack = () => {
     justify-content: center;
     width: 22px;
     height: 22px;
-    border: 2px solid #4a5568;
-    border-radius: 4px;
+    border: 2px solid $dark-line-gray;
+    border-radius: $radius-sm;
     color: transparent;
-    font-size: 14px;
+    @include font-14-regular;
   }
   input:checked + .checkbox-custom {
-    background: #3b82c4;
-    border-color: #3b82c4;
-    color: #fff;
+    background: $main-color;
+    border-color: $main-color;
+    color: $white;
+  }
+}
+
+// 라디오
+.radio-group {
+  display: flex;
+  gap: 16px;
+}
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  @include font-14-regular;
+
+  input[type='radio'] {
+    display: none;
+  }
+
+  .radio-custom {
+    width: 16px;
+    height: 16px;
+    border: 2px solid $dark-line-gray;
+    border-radius: 50%;
+    position: relative;
+  }
+
+  input[type='radio']:checked + .radio-custom {
+    border-color: $main-color;
+    &::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: $main-color;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
   }
 }
 
 // 에디터
+// 에디터
 .editor-wrap {
   margin-bottom: 24px;
-  // CKEditor 다크 테마 오버라이드
-  :deep(.ck-editor__editable) {
-    min-height: 250px;
-    background: #fff;
-    color: #333;
+
+  :deep(.ck.ck-editor) {
+    // 툴바
+    .ck-toolbar {
+      background: $bg-op;
+      border-color: $dark-line-gray;
+    }
+    .ck-toolbar__items .ck-button {
+      color: $white;
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      &.ck-on {
+        background: $main-color;
+        color: $white;
+      }
+    }
+    .ck-toolbar__separator {
+      background: $dark-line-gray;
+    }
+    // 드롭다운
+    .ck-dropdown__panel {
+      background: $bg-op;
+      border-color: $dark-line-gray;
+    }
+
+    // 본문 편집 영역
+    .ck-editor__editable {
+      min-height: 250px;
+      background: $dark-input;
+      color: $white;
+      border-color: $dark-line-gray;
+
+      &.ck-focused {
+        border-color: $main-color;
+      }
+    }
   }
 }
 
@@ -690,13 +816,12 @@ const goBack = () => {
   margin-bottom: 12px;
 }
 .attach-label {
-  font-weight: bold;
-  font-size: 14px;
-  color: #ddd;
+  @include font-14-bold;
+  color: $white;
 }
 .attach-desc {
-  font-size: 12px;
-  color: #888;
+  @include font-12-regular;
+  color: $dark-text;
 }
 .attach-list {
   display: flex;
@@ -707,8 +832,8 @@ const goBack = () => {
   position: relative;
   width: 130px;
   height: 120px;
-  border: 1px dashed #4a5568;
-  border-radius: 6px;
+  border: 1px dashed $dark-line-gray;
+  border-radius: $radius-sm;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -720,11 +845,11 @@ const goBack = () => {
     cursor: pointer;
   }
   &.add-btn {
-    color: #888;
-    font-size: 13px;
+    color: $dark-text;
+    @include font-12-regular;
     &:hover {
-      border-color: #3b82c4;
-      color: #3b82c4;
+      border-color: $main-color;
+      color: $main-color;
     }
   }
 }
@@ -734,8 +859,8 @@ const goBack = () => {
   object-fit: cover;
 }
 .attach-filename {
-  font-size: 12px;
-  color: #ccc;
+  @include font-12-regular;
+  color: $dark-text;
   text-align: center;
   padding: 8px;
   word-break: break-all;
@@ -752,7 +877,7 @@ const goBack = () => {
   height: 22px;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.6);
-  color: #fff;
+  color: $white;
   border: none;
   font-size: 12px;
   cursor: pointer;
@@ -760,5 +885,10 @@ const goBack = () => {
   &:hover {
     background: #e57373;
   }
+}
+
+// 삭제 조회모드 첨부파일
+.attachments-view {
+  margin-top: 24px;
 }
 </style>

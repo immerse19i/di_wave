@@ -390,8 +390,29 @@ const onResize = () => {
 };
 </script>
 <style lang="scss" scoped>
-// AccountList.vue 스타일과 동일 패턴 (.page-wrap, .filter-area 등)
-// 아래는 공지사항 전용 추가 스타일만
+.page-wrap {
+  padding: 32px 42px;
+  color: $white;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  .page-title {
+    @include font-20-bold;
+  }
+  .breadcrumb {
+    @include font-12-regular;
+    color: $dark-text;
+  }
+}
+
+// 필터 영역
+.filter-area {
+  margin-bottom: 16px;
+}
 
 .filter-row {
   display: flex;
@@ -399,83 +420,339 @@ const onResize = () => {
   gap: 30px;
   margin-bottom: 12px;
 }
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-label {
+  @include font-14-medium;
+  margin-right: 8px;
+}
+
+.multi-select-btns {
+  display: flex;
+  gap: 4px;
+
+  .filter-btn {
+    padding: 8px 20px;
+    border-radius: $radius-sm;
+    border: 1px solid $dark-line-gray;
+    background: none;
+    color: $dark-text;
+    @include font-14-medium;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .check-icon {
+      font-size: 12px;
+    }
+
+    &.active {
+      background: $main-color;
+      border-color: $main-color;
+      color: $white;
+    }
+  }
+}
+
+// 라디오 버튼
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  @include font-14-regular;
+
+  input[type='radio'] {
+    display: none;
+  }
+
+  .radio-custom {
+    width: 16px;
+    height: 16px;
+    border: 2px solid $dark-line-gray;
+    border-radius: 50%;
+    position: relative;
+  }
+
+  input[type='radio']:checked + .radio-custom {
+    border-color: $main-color;
+    &::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: $main-color;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+}
+
 .date-filter {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
+.date-input {
+  padding: 8px 12px;
+  background: $dark-input;
+  border: 1px solid $dark-line-gray;
+  border-radius: $radius-sm;
+  color: $white;
+  @include font-14-regular;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.date-separator {
+  color: $dark-text;
+}
+
+// 검색
+.search-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+
+  .search-box {
+    flex: 1;
+    display: flex;
+    padding: 8px 16px;
+    border-radius: $radius-sm;
+    background: $bg-op;
+    border: 1px solid;
+    border-image-source: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.09) 0%,
+      rgba(255, 255, 255, 0.06) 100%
+    );
+
+    .search-input {
+      width: 100%;
+      background: none;
+      border: none;
+      color: $white;
+      @include font-14-regular;
+      &::placeholder {
+        color: $dark-input-gray;
+      }
+    }
+
+    &:has(input:focus) {
+      border-image-source: none;
+      border-color: $main-color;
+    }
+  }
+
+  .btn-search {
+    color: $white;
+    background: $main-gad;
+    min-width: 100px;
+    padding: 8px 16px;
+    border-radius: $radius-sm;
+    @include font-14-medium;
+    cursor: pointer;
+  }
+}
+
+// 툴바 (총 건수 + 작성 버튼)
 .toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 16px 0 8px;
+  margin: 0 0 8px;
 }
+
 .total-count {
-  font-size: 14px;
-  color: #ccc;
+  @include font-14-regular;
+  color: $dark-text;
 }
+
 .btn-write {
-  padding: 8px 24px;
-  background: #3b82c4;
-  color: #fff;
+  padding: 8px 20px;
+  background: $main-gad;
+  color: $white;
   border: none;
-  border-radius: 4px;
+  border-radius: $radius-sm;
+  @include font-14-medium;
   cursor: pointer;
-  &:hover {
-    background: #2a6ba3;
+}
+
+// 테이블
+.table-area {
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-top-right-radius: 8px;
+    border-top-left-radius: 8px;
+    overflow: hidden;
+
+    th,
+    td {
+      text-align: center;
+      padding: 12px 8px;
+      @include font-12-regular;
+    }
+
+    thead tr {
+      background: $main-gad;
+    }
+    th {
+      @include font-14-bold;
+    }
+
+    th.sortable {
+      cursor: pointer;
+      user-select: none;
+      &:hover {
+        opacity: 0.8;
+      }
+      .sort-icon {
+        margin-left: 4px;
+        font-size: 10px;
+      }
+    }
+
+    tbody tr:nth-child(odd) {
+      background: $bg-op;
+    }
+
+    .data-row {
+      cursor: pointer;
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+      }
+    }
+
+    .row-deleted {
+      opacity: 0.5;
+    }
+
+    .td-title {
+      text-align: left;
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .attach-icon {
+      font-size: 14px;
+    }
+
+    // 상태 배지
+    .status-badge {
+      padding: 2px 8px;
+      border-radius: $radius-sm;
+      @include font-12-regular;
+    }
+    .status-published {
+      color: $main-color;
+    }
+    .status-draft {
+      color: #ffd54f;
+    }
+    .status-private {
+      color: $dark-text;
+    }
+    .status-deleted {
+      color: #e57373;
+    }
+
+    .td-delete {
+      cursor: pointer;
+    }
+    .btn-delete-icon {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      opacity: 0.7;
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    .empty-row {
+      padding: 60px 0;
+      color: $dark-text;
+      @include font-14-regular;
+    }
+  }
+
+  // 컬럼 너비
+  .col-no {
+    width: 60px;
+  }
+  .col-draft {
+    width: 80px;
+  }
+  .col-title {
+    width: auto;
+  }
+  .col-attach {
+    width: 50px;
+  }
+  .col-pinned {
+    width: 110px;
+  }
+  .col-status {
+    width: 80px;
+  }
+  .col-date {
+    width: 110px;
+  }
+  .col-author {
+    width: 100px;
+  }
+  .col-delete {
+    width: 60px;
   }
 }
 
-// 상태 배지
-.status-badge {
-  padding: 2px 8px;
-  border-radius: 3px;
-  font-size: 12px;
-}
-.status-published {
-  color: #4fc3f7;
-}
-.status-draft {
-  color: #ffd54f;
-}
-.status-private {
-  color: #aaa;
-}
-.status-deleted {
-  color: #e57373;
-}
+// 페이지네이션
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  margin-top: 24px;
 
-// 삭제된 행
-.row-deleted {
-  opacity: 0.5;
-}
+  button {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    background: none;
+    color: $dark-text;
+    border: none;
+    border-radius: $radius-sm;
+    @include font-12-regular;
+    cursor: pointer;
 
-.td-title {
-  text-align: left;
-  max-width: 300px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.td-delete {
-  cursor: pointer;
-}
-.btn-delete-icon {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 18px;
-  opacity: 0.7;
-  &:hover {
-    opacity: 1;
+    &:hover:not(:disabled) {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+    &.active {
+      background: $main-color;
+      color: $white;
+      @include font-12-bold;
+    }
+    &:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
   }
-}
-
-.empty-row {
-  text-align: center;
-  padding: 40px 0;
-  color: #888;
 }
 </style>
