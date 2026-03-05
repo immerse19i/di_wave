@@ -32,6 +32,7 @@ const AccountDetail = () => import('@/views/admin/AccountDetail.vue')
 const AdminNotice = () => import('@/views/admin/AdminNotice.vue')
 const AdminPopup = () => import('@/views/admin/AdminPopup.vue')
 const AdminPopupWrite = () => import('@/views/admin/AdminPopupWrite.vue')
+const AdminInfoEdit = () => import('@/views/admin/AdminInfoEdit.vue')
 
 
 const routes = [
@@ -90,7 +91,7 @@ const routes = [
 { path: 'popups', component: AdminPopup },
 { path: 'popups/write', component: AdminPopupWrite },
 { path: 'popups/:id', component: AdminPopupWrite, props: true },
-
+{ path: 'info', component: AdminInfoEdit },
   ],
 },
   // routes 배열에 추가 (/main 라우트 아래에)

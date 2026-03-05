@@ -90,7 +90,9 @@ getPopupDetail: (id) => api.get(`/admin/popups/${id}`),
 createPopup: (data) => api.post('/admin/popups', data),
 updatePopup: (id, data) => api.put(`/admin/popups/${id}`, data),
 deletePopup: (id) => api.patch(`/admin/popups/${id}/delete`),
-
+// ===== 정보수정 =====
+getInfo: () => api.get('/info/admin'),
+updateInfo: (data) => api.put('/info/admin', data),
 
 
 }
