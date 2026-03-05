@@ -126,7 +126,15 @@
             <td class="ellipsis">{{ item.email }}</td>
             <td>{{ item.phone || '-' }}</td>
             <td>{{ formatDate(item.created_at) }}</td>
-            <td>{{ item.is_active ? '정상' : '탈퇴' }}</td>
+            <td>
+              {{
+                item.status === 'approved'
+                  ? '정상'
+                  : item.status === 'suspended'
+                    ? '정지'
+                    : '탈퇴'
+              }}
+            </td>
             <td>
               <button class="btn-detail" @click.stop="goToDetail(item.id)">
                 상세보기
@@ -200,14 +208,18 @@ const isAllSelected = computed(
 const toggleAll = () => {
   statusFilter.value.active = true;
   statusFilter.value.inactive = true;
+  pagination.value.page = 1;
+  fetchList();
 };
 
 const toggleStatus = (key) => {
   statusFilter.value[key] = !statusFilter.value[key];
-  // 둘 다 해제되면 전체 선택으로 복원
   if (!statusFilter.value.active && !statusFilter.value.inactive) {
     toggleAll();
+    return;
   }
+  pagination.value.page = 1;
+  fetchList();
 };
 
 // 가입일 필터
