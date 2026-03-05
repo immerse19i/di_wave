@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { verifyToken, isAdmin } = require('../middleware/auth')
+const { verifyToken, isAdmin } = require('../middlewares/auth')
 const infoController = require('../controllers/infoController')
 
 // 유저용 (인증 필요)

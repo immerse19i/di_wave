@@ -227,6 +227,15 @@ CREATE TABLE terms (
 CREATE INDEX idx_terms_type ON terms(type);
 CREATE INDEX idx_terms_current ON terms(is_current);
 
+-- 사이트 정보 (site_info) - 단일 레코드
+CREATE TABLE site_info (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(200) NOT NULL DEFAULT '',
+    content TEXT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+INSERT INTO site_info (id, title, content) VALUES (1, '', '');
+
 -- 초기 데이터 (약관 6종, 파일 미등록 상태)
 INSERT INTO terms (type, group_type, name, file_name, file_path, version, is_current, is_public) VALUES
 ('terms_of_service', 'signup', '서비스 이용약관', '', '', 0, TRUE, TRUE),
