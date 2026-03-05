@@ -367,6 +367,166 @@
           </div>
         </div>
       </div>
+      <!-- 크레딧 조회 팝업 -->
+      <div
+        class="popup-overlay"
+        v-if="showCreditHistory"
+        @click.self="closeCreditHistory"
+      >
+        <div class="credit-history-popup">
+          <h3 class="popup-title">크레딧 조회</h3>
+          <p class="popup-hospital">
+            {{ account.name }}({{ account.login_id }})
+          </p>
+
+          <!-- 기간 필터 -->
+          <div class="filter-row">
+            <span class="filter-label">기간</span>
+            <input
+              type="date"
+              v-model="chFilter.startDate"
+              class="date-input"
+            />
+            <span class="date-sep">~</span>
+            <input type="date" v-model="chFilter.endDate" class="date-input" />
+            <div class="quick-btns">
+              <button
+                v-for="q in quickPeriods"
+                :key="q.value"
+                :class="['quick-btn', { active: chFilter.quick === q.value }]"
+                @click="setQuickPeriod(q.value)"
+              >
+                {{ q.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- 유형 필터 -->
+          <div class="filter-row">
+            <span class="filter-label">유형</span>
+            <div class="credit-radios">
+              <label
+                v-for="t in chTypes"
+                :key="t.value"
+                :class="{ selected: chFilter.type === t.value }"
+              >
+                <input
+                  type="radio"
+                  v-model="chFilter.type"
+                  :value="t.value"
+                  @change="fetchCreditHistory(1)"
+                />
+                {{ t.label }}
+              </label>
+            </div>
+          </div>
+
+          <!-- 엑셀 다운로드 + 잔여 -->
+          <div class="ch-toolbar">
+            <button class="btn-excel" @click="downloadExcel">
+              <span class="excel-icon">↓</span> 엑셀 다운로드
+            </button>
+            <div class="ch-balance">
+              <span class="balance-label">잔여</span>
+              <span class="balance-value">{{ chBalance }}</span>
+            </div>
+          </div>
+
+          <!-- 테이블 -->
+          <table class="ch-table">
+            <colgroup>
+              <col style="width: 15%" />
+              <col style="width: 14%" />
+              <col style="width: 10%" />
+              <col style="width: 11%" />
+              <col style="width: 14%" />
+              <col style="width: 10%" />
+              <col style="width: 10%" />
+              <col style="width: 8%" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>날짜</th>
+                <th>환자등록번호</th>
+                <th>환자명</th>
+                <th>담당주치의</th>
+                <th>상세 내역</th>
+                <th>충전/사용</th>
+                <th>잔여량</th>
+                <th>영수증</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in chList" :key="item.id">
+                <td>{{ formatLogDate(item.created_at) }}</td>
+                <td>{{ item.patient_code || '-' }}</td>
+                <td>{{ item.patient_name || '-' }}</td>
+                <td>{{ item.physician || '-' }}</td>
+                <td>{{ getCreditDetail(item) }}</td>
+                <td :class="getCreditAmountClass(item)">
+                  {{ getCreditAmountText(item) }}
+                </td>
+                <td>{{ item.balance_after }}</td>
+                <td>
+                  <span
+                    v-if="item.payment_id"
+                    class="receipt-icon"
+                    title="영수증"
+                    >🧾</span
+                  >
+                </td>
+              </tr>
+              <tr v-if="chList.length === 0">
+                <td colspan="8" class="empty-message">조회 결과가 없습니다.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- 페이지네이션 -->
+          <div class="pagination" v-if="chTotalPages > 1">
+            <button
+              class="page-btn"
+              :disabled="chPage <= 1"
+              @click="fetchCreditHistory(1)"
+            >
+              &laquo;
+            </button>
+            <button
+              class="page-btn"
+              :disabled="chPage <= 1"
+              @click="fetchCreditHistory(chPage - 1)"
+            >
+              &lt;
+            </button>
+            <button
+              v-for="p in chVisiblePages"
+              :key="p"
+              :class="['page-btn', { active: p === chPage }]"
+              @click="fetchCreditHistory(p)"
+            >
+              {{ p }}
+            </button>
+            <button
+              class="page-btn"
+              :disabled="chPage >= chTotalPages"
+              @click="fetchCreditHistory(chPage + 1)"
+            >
+              &gt;
+            </button>
+            <button
+              class="page-btn"
+              :disabled="chPage >= chTotalPages"
+              @click="fetchCreditHistory(chTotalPages)"
+            >
+              &raquo;
+            </button>
+          </div>
+
+          <button class="btn-log-confirm" @click="closeCreditHistory">
+            닫기
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -599,7 +759,137 @@ const handleStatusChange = async () => {
 };
 
 // TODO: 크레딧 조회 이동
-const goToCreditHistory = () => {};
+// 크레딧 조회 팝업
+const showCreditHistory = ref(false);
+const chList = ref([]);
+const chPage = ref(1);
+const chTotalPages = ref(0);
+const chBalance = ref(0);
+const chFilter = ref({
+  startDate: '',
+  endDate: '',
+  type: 'all',
+  quick: 30,
+});
+
+const quickPeriods = [
+  { label: '오늘', value: 0 },
+  { label: '7일', value: 7 },
+  { label: '30일', value: 30 },
+  { label: '90일', value: 90 },
+];
+
+const chTypes = [
+  { label: '전체', value: 'all' },
+  { label: '충전', value: 'charge' },
+  { label: '사용', value: 'use' },
+];
+
+const chVisiblePages = computed(() => {
+  const total = chTotalPages.value;
+  const current = chPage.value;
+  let start = Math.max(1, current - 4);
+  let end = Math.min(total, start + 9);
+  start = Math.max(1, end - 9);
+  const pages = [];
+  for (let i = start; i <= end; i++) pages.push(i);
+  return pages;
+});
+
+const setQuickPeriod = (days) => {
+  chFilter.value.quick = days;
+  const end = new Date();
+  const start = new Date();
+  if (days > 0) start.setDate(end.getDate() - days);
+  const fmt = (d) => d.toISOString().slice(0, 10);
+  chFilter.value.startDate = fmt(start);
+  chFilter.value.endDate = fmt(end);
+  fetchCreditHistory(1);
+};
+
+const goToCreditHistory = () => {
+  setQuickPeriod(30); // 기본 30일
+  chFilter.value.type = 'all';
+  showCreditHistory.value = true;
+};
+
+const closeCreditHistory = () => {
+  showCreditHistory.value = false;
+};
+
+const fetchCreditHistory = async (page = 1) => {
+  try {
+    const params = { page, limit: 12 };
+    if (chFilter.value.startDate) params.startDate = chFilter.value.startDate;
+    if (chFilter.value.endDate) params.endDate = chFilter.value.endDate;
+    if (chFilter.value.type !== 'all') params.type = chFilter.value.type;
+
+    const res = await adminAPI.getCreditHistory(props.id, params);
+    chList.value = res.data.data;
+    chPage.value = res.data.currentPage;
+    chTotalPages.value = res.data.totalPages;
+    chBalance.value = res.data.balance;
+  } catch (e) {
+    message.showAlert('크레딧 이력 조회에 실패했습니다.');
+  }
+};
+
+const getCreditDetail = (item) => {
+  if (item.type === 'use' && item.analysis_id) return '분석';
+  if (item.type === 'use' && !item.analysis_id) return '차감(관리자)';
+  if (item.type === 'charge' && item.payment_id) return '충전';
+  if (item.type === 'charge' && !item.payment_id) return '지급(관리자)';
+  if (item.type === 'refund') return '환불';
+  return '-';
+};
+
+const getCreditAmountText = (item) => {
+  if (item.type === 'charge' || item.type === 'refund')
+    return `+${item.amount}`;
+  return `-${item.amount}`;
+};
+
+const getCreditAmountClass = (item) => {
+  return item.type === 'charge' || item.type === 'refund'
+    ? 'amount-plus'
+    : 'amount-minus';
+};
+
+// 엑셀 다운로드
+const downloadExcel = async () => {
+  try {
+    const params = { all: 'true' };
+    if (chFilter.value.startDate) params.startDate = chFilter.value.startDate;
+    if (chFilter.value.endDate) params.endDate = chFilter.value.endDate;
+    if (chFilter.value.type !== 'all') params.type = chFilter.value.type;
+
+    const res = await adminAPI.getCreditHistory(props.id, params);
+    const data = res.data.data;
+
+    if (data.length === 0) {
+      message.showAlert('다운로드할 데이터가 없습니다.');
+      return;
+    }
+
+    const { utils, writeFile } = await import('xlsx');
+    const rows = data.map((item) => ({
+      날짜: formatLogDate(item.created_at),
+      환자등록번호: item.patient_code || '-',
+      환자명: item.patient_name || '-',
+      담당주치의: item.physician || '-',
+      '상세 내역': getCreditDetail(item),
+      '충전/사용': getCreditAmountText(item),
+      잔여량: item.balance_after,
+    }));
+
+    const ws = utils.json_to_sheet(rows);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, '크레딧 이력');
+    writeFile(wb, `크레딧이력_${account.value.name}.xlsx`);
+  } catch (e) {
+    message.showAlert('엑셀 다운로드에 실패했습니다.');
+  }
+};
 
 // 크레딧 수동 관리 팝업
 const showCreditPopup = ref(false);
@@ -1212,6 +1502,162 @@ const formatShortDate = (dateStr) => {
 
   .credit-after {
     @include font-14-medium;
+  }
+}
+
+// 크레딧 조회 팝업
+.credit-history-popup {
+  background: $dark-bg;
+  border: 1px solid $dark-line-gray;
+  border-radius: $radius-md;
+  padding: 32px 40px;
+  width: 1000px;
+  max-width: 95vw;
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 8px;
+
+  .filter-label {
+    min-width: 50px;
+    @include font-14-medium;
+  }
+
+  .date-input {
+    padding: 8px 12px;
+    background: $dark-input;
+    border: 1px solid $dark-line-gray;
+    border-radius: $radius-sm;
+    color: $white;
+    @include font-12-regular;
+    &::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+    }
+  }
+
+  .date-sep {
+    @include font-14-regular;
+    color: $dark-text;
+  }
+
+  .quick-btns {
+    display: flex;
+    gap: 0;
+    margin-left: 12px;
+
+    .quick-btn {
+      padding: 8px 16px;
+      background: $dark-input;
+      border: 1px solid $dark-line-gray;
+      color: $dark-text;
+      @include font-12-regular;
+      cursor: pointer;
+
+      &:first-child {
+        border-radius: $radius-sm 0 0 $radius-sm;
+      }
+      &:last-child {
+        border-radius: 0 $radius-sm $radius-sm 0;
+      }
+      &:not(:first-child) {
+        border-left: none;
+      }
+
+      &.active {
+        background: $main-color;
+        border-color: $main-color;
+        color: $white;
+      }
+    }
+  }
+}
+
+.ch-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+
+  .btn-excel {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    color: $white;
+    @include font-12-regular;
+    cursor: pointer;
+    .excel-icon {
+      font-size: 14px;
+    }
+    &:hover {
+      color: $main-color;
+    }
+  }
+
+  .ch-balance {
+    display: flex;
+    align-items: center;
+    .balance-label {
+      padding: 8px 16px;
+      background: $main-gad;
+      @include font-14-medium;
+      border-radius: $radius-sm 0 0 $radius-sm;
+    }
+    .balance-value {
+      padding: 8px 20px;
+      background: $dark-input;
+      border: 1px solid $dark-line-gray;
+      border-radius: 0 $radius-sm $radius-sm 0;
+      @include font-14-medium;
+      min-width: 60px;
+      text-align: center;
+    }
+  }
+}
+
+.ch-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+
+  th,
+  td {
+    padding: 10px 8px;
+    @include font-12-regular;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  thead tr {
+    background: $main-gad;
+    th {
+      @include font-12-bold;
+    }
+  }
+
+  tbody tr:nth-child(odd) {
+    background: $bg-op;
+  }
+
+  .amount-plus {
+    color: #4caf50;
+  }
+  .amount-minus {
+    color: $white;
+  }
+
+  .receipt-icon {
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .empty-message {
+    padding: 60px 0;
+    color: $dark-text;
   }
 }
 </style>
