@@ -111,8 +111,26 @@ CREATE TABLE notices (
     id INT PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(200) NOT NULL,
     content TEXT,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    status ENUM('published', 'draft', 'private', 'deleted') DEFAULT 'draft',
+    is_pinned BOOLEAN DEFAULT FALSE,
+    has_attachment BOOLEAN DEFAULT FALSE,
+    author_id INT,
+    author_name VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    published_at DATETIME DEFAULT NULL,
+    deleted_at DATETIME DEFAULT NULL
+);
+
+-- 공지사항 첨부파일 (notice_attachments)
+CREATE TABLE notice_attachments (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    notice_id INT NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(255) NOT NULL,
+    file_size INT DEFAULT 0,
+    file_type VARCHAR(50),
+    sort_order INT DEFAULT 0,
+    FOREIGN KEY (notice_id) REFERENCES notices(id) ON DELETE CASCADE
 );
 
 -- 고객문의 (inquiries)
@@ -129,16 +147,33 @@ CREATE TABLE inquiries (
     FOREIGN KEY (hospital_id) REFERENCES hospitals(id) ON DELETE SET NULL
 );
 
--- 팝업 (popups)
+-- 안내팝업 (popups)
 CREATE TABLE popups (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    title VARCHAR(200),
+    title VARCHAR(200) NOT NULL,
     content TEXT,
-    image_path VARCHAR(255),
-    link_url VARCHAR(255),
-    start_date TIMESTAMP NULL,
-    end_date TIMESTAMP NULL,
-    is_active BOOLEAN DEFAULT TRUE,
+    status ENUM('published', 'draft', 'deleted') DEFAULT 'draft',
+    display_start DATE DEFAULT NULL,
+    display_end DATE DEFAULT NULL,
+    is_always BOOLEAN DEFAULT FALSE,
+    author_id INT,
+    author_name VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    published_at DATETIME DEFAULT NULL,
+    deleted_at DATETIME DEFAULT NULL
+);
+
+-- 관리자 로그 (admin_logs)
+CREATE TABLE admin_logs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    hospital_id INT NULL,
+    target_type VARCHAR(50) NOT NULL,
+    target_id INT NULL,
+    category VARCHAR(100) NOT NULL,
+    details TEXT,
+    operator VARCHAR(50) DEFAULT '-',
+    actor_type ENUM('admin', 'user', 'system') DEFAULT 'admin',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -162,6 +197,11 @@ CREATE INDEX idx_analyses_status ON analyses(status);
 CREATE INDEX idx_credit_transactions_hospital ON credit_transactions(hospital_id);
 CREATE INDEX idx_usage_logs_hospital ON usage_logs(hospital_id);
 CREATE INDEX idx_usage_logs_created ON usage_logs(created_at);
+CREATE INDEX idx_notice_attachments_notice ON notice_attachments(notice_id);
+CREATE INDEX idx_notices_status ON notices(status);
+CREATE INDEX idx_popups_status ON popups(status);
+CREATE INDEX idx_admin_logs_hospital ON admin_logs(hospital_id);
+CREATE INDEX idx_admin_logs_target ON admin_logs(target_type, target_id);
 
 -- 기본 관리자 계정 (비밀번호: admin123 -> bcrypt 해시)
 INSERT INTO users (email, password, name, role) VALUES
