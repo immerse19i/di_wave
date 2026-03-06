@@ -595,7 +595,7 @@ const licenseName = computed(() => {
 
 const fileUrl = computed(() => {
   if (!account.value?.business_license_path) return '';
-  return `${import.meta.env.VITE_API_URL || ''}${account.value.business_license_path}`;
+  return `/${account.value.business_license_path}`;
 });
 
 // 데이터 로드
