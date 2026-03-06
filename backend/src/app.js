@@ -53,6 +53,9 @@ app.use('/api/admin/popups', popupRoutes)
 const infoRoutes = require('./routes/info')
 app.use('/api/info', infoRoutes)
 
+const logsRoutes = require('./routes/logs');
+app.use('/api/admin/logs', logsRoutes);
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
