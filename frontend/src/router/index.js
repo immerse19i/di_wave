@@ -35,6 +35,8 @@ const AdminPopupWrite = () => import('@/views/admin/AdminPopupWrite.vue')
 const AdminInfoEdit = () => import('@/views/admin/AdminInfoEdit.vue')
 const UsageLog = () => import('@/views/admin/UsageLog.vue')
 const UsageLogDetail = () => import('@/views/admin/UsageLogDetail.vue')
+const Permission = () => import('@/views/admin/Permission.vue')
+
 
 const routes = [
   // User Routes
@@ -95,6 +97,7 @@ const routes = [
 { path: 'info', component: AdminInfoEdit },
 { path: 'logs', component: UsageLog },
 { path: 'logs/:id', component: UsageLogDetail, props: true },
+{ path: 'permissions', component: Permission },
   ],
 },
   // routes 배열에 추가 (/main 라우트 아래에)

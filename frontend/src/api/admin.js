@@ -102,5 +102,13 @@ getLogDetail(id) {
   return api.get(`/admin/logs/${id}`);
 },
 
+// 권한
+getAdmins() {
+  return api.get('/admin/permissions');
+},
+toggleAdmin(id) {
+  return api.patch(`/admin/permissions/${id}/toggle`);
+},
+
 
 }
