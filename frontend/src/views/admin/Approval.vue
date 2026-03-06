@@ -120,146 +120,132 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { adminAPI } from '@/api/admin';
+const router = useRouter();
 
 // 탭
 const tabs = [
   { label: '전체', value: 'all' },
   { label: '승인대기', value: 'pending' },
   { label: '반려', value: 'rejected' },
-]
-const currentTab = ref('all')
+];
+const currentTab = ref('all');
 
 // 상태
-const hospitalList = ref([])
-const searchKeyword = ref('')
-const currentSearch = ref('')
-const sortField = ref('')
-const sortOrder = ref('')
-const sortClickCount = ref({})
-const pagination = ref({ page: 1, limit: 20, total: 0, totalPages: 0 })
+const hospitalList = ref([]);
+const searchKeyword = ref('');
+const currentSearch = ref('');
+const sortField = ref('');
+const sortOrder = ref('');
+const sortClickCount = ref({});
+const pagination = ref({ page: 1, limit: 20, total: 0, totalPages: 0 });
 
 // ── mock 데이터 (API 연동 시 제거) ──
-const mockData = [
-  { id: 1, name: '화이트림치과', status: 'pending', created_at: '2026-02-20' },
-  { id: 2, name: '화이트림치과', status: 'pending', created_at: '2026-02-20' },
-  { id: 3, name: '화이트림치과', status: 'rejected', created_at: '2026-02-19' },
-  { id: 4, name: '화이트림치과', status: 'pending', created_at: '2026-02-18' },
-  { id: 5, name: '화이트림치과', status: 'pending', created_at: '2026-02-17' },
-  { id: 6, name: '화이트림치과', status: 'pending', created_at: '2026-02-16' },
-  { id: 7, name: '화이트림치과', status: 'pending', created_at: '2026-02-15' },
-  { id: 8, name: '화이트림치과', status: 'pending', created_at: '2026-02-14' },
-  { id: 9, name: '화이트림치과', status: 'pending', created_at: '2026-02-13' },
-  { id: 10, name: '화이트림치과', status: 'pending', created_at: '2026-02-12' },
-]
+
+// 2026.03.03 api 연동 교체
 
 // 탭 + 검색 필터
 const filteredList = computed(() => {
-  let list = [...hospitalList.value]
-
-  if (currentTab.value !== 'all') {
-    list = list.filter((item) => item.status === currentTab.value)
-  }
-
-  if (currentSearch.value.length >= 2) {
-    list = list.filter((item) => item.name.includes(currentSearch.value))
-  }
-
-  if (sortField.value) {
-    list.sort((a, b) => {
-      const aVal = a[sortField.value] || ''
-      const bVal = b[sortField.value] || ''
-      const result = aVal < bVal ? -1 : aVal > bVal ? 1 : 0
-      return sortOrder.value === 'DESC' ? -result : result
-    })
-  }
-
-  return list
-})
+  return hospitalList.value;
+});
 
 const visiblePages = computed(() => {
-  const total = pagination.value.totalPages
-  const current = pagination.value.page
-  const pages = []
-  let start = Math.max(1, current - 4)
-  let end = Math.min(total, start + 9)
-  start = Math.max(1, end - 9)
+  const total = pagination.value.totalPages;
+  const current = pagination.value.page;
+  const pages = [];
+  let start = Math.max(1, current - 4);
+  let end = Math.min(total, start + 9);
+  start = Math.max(1, end - 9);
   for (let i = start; i <= end; i++) {
-    pages.push(i)
+    pages.push(i);
   }
-  return pages
-})
+  return pages;
+});
 
 const fetchList = async () => {
-  // TODO: const res = await adminAPI.getHospitals({ ... })
-  hospitalList.value = mockData
-  pagination.value.total = mockData.length
-  pagination.value.totalPages = Math.ceil(mockData.length / pagination.value.limit)
-}
+  try {
+    const res = await adminAPI.getHospitals({
+      status: currentTab.value,
+      search: currentSearch.value,
+      sortField: sortField.value,
+      sortOrder: sortOrder.value,
+      page: pagination.value.page,
+      limit: pagination.value.limit,
+    });
+    hospitalList.value = res.data.data;
+    pagination.value.total = res.data.total;
+    pagination.value.totalPages = res.data.totalPages;
+  } catch (e) {
+    console.error('목록 조회 실패:', e);
+  }
+};
 
 const changeTab = (tab) => {
-  currentTab.value = tab
-  pagination.value.page = 1
-}
+  currentTab.value = tab;
+  pagination.value.page = 1;
+  fetchList();
+};
 
 const handleSearch = () => {
-  if (searchKeyword.value.length > 0 && searchKeyword.value.length < 2) return
-  currentSearch.value = searchKeyword.value
-  pagination.value.page = 1
-}
+  if (searchKeyword.value.length > 0 && searchKeyword.value.length < 2) return;
+  currentSearch.value = searchKeyword.value;
+  pagination.value.page = 1;
+  fetchList();
+};
 
 const toggleSort = (field) => {
-  const count = (sortClickCount.value[field] || 0) + 1
+  const count = (sortClickCount.value[field] || 0) + 1;
   Object.keys(sortClickCount.value).forEach((key) => {
-    if (key !== field) sortClickCount.value[key] = 0
-  })
+    if (key !== field) sortClickCount.value[key] = 0;
+  });
 
   if (count === 1) {
-    sortField.value = field
-    sortOrder.value = field === 'created_at' ? 'DESC' : 'ASC'
+    sortField.value = field;
+    sortOrder.value = field === 'created_at' ? 'DESC' : 'ASC';
   } else if (count === 2) {
-    sortField.value = field
-    sortOrder.value = field === 'created_at' ? 'ASC' : 'DESC'
+    sortField.value = field;
+    sortOrder.value = field === 'created_at' ? 'ASC' : 'DESC';
   } else {
-    sortField.value = ''
-    sortOrder.value = ''
-    sortClickCount.value[field] = 0
-    return
+    sortField.value = '';
+    sortOrder.value = '';
+    sortClickCount.value[field] = 0;
+    return;
   }
-  sortClickCount.value[field] = count
-}
+  sortClickCount.value[field] = count;
+  fetchList();
+};
 
 const getSortIcon = (field) => {
-  if (sortField.value !== field) return '↕'
-  return sortOrder.value === 'ASC' ? '↑' : '↓'
-}
+  if (sortField.value !== field) return '↕';
+  return sortOrder.value === 'ASC' ? '↑' : '↓';
+};
 
 const goToPage = (page) => {
-  if (page < 1 || page > pagination.value.totalPages) return
-  pagination.value.page = page
-}
+  if (page < 1 || page > pagination.value.totalPages) return;
+  pagination.value.page = page;
+  fetchList();
+};
 
 const goToDetail = (id) => {
-  router.push(`/admin/approval/${id}`)
-}
+  router.push(`/admin/approval/${id}`);
+};
 
 const statusLabel = (status) => {
-  const map = { pending: '승인대기', approved: '승인', rejected: '반려' }
-  return map[status] || status
-}
+  const map = { pending: '승인대기', approved: '승인', rejected: '반려' };
+  return map[status] || status;
+};
 
 const formatDate = (dateStr) => {
-  if (!dateStr) return '-'
-  const d = new Date(dateStr)
-  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`
-}
+  if (!dateStr) return '-';
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+};
 
 onMounted(() => {
-  fetchList()
-})
+  fetchList();
+});
 </script>
 
 <style lang="scss" scoped>

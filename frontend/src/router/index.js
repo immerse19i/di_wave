@@ -16,6 +16,7 @@ const Credit = () => import('@/views/user/page/user-info/Credit.vue');
 const Info = () => import('@/views/user/page/user-info/Info.vue');
 const CreditCharge = () => import('@/views/user/page/user-info/CreditCharge.vue');
 const Terms = () => import('@/views/user/Terms.vue')
+const AdminNoticeWrite = () => import('@/views/admin/AdminNoticeWrite.vue')
 
 // Admin Views
 const AdminLogin = () => import('@/views/admin/Login.vue');
@@ -25,6 +26,16 @@ const AdminDashboard = () => import('@/views/admin/Approval.vue');
 const AdminMain = () => import('@/views/admin/AdminMain.vue')
 const AdminTerms = () => import('@/views/admin/AdminTerms.vue')
 const AdminTermsHistory = () => import('@/views/admin/AdminTermsHistory.vue')
+const ApprovalDetail = () => import('@/views/admin/ApprovalDetail.vue')
+const AccountList = () => import('@/views/admin/AccountList.vue')
+const AccountDetail = () => import('@/views/admin/AccountDetail.vue')
+const AdminNotice = () => import('@/views/admin/AdminNotice.vue')
+const AdminPopup = () => import('@/views/admin/AdminPopup.vue')
+const AdminPopupWrite = () => import('@/views/admin/AdminPopupWrite.vue')
+const AdminInfoEdit = () => import('@/views/admin/AdminInfoEdit.vue')
+const UsageLog = () => import('@/views/admin/UsageLog.vue')
+const UsageLogDetail = () => import('@/views/admin/UsageLogDetail.vue')
+const Permission = () => import('@/views/admin/Permission.vue')
 
 
 const routes = [
@@ -74,6 +85,19 @@ const routes = [
     { path: 'approval', component: AdminDashboard },
     { path: 'terms', component: AdminTerms },
     { path: 'terms/history/:type', component: AdminTermsHistory },
+    { path: 'approval/:id', component: ApprovalDetail, props: true },  // ← 추가
+    { path: 'accounts', component: AccountList },
+    { path: 'accounts/:id', component: AccountDetail, props: true },
+    { path: 'notices', component: AdminNotice },
+    { path: 'notices/write', component: AdminNoticeWrite },
+{ path: 'notices/:id', component: AdminNoticeWrite, props: true },
+{ path: 'popups', component: AdminPopup },
+{ path: 'popups/write', component: AdminPopupWrite },
+{ path: 'popups/:id', component: AdminPopupWrite, props: true },
+{ path: 'info', component: AdminInfoEdit },
+{ path: 'logs', component: UsageLog },
+{ path: 'logs/:id', component: UsageLogDetail, props: true },
+{ path: 'permissions', component: Permission },
   ],
 },
   // routes 배열에 추가 (/main 라우트 아래에)

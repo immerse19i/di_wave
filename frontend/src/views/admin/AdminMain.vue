@@ -38,42 +38,66 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useAuthStore } from '@/store/auth'
-import { authAPI } from '@/api/auth'
+import { computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useAuthStore } from '@/store/auth';
+import { authAPI } from '@/api/auth';
 
-const router = useRouter()
-const route = useRoute()
-const auth = useAuthStore()
+const router = useRouter();
+const route = useRoute();
+const auth = useAuthStore();
 
-const userName = computed(() => auth.user?.login_id || 'admin')
+const userName = computed(() => auth.user?.login_id || 'admin');
 
 const menuList = [
-  { label: '승인관리', path: '/admin/approval', icon: '/assets/icons/profile.svg' },
-  { label: '가입계정목록', path: '/admin/accounts', icon: '/assets/icons/profile.svg' },
-  { label: '공지사항', path: '/admin/notices', icon: '/assets/icons/notice.svg' },
-  { label: '고객문의관리', path: '/admin/inquiries', icon: '/assets/icons/inquiry.svg' },
-  { label: '안내팝업', path: '/admin/popups', icon: '/assets/icons/notice.svg' },
+  {
+    label: '승인관리',
+    path: '/admin/approval',
+    icon: '/assets/icons/profile.svg',
+  },
+  {
+    label: '가입계정목록',
+    path: '/admin/accounts',
+    icon: '/assets/icons/profile.svg',
+  },
+  {
+    label: '공지사항',
+    path: '/admin/notices',
+    icon: '/assets/icons/notice.svg',
+  },
+  {
+    label: '고객문의관리',
+    path: '/admin/inquiries',
+    icon: '/assets/icons/inquiry.svg',
+  },
+  {
+    label: '안내팝업',
+    path: '/admin/popups',
+    icon: '/assets/icons/notice.svg',
+  },
   { label: '이용약관', path: '/admin/terms', icon: '/assets/icons/info.svg' },
-  { label: '정보 수정', path: '/admin/settings', icon: '/assets/icons/info.svg' },
+  { label: '정보 수정', path: '/admin/info', icon: '/assets/icons/info.svg' },
   { label: '사용기록', path: '/admin/logs', icon: '/assets/icons/info.svg' },
-  { label: '권한', path: '/admin/roles', icon: '/assets/icons/password.svg' },
-]
+  {
+    label: '권한',
+    path: '/admin/permissions',
+    icon: '/assets/icons/password.svg',
+  },
+];
 
 const isActiveMenu = (path) => {
-  return route.path.startsWith(path)
-}
+  return route.path.startsWith(path);
+};
 
 const handleLogout = async () => {
   try {
-    await authAPI.logout()
+    await authAPI.logout();
   } catch (e) {
     // 에러 무시
   }
-  localStorage.removeItem('token')
-  router.push('/admin/login')
-}
+  localStorage.removeItem('token');
+  router.push('/admin/login');
+};
 </script>
 
 <style lang="scss" scoped>

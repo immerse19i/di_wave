@@ -41,6 +41,24 @@ app.use('/api/terms', termsRoutes);
 const paymentRoutes = require('./routes/payments');
 app.use('/api/payments', paymentRoutes);
 
+const hospitalRoutes = require('./routes/hospitals');
+app.use('/api/admin/hospitals', hospitalRoutes);
+
+const noticeRoutes = require('./routes/notices')
+app.use('/api/admin/notices', noticeRoutes)
+
+const popupRoutes = require('./routes/popups')
+app.use('/api/admin/popups', popupRoutes)
+
+const infoRoutes = require('./routes/info')
+app.use('/api/info', infoRoutes)
+
+const logsRoutes = require('./routes/logs');
+app.use('/api/admin/logs', logsRoutes);
+
+const permissionRoutes = require('./routes/permissions');
+app.use('/api/admin/permissions', permissionRoutes);
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
