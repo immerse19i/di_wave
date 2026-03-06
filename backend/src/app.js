@@ -56,6 +56,9 @@ app.use('/api/info', infoRoutes)
 const logsRoutes = require('./routes/logs');
 app.use('/api/admin/logs', logsRoutes);
 
+const permissionRoutes = require('./routes/permissions');
+app.use('/api/admin/permissions', permissionRoutes);
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
