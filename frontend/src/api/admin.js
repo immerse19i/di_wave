@@ -94,5 +94,13 @@ deletePopup: (id) => api.patch(`/admin/popups/${id}/delete`),
 getInfo: () => api.get('/info/admin'),
 updateInfo: (data) => api.put('/info/admin', data),
 
+// 사용기록
+getLogs(params) {
+  return api.get('/admin/logs', { params });
+},
+getLogDetail(id) {
+  return api.get(`/admin/logs/${id}`);
+},
+
 
 }

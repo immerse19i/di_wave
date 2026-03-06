@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { verifyToken } = require('../middlewares/auth');
-const { isAdmin } = require('../middlewares/adminAuth');
+const { verifyToken, isAdmin } = require('../middlewares/auth');
 const logController = require('../controllers/admin/logController');
 
 router.get('/', verifyToken, isAdmin, logController.getLogs);
