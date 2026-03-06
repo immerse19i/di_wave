@@ -210,8 +210,7 @@ const rejectReasons = [
 // 사업자등록증 파일 URL
 const fileUrl = computed(() => {
   if (!hospital.value?.business_license_path) return '';
-  const base = import.meta.env.VITE_API_URL || '';
-  return `${base}/${hospital.value.business_license_path}`;
+  return `/${hospital.value.business_license_path}`;
 });
 
 // 파일명 추출
