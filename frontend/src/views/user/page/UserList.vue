@@ -142,7 +142,7 @@ const currentSearch = ref('');
 const sortField = ref('');
 const sortOrder = ref('');
 const sortClickCount = ref({});
-const pagination = ref({ page: 1, limit: 20, total: 0, totalPages: 0 });
+const pagination = ref({ page: 1, limit: 15, total: 0, totalPages: 0 });
 
 // 페이지네이션 표시 페이지 계산
 const visiblePages = computed(() => {
