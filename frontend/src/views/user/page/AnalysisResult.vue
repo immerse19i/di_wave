@@ -47,7 +47,7 @@
 
       <!-- 정보 수정 버튼 -->
       <button class="btn-edit" @click="openEditModal">
-        <img src="/assets/icons/edit.svg" alt="edit" />
+        <img src="/assets/icons/edit.svg" alt="edit" /> 수정
       </button>
     </div>
 
@@ -100,7 +100,8 @@
           </div>
           <div class="age-info">
             <div>
-              현재 나이
+              <span class="type"> 현재 나이 </span>
+
               <b>{{
                 formatAge(
                   analysis.chronological_age_years,
@@ -109,13 +110,27 @@
               }}</b>
             </div>
             <div>
-              뼈 나이(AI)
-              <b>{{
+              <span class="type"> 뼈 나이(AI) </span>
+              <b class="born">{{
                 formatAge(analysis.bone_age_years, analysis.bone_age_months)
               }}</b>
             </div>
-            <div>
-              유전적 예측 키 <b>{{ mphHeight ? mphHeight + ' cm' : '-' }}</b>
+            <div class="has-tooltip">
+              <span class="type"> 유전적 예측 키 </span>
+              <b>{{ mphHeight ? mphHeight + ' cm' : '-' }}</b>
+              <div class="tootip_wrap">
+                <span class="tooltip-wrap">
+                  <img
+                    src="/assets/icons/question.svg"
+                    alt=""
+                    class="tooltip-icon"
+                  />
+                  <img
+                    class="tooltip-img tooltip-right"
+                    src="/assets/images/tooltip/parental_height.svg"
+                  />
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -165,9 +180,8 @@
                 </span>
               </div>
             </div>
-            <div class="score-gauge">
-              <span class="score-value">{{ heightScore }}/100 점</span>
-            </div>
+            <ScoreGauge :score="Number(heightScore) || 0" id="height" />
+            <span class="score-value">{{ heightScore }}/100 점</span>
           </div>
           <div class="score-card">
             <div class="card-top-area">
@@ -187,9 +201,8 @@
               </div>
             </div>
 
-            <div class="score-gauge">
-              <span class="score-value">{{ potentialScore }}/100 점</span>
-            </div>
+            <ScoreGauge :score="Number(potentialScore) || 0" id="potential" />
+            <span class="score-value">{{ potentialScore }}/100 점</span>
           </div>
         </div>
 
@@ -314,6 +327,7 @@ import { useModalStore } from '@/store/modal'; // ← 추가
 import growthHeightData from '@/data/growth_height.json';
 import Chart from 'chart.js/auto';
 import ToggleSwitch from '../../../components/common/ToggleSwitch.vue';
+import ScoreGauge from '../../../components/common/ScoreGauge.vue';
 
 const modal = useModalStore(); // ← 추가
 
@@ -634,11 +648,20 @@ watch(
 );
 </script>
 <style lang="scss" scoped>
+.has-tooltip {
+  display: flex;
+  align-items: center;
+  .tooltip-wrap {
+    display: flex;
+    align-items: center;
+  }
+}
 .analysis-result {
   color: $white;
   height: 100%;
   display: flex;
   flex-direction: column;
+  background: $analysis-gad;
 }
 .card-top-area {
   display: flex;
@@ -649,12 +672,14 @@ watch(
 .top-bar {
   display: flex;
   align-items: center;
+
   padding: 12px 24px;
   gap: 16px;
 
   .top-left {
     display: flex;
     align-items: center;
+
     gap: 12px;
   }
 
@@ -721,18 +746,28 @@ watch(
     flex: 1;
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 16px;
     @include font-12-regular;
 
     b {
-      @include font-12-bold;
+      @include font-14-bold;
       margin-right: 4px;
     }
   }
 
   .btn-edit {
-    background: none;
+    @include font-14-bold;
+    background: $main-color;
+    display: flex;
+    color: $white;
+    border-radius: 4px;
+    padding: 4px;
+    gap: 4px;
+    align-items: center;
+    padding-right: 8px;
     cursor: pointer;
+
     img {
       width: 20px;
       height: 20px;
@@ -828,7 +863,8 @@ watch(
 // 최종 예측 키
 .result-summary {
   background: $bg-op;
-  border-radius: $radius-md;
+  border-radius: $radius-xxl;
+  border: $border-op;
   padding: 20px 24px;
   display: flex;
   justify-content: space-between;
@@ -836,14 +872,20 @@ watch(
   margin-bottom: 16px;
 
   .predicted-height {
+    display: flex;
+    align-items: center;
+    gap: 20px;
     .label {
-      @include font-14-regular;
+      @include font-20-bold;
       display: block;
-      margin-bottom: 4px;
+      color: $dark-text;
+      // margin-bottom: 4px;
     }
     .value {
-      font-size: 56px;
+      font-size: 52px;
       font-weight: bold;
+      display: flex;
+      align-items: center;
       small {
         font-size: 20px;
         margin-left: 4px;
@@ -852,12 +894,19 @@ watch(
   }
 
   .age-info {
-    text-align: right;
-    @include font-12-regular;
+    text-align: left;
+    @include font-14-bold;
     line-height: 1.8;
+    .type {
+      width: 95px;
+      display: inline-block;
+    }
     b {
-      @include font-14-bold;
+      @include font-16-bold;
       margin-left: 8px;
+      &.born {
+        font-size: 20px;
+      }
     }
   }
 }
@@ -865,7 +914,8 @@ watch(
 // 의사 판독
 .doctor-boneage {
   background: $bg-op;
-  border-radius: $radius-md;
+  border-radius: $radius-xxl;
+  border: $border-op;
   padding: 12px 24px;
   display: flex;
   align-items: center;
@@ -887,7 +937,10 @@ watch(
       border: 1px solid $dark-line-gray;
       border-radius: $radius-sm;
       padding: 6px 12px;
-      @include font-14-regular;
+      @include font-20-bold;
+    }
+    span {
+      @include font-14-bold;
     }
   }
 
@@ -900,7 +953,8 @@ watch(
 // 분석 브리핑
 .analysis-briefing {
   background: $bg-op;
-  border-radius: $radius-md;
+  border-radius: $radius-xxl;
+  border: $border-op;
   padding: 16px 24px;
   margin-bottom: 16px;
 
@@ -922,7 +976,8 @@ watch(
   .score-card {
     flex: 1;
     background: $bg-op;
-    border-radius: $radius-md;
+    border-radius: $radius-xxl;
+    border: $border-op;
     padding: 16px 24px;
     text-align: center;
 
@@ -975,7 +1030,8 @@ watch(
 // 차트 영역
 .chart-area {
   background: $bg-op;
-  border-radius: $radius-md;
+  border-radius: $radius-xxl;
+  border: $border-op;
   padding: 16px;
   margin-bottom: 16px;
 
@@ -1028,7 +1084,8 @@ watch(
 // 예측 키 비교
 .predict-area {
   background: $bg-op;
-  border-radius: $radius-md;
+  border-radius: $radius-xxl;
+  border: $border-op;
   padding: 20px 24px;
   margin-bottom: 16px;
 
