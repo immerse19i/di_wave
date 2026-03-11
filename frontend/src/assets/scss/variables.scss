@@ -11,13 +11,18 @@ $main-color: #305b86;
 $sub-color: #4e769e;
 $sub-color-2: #7eaedf;
 $main-gad: linear-gradient(180deg, #305b86 1.04%, #1e456b 101.04%);
+$analysis-gad: linear-gradient(128.55deg, #1A1D23 8.46%, #1F2F47 84.75%);
 $bg-op: linear-gradient(
   131.39deg,
   rgba(255, 255, 255, 0.1) 13.4%,
   rgba(255, 255, 255, 0.06) 48.64%
 );
+
+$border-op :1px solid rgba(255, 255, 255, 0.1);
+
 $stroke-grad: linear-gradient(180deg, #ffffff99 0%, #ffffff66 100%);
 $pdf-grad:linear-gradient(270deg, #2DB7AE 0%, #285989 100%);
+
 
 
 // Base Colors
@@ -40,6 +45,9 @@ $dark-black: #121820;
 $dark-input: #2c323c;
 $dark-input-gray: #aab1b9;
 $dark-text: #dedede;
+$text-white-70 : rgba(255, 255, 255, 0.7);
+$white-10: rgba(255, 255, 255, 0.1);
+
 
 // Chromatic Colors
 $chromatic-red: #db6e6e;
@@ -195,6 +203,8 @@ $spacing-xxl: 32px;
 $radius-sm: 4px;
 $radius-md: 8px;
 $radius-lg: 12px;
+$radius-xl: 16px;
+$radius-xxl: 20px;
 $radius-full: 9999px;
 
 // --------------------------------------------

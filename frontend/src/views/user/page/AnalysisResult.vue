@@ -47,7 +47,7 @@
 
       <!-- 정보 수정 버튼 -->
       <button class="btn-edit" @click="openEditModal">
-        <img src="/assets/icons/edit.svg" alt="edit" />
+        <img src="/assets/icons/edit.svg" alt="edit" /> 수정
       </button>
     </div>
 
@@ -100,7 +100,8 @@
           </div>
           <div class="age-info">
             <div>
-              현재 나이
+              <span class="type"> 현재 나이 </span>
+
               <b>{{
                 formatAge(
                   analysis.chronological_age_years,
@@ -109,13 +110,27 @@
               }}</b>
             </div>
             <div>
-              뼈 나이(AI)
-              <b>{{
+              <span class="type"> 뼈 나이(AI) </span>
+              <b class="born">{{
                 formatAge(analysis.bone_age_years, analysis.bone_age_months)
               }}</b>
             </div>
-            <div>
-              유전적 예측 키 <b>{{ mphHeight ? mphHeight + ' cm' : '-' }}</b>
+            <div class="has-tooltip">
+              <span class="type"> 유전적 예측 키 </span>
+              <b>{{ mphHeight ? mphHeight + ' cm' : '-' }}</b>
+              <div class="tootip_wrap">
+                <span class="tooltip-wrap">
+                  <img
+                    src="/assets/icons/question.svg"
+                    alt=""
+                    class="tooltip-icon"
+                  />
+                  <img
+                    class="tooltip-img tooltip-right"
+                    src="/assets/images/tooltip/parental_height.svg"
+                  />
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -165,9 +180,8 @@
                 </span>
               </div>
             </div>
-            <div class="score-gauge">
-              <span class="score-value">{{ heightScore }}/100 점</span>
-            </div>
+            <ScoreGauge :score="Number(heightScore) || 0" id="height" />
+            <span class="score-value">{{ heightScore }}/100 점</span>
           </div>
           <div class="score-card">
             <div class="card-top-area">
@@ -187,9 +201,8 @@
               </div>
             </div>
 
-            <div class="score-gauge">
-              <span class="score-value">{{ potentialScore }}/100 점</span>
-            </div>
+            <ScoreGauge :score="Number(potentialScore) || 0" id="potential" />
+            <span class="score-value">{{ potentialScore }}/100 점</span>
           </div>
         </div>
 
@@ -232,46 +245,113 @@
         </div>
 
         <!-- 예측 키 비교 (#11) -->
+        <!-- 예측 키 비교 (#11) -->
         <div v-if="activeTab === 'predict'" class="predict-area">
           <div class="predict-row">
             <span class="predict-label">현재 키</span>
-            <span class="predict-value">{{ analysis.height || '-' }} cm</span>
-            <div class="slider-bar">
-              <div
-                class="slider-fill"
-                :style="{ width: heightPercent + '%' }"
-              ></div>
+            <span class="predict-value"
+              >{{ analysis.height || '-' }}
+              <div class="unit">cm</div></span
+            >
+            <div class="slider-wrap">
+              <span class="range-label">작음(0)</span>
+              <div class="slider-bar">
+                <div
+                  class="slider-fill"
+                  :style="{ width: heightPercent + '%' }"
+                ></div>
+                <div
+                  class="slider-handle"
+                  :style="{ left: heightPercent + '%' }"
+                >
+                  <div class="bubble">
+                    <div class="bubble-box">
+                      {{ Math.round(heightPercent) }}
+                    </div>
+                    <img
+                      src="/assets/icons/chat_bubble_bottom.svg"
+                      alt=""
+                      class="bubble-tail"
+                    />
+                  </div>
+                  <div class="dot"></div>
+                </div>
+              </div>
+              <span class="range-label">큼(100)</span>
             </div>
           </div>
+
           <div class="predict-row">
             <span class="predict-label">유전 기반<br />예측 키</span>
-            <span class="predict-value">{{ mphHeight || '-' }} cm</span>
-            <div class="slider-bar">
-              <div
-                class="slider-fill"
-                :style="{ width: mphPercent + '%' }"
-              ></div>
-            </div>
-          </div>
-          <div class="predict-row">
-            <span class="predict-label">뼈나이 기반<br />예측 키</span>
             <span class="predict-value"
-              >{{ boneAgePredictedHeight || '-' }} cm</span
+              >{{ mphHeight || '-' }}
+              <div class="unit">cm</div></span
             >
-            <div class="slider-bar">
-              <div
-                class="slider-fill"
-                :style="{ width: boneAgePercent + '%' }"
-              ></div>
+            <div class="slider-wrap">
+              <span class="range-label">작음(0)</span>
+              <div class="slider-bar">
+                <div
+                  class="slider-fill"
+                  :style="{ width: mphPercent + '%' }"
+                ></div>
+                <div class="slider-handle" :style="{ left: mphPercent + '%' }">
+                  <div class="bubble">
+                    <div class="bubble-box">{{ Math.round(mphPercent) }}</div>
+                    <img
+                      src="/assets/icons/chat_bubble_bottom.svg"
+                      alt=""
+                      class="bubble-tail"
+                    />
+                  </div>
+                  <div class="dot"></div>
+                </div>
+              </div>
+              <span class="range-label">큼(100)</span>
             </div>
           </div>
+
+          <div class="predict-row">
+            <span class="predict-label">성장곡선기반<br />예측키</span>
+            <span class="predict-value"
+              >{{ boneAgePredictedHeight || '-' }}
+              <div class="unit">cm</div></span
+            >
+            <div class="slider-wrap">
+              <span class="range-label">작음(0)</span>
+              <div class="slider-bar">
+                <div
+                  class="slider-fill"
+                  :style="{ width: boneAgePercent + '%' }"
+                ></div>
+                <div
+                  class="slider-handle"
+                  :style="{ left: boneAgePercent + '%' }"
+                >
+                  <div class="bubble">
+                    <div class="bubble-box">
+                      {{ Math.round(boneAgePercent) }}
+                    </div>
+                    <img
+                      src="/assets/icons/chat_bubble_bottom.svg"
+                      alt=""
+                      class="bubble-tail"
+                    />
+                  </div>
+                  <div class="dot"></div>
+                </div>
+              </div>
+              <span class="range-label">큼(100)</span>
+            </div>
+          </div>
+
           <div class="correction-info">
             <span>유전기반 보정량 : {{ geneticCorrection }}</span>
             <span>성숙도 기반 보정량 : {{ maturityCorrection }}</span>
           </div>
+
           <div class="predict-row final">
             <div class="card-top-area">
-              <span class="predict-label">최종 예측 키 </span>
+              <span class="predict-label">최종 예측 키</span>
               <div class="tootip_wrap">
                 <span class="tooltip-wrap">
                   <img
@@ -286,13 +366,33 @@
                 </span>
               </div>
             </div>
-
-            <span class="predict-value">{{ finalPredictedHeight }} cm</span>
-            <div class="slider-bar final-bar">
-              <div
-                class="slider-fill"
-                :style="{ width: finalPercent + '%' }"
-              ></div>
+            <span class="predict-value"
+              >{{ finalPredictedHeight }}
+              <div class="unit">cm</div>
+            </span>
+            <div class="slider-wrap">
+              <span class="range-label">작음(0)</span>
+              <div class="slider-bar">
+                <div
+                  class="slider-fill"
+                  :style="{ width: finalPercent + '%' }"
+                ></div>
+                <div
+                  class="slider-handle"
+                  :style="{ left: finalPercent + '%' }"
+                >
+                  <div class="bubble">
+                    <div class="bubble-box">{{ Math.round(finalPercent) }}</div>
+                    <img
+                      src="/assets/icons/chat_bubble_bottom.svg"
+                      alt=""
+                      class="bubble-tail"
+                    />
+                  </div>
+                  <div class="dot"></div>
+                </div>
+              </div>
+              <span class="range-label">큼(100)</span>
             </div>
           </div>
         </div>
@@ -314,6 +414,7 @@ import { useModalStore } from '@/store/modal'; // ← 추가
 import growthHeightData from '@/data/growth_height.json';
 import Chart from 'chart.js/auto';
 import ToggleSwitch from '../../../components/common/ToggleSwitch.vue';
+import ScoreGauge from '../../../components/common/ScoreGauge.vue';
 
 const modal = useModalStore(); // ← 추가
 
@@ -634,11 +735,20 @@ watch(
 );
 </script>
 <style lang="scss" scoped>
+.has-tooltip {
+  display: flex;
+  align-items: center;
+  .tooltip-wrap {
+    display: flex;
+    align-items: center;
+  }
+}
 .analysis-result {
   color: $white;
   height: 100%;
   display: flex;
   flex-direction: column;
+  background: $analysis-gad;
 }
 .card-top-area {
   display: flex;
@@ -649,12 +759,14 @@ watch(
 .top-bar {
   display: flex;
   align-items: center;
+
   padding: 12px 24px;
   gap: 16px;
 
   .top-left {
     display: flex;
     align-items: center;
+
     gap: 12px;
   }
 
@@ -721,18 +833,28 @@ watch(
     flex: 1;
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 16px;
     @include font-12-regular;
 
     b {
-      @include font-12-bold;
+      @include font-14-bold;
       margin-right: 4px;
     }
   }
 
   .btn-edit {
-    background: none;
+    @include font-14-bold;
+    background: $main-color;
+    display: flex;
+    color: $white;
+    border-radius: 4px;
+    padding: 4px;
+    gap: 4px;
+    align-items: center;
+    padding-right: 8px;
     cursor: pointer;
+
     img {
       width: 20px;
       height: 20px;
@@ -749,7 +871,8 @@ watch(
 
 // 왼쪽: X-ray
 .left-panel {
-  width: 45%;
+  // width: 45%;
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -820,7 +943,9 @@ watch(
 }
 // 오른쪽: 결과
 .right-panel {
-  width: 55%;
+  // width: 55%;
+  flex: 1;
+  max-width: 729px;
   padding: 20px 24px;
   // overflow-y: auto;
 }
@@ -828,7 +953,8 @@ watch(
 // 최종 예측 키
 .result-summary {
   background: $bg-op;
-  border-radius: $radius-md;
+  border-radius: $radius-xxl;
+  border: $border-op;
   padding: 20px 24px;
   display: flex;
   justify-content: space-between;
@@ -836,14 +962,20 @@ watch(
   margin-bottom: 16px;
 
   .predicted-height {
+    display: flex;
+    align-items: center;
+    gap: 20px;
     .label {
-      @include font-14-regular;
+      @include font-20-bold;
       display: block;
-      margin-bottom: 4px;
+      color: $dark-text;
+      // margin-bottom: 4px;
     }
     .value {
-      font-size: 56px;
+      font-size: 52px;
       font-weight: bold;
+      display: flex;
+      align-items: center;
       small {
         font-size: 20px;
         margin-left: 4px;
@@ -852,12 +984,19 @@ watch(
   }
 
   .age-info {
-    text-align: right;
-    @include font-12-regular;
+    text-align: left;
+    @include font-14-bold;
     line-height: 1.8;
+    .type {
+      width: 95px;
+      display: inline-block;
+    }
     b {
-      @include font-14-bold;
+      @include font-16-bold;
       margin-left: 8px;
+      &.born {
+        font-size: 20px;
+      }
     }
   }
 }
@@ -865,7 +1004,8 @@ watch(
 // 의사 판독
 .doctor-boneage {
   background: $bg-op;
-  border-radius: $radius-md;
+  border-radius: $radius-xxl;
+  border: $border-op;
   padding: 12px 24px;
   display: flex;
   align-items: center;
@@ -874,6 +1014,7 @@ watch(
 
   .label {
     @include font-14-bold;
+    color: $dark-text;
   }
 
   .dropdowns {
@@ -887,7 +1028,20 @@ watch(
       border: 1px solid $dark-line-gray;
       border-radius: $radius-sm;
       padding: 6px 12px;
-      @include font-14-regular;
+      @include font-20-bold;
+
+      // 추가
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url('/assets/icons/dropdown_icon.svg');
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 12px;
+      padding-right: 28px;
+    }
+    span {
+      @include font-14-bold;
     }
   }
 
@@ -900,7 +1054,8 @@ watch(
 // 분석 브리핑
 .analysis-briefing {
   background: $bg-op;
-  border-radius: $radius-md;
+  border-radius: $radius-xxl;
+  border: $border-op;
   padding: 16px 24px;
   margin-bottom: 16px;
 
@@ -922,10 +1077,11 @@ watch(
   .score-card {
     flex: 1;
     background: $bg-op;
-    border-radius: $radius-md;
+    border-radius: $radius-xxl;
+    border: $border-op;
     padding: 16px 24px;
     text-align: center;
-
+    position: relative;
     h4 {
       @include font-14-bold;
       margin-bottom: 12px;
@@ -945,6 +1101,10 @@ watch(
 
     .score-value {
       @include font-14-bold;
+      position: absolute;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
     }
   }
 }
@@ -954,17 +1114,18 @@ watch(
   display: flex;
   gap: 0;
   margin-bottom: 16px;
-  border-bottom: 1px solid $dark-line-gray;
+  // border-bottom: 1px solid $white;
 
   button {
     padding: 12px 24px;
     background: none;
-    color: $dark-text;
+    color: $white;
     @include font-14-regular;
     cursor: pointer;
-    border-bottom: 2px solid transparent;
-
+    border-bottom: 2px solid $white;
+    opacity: 0.2;
     &.active {
+      opacity: 1;
       color: $white;
       @include font-14-bold;
       border-bottom-color: $white;
@@ -975,7 +1136,8 @@ watch(
 // 차트 영역
 .chart-area {
   background: $bg-op;
-  border-radius: $radius-md;
+  border-radius: $radius-xxl;
+  border: $border-op;
   padding: 16px;
   margin-bottom: 16px;
 
@@ -1026,10 +1188,12 @@ watch(
 }
 
 // 예측 키 비교
+// 예측 키 비교
 .predict-area {
   background: $bg-op;
-  border-radius: $radius-md;
-  padding: 20px 24px;
+  border-radius: $radius-xxl;
+  border: $border-op;
+  padding: 36.5px 20px 14px;
   margin-bottom: 16px;
 
   .predict-row {
@@ -1037,41 +1201,107 @@ watch(
     align-items: center;
     gap: 16px;
     margin-bottom: 16px;
-
+    padding-top: 16.5px;
     .predict-label {
       width: 100px;
-      @include font-12-regular;
-      flex-shrink: 0;
-    }
-    .predict-value {
-      width: 80px;
       @include font-14-bold;
       flex-shrink: 0;
+      color: $text-white-70;
+      text-align: center;
     }
-    .slider-bar {
-      flex: 1;
-      height: 8px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
-      position: relative;
-      overflow: hidden;
-
-      .slider-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #00bcd4, #2196f3);
-        border-radius: 4px;
-        transition: width 0.3s;
-      }
-
-      &.final-bar .slider-fill {
-        background: linear-gradient(90deg, #00bcd4, #2196f3, #e0e0e0);
+    .predict-value {
+      width: 100px;
+      @include font-16-bold;
+      flex-shrink: 0;
+      display: flex;
+      gap: 4px;
+      align-items: end;
+      .unit {
+        @include font-14-regular;
       }
     }
 
     &.final {
       margin-top: 16px;
       padding-top: 16px;
-      border-top: 1px solid $dark-line-gray;
+      // border-top: 1px solid $dark-line-gray;
+    }
+  }
+
+  .slider-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .range-label {
+      @include font-12-regular;
+      color: $dark-text;
+      white-space: nowrap;
+    }
+  }
+
+  .slider-bar {
+    flex: 1;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    position: relative;
+
+    .slider-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00bcd4, #2196f3);
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+
+    .slider-handle {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+
+      .dot {
+        width: 15px;
+        height: 15px;
+        background: $white;
+        border-radius: 50%;
+        box-shadow: 0 0 8.6px rgba(255, 255, 255, 0.5);
+      }
+
+      .bubble {
+        position: absolute;
+        bottom: 22px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 0.2s;
+        pointer-events: none;
+
+        .bubble-box {
+          background: $dark-gray-dark;
+          color: $white;
+          @include font-12-regular;
+          padding: 6px 12px;
+          border-radius: 6px;
+          text-align: center;
+          min-width: 36px;
+          color: $text-white-70;
+        }
+
+        .bubble-tail {
+          display: block;
+          width: 12px;
+          height: auto;
+          margin-top: -1px;
+        }
+      }
+    }
+
+    &:hover .slider-handle .bubble {
+      opacity: 1;
     }
   }
 
@@ -1083,9 +1313,9 @@ watch(
     @include font-12-regular;
 
     span {
-      background: $dark-input;
+      background: $white-10;
       padding: 8px 16px;
-      border-radius: $radius-sm;
+      border-radius: $radius-full;
     }
   }
 }
