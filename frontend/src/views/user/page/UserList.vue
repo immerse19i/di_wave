@@ -100,13 +100,21 @@
     </div>
 
     <!-- 페이지네이션 -->
-    <div class="pagination" v-if="pagination.totalPages > 1">
+    <!-- 페이지네이션 -->
+    <div class="pagination">
+      <button
+        class="page-btn arrow"
+        :disabled="pagination.page <= 1"
+        @click="goToPage(1)"
+      >
+        <img src="/assets/icons/arrow_first.svg" alt="first" />
+      </button>
       <button
         class="page-btn arrow"
         :disabled="pagination.page <= 1"
         @click="goToPage(pagination.page - 1)"
       >
-        &lt;
+        <img src="/assets/icons/arrow_prev.svg" alt="prev" />
       </button>
       <button
         v-for="pageNum in visiblePages"
@@ -121,7 +129,14 @@
         :disabled="pagination.page >= pagination.totalPages"
         @click="goToPage(pagination.page + 1)"
       >
-        &gt;
+        <img src="/assets/icons/arrow_next.svg" alt="next" />
+      </button>
+      <button
+        class="page-btn arrow"
+        :disabled="pagination.page >= pagination.totalPages"
+        @click="goToPage(pagination.totalPages)"
+      >
+        <img src="/assets/icons/arrow_last.svg" alt="last" />
       </button>
     </div>
   </div>
@@ -387,6 +402,18 @@ onMounted(() => {
       border-radius: $radius-sm;
       @include font-12-regular;
       cursor: pointer;
+
+      &.arrow {
+        @include font-14-bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        img {
+          width: 16px;
+          height: 16px;
+        }
+      }
 
       &:hover:not(:disabled) {
         background-color: rgba(255, 255, 255, 0.08);
