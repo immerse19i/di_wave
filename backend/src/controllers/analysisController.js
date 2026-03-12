@@ -1,6 +1,9 @@
 const {pool} = require('../config/database');
 const { predictBoneAge} = require('../services/aiService');
 const config = require('../config/config');
+const pdfService = require('../services/pdfService');
+
+
 
 // 분석 요청
 exports.createAnalysis = async (req, res) => {
@@ -345,5 +348,38 @@ await pool.query(
   } catch (error) {
     console.error('분석 수정 오류:', error);
     res.status(500).json({ success: false, message: '수정 중 오류가 발생했습니다.' });
+  }
+};
+
+
+
+exports.generateReport = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const hospitalId = req.user.hospitalId;
+
+    const [rows] = await pool.query(
+      `SELECT a.*, p.name AS patient_name FROM analyses a
+       JOIN patients p ON a.patient_id = p.id
+       WHERE a.id = ? AND a.hospital_id = ?`,
+      [id, hospitalId]
+    );
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: '분석을 찾을 수 없습니다.' });
+    }
+
+    const pdfBuffer = await pdfService.generatePDF(id);
+
+    const patientName = rows[0].patient_name || 'report';
+    const date = new Date(rows[0].created_at).toISOString().slice(0, 10).replace(/-/g, '');
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition',
+      `attachment; filename="${encodeURIComponent(patientName)}_${date}_report.pdf"`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error('PDF 생성 오류:', error);
+    res.status(500).json({ success: false, message: 'PDF 생성에 실패했습니다.' });
   }
 };
