@@ -27,7 +27,7 @@ function generateReportHTML(data) {
     return { years, months };
   };
 
-  // ===== 백분위 계산 (ReportViewer.vue L689-717 이식) =====
+  // ===== 백분위 계산 =====
   const getPercentile = (value, data, months, gender) => {
     if (!value || !gender) return 0;
     const gData = gender === 'M' ? data.male : data.female;
@@ -104,7 +104,7 @@ function generateReportHTML(data) {
   const diffText = (diffY > 0 ? `${diffY}세 ` : '') + `${String(diffMo).padStart(2, '0')}개월`;
   const ageDiffText = `뼈나이가 ${diffText} ${diff >= 0 ? '많습니다' : '적습니다'}.`;
 
-  // 현재키의 18세 예측값 (같은 백분위 유지 시)
+  // 현재키의 18세 예측값
   const getCurrentHeightPredicted18 = () => {
     const gData = gender === 'M' ? growthHeight.male : growthHeight.female;
     const p = heightPercentile;
@@ -127,6 +127,39 @@ function generateReportHTML(data) {
 
   const predicted18 = getCurrentHeightPredicted18();
 
+  // 파일 ID
+  const fileId = `${analysis.patient_name}_${formatDate(analysis.birth_date, '')}_a${analysis.id}`;
+
+  // ===== 게이지 행 헬퍼 =====
+  const gaugeRowHTML = (label, value, unit, percentile) => `
+    <div class="gauge-row">
+      <div class="gauge-label-box">${label}</div>
+      <span class="gauge-value"><strong>${value || '-'}</strong> ${unit}</span>
+      <div class="gauge-bar-wrapper">
+        <div class="small_img">
+          <img class="dino-small" src="${baseUrl}/report-assets/dino_marker_small.png" />
+          <span>작음(0)</span>
+        </div>
+        <div class="gauge-bar">
+          <div class="gauge-fill" style="width: ${percentile}%"></div>
+          <div class="gauge-marker" style="left: ${percentile}%">
+            <span class="marker-value">${percentile}</span>
+            <img src="${baseUrl}/report-assets/dino_marker_progress.png" />
+          </div>
+        </div>
+        <div class="tall_img">
+          <img class="dino-tall" src="${baseUrl}/report-assets/dino_marker_tall.png" />
+          <span>큼(100)</span>
+        </div>
+      </div>
+    </div>`;
+
+  // 레벨바 헬퍼
+  const levelBarHTML = (levels, activeLevel) =>
+    `<div class="level-bar level-${levels.length}">
+      ${levels.map(l => `<span class="${l === activeLevel ? 'active' : ''}">${l}</span>`).join('')}
+    </div>`;
+
   // ===== HTML 생성 =====
   return `<!DOCTYPE html>
 <html>
@@ -134,6 +167,14 @@ function generateReportHTML(data) {
   <meta charset="UTF-8">
   <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
   <style>
+  @font-face {
+  font-family: 'Cafe24Ssurround';
+  src: url('${baseUrl}/report-fonts/Cafe24Ssurround-v2.0.woff2') format('woff2'),
+       url('${baseUrl}/report-fonts/Cafe24Ssurround-v2.0.woff') format('woff'),
+       url('${baseUrl}/report-fonts/Cafe24Ssurround-v2.0.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
     @page { size: A4; margin: 0; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { margin: 0; font-family: 'Pretendard', sans-serif; background: #fff; }
@@ -142,40 +183,205 @@ function generateReportHTML(data) {
       width: 210mm; height: 297mm;
       page-break-after: always;
       overflow: hidden; position: relative;
+      background: #fff;
+      font-family: 'Pretendard', sans-serif;
+      color: #333;
     }
     .pdf-page:last-child { page-break-after: auto; }
 
-    /* ===== 여기에 ReportViewer.vue의 scoped CSS를 순수 CSS로 변환하여 붙여넣기 ===== */
-    /* $pdf-grad → linear-gradient(270deg, #2DB7AE 0%, #285989 100%) */
-    /* 기타 SCSS 변수 → 실제 값으로 치환 */
+    /* ===== 공통 헤더/상단 ===== */
+    .page-header { width: 100%; display: block; }
+    .page-top-info {
+      display: flex; justify-content: flex-end; gap: 16px;
+      padding: 8px 40px; font-size: 11px; color: #666;
+    }
+    .page-top-info .hospital { font-weight: bold; color: #333; }
 
-    /* 커버 페이지 */
-    .cover-page { display: flex; flex-direction: column; align-items: center; padding-top: 120px; }
-    .cover-logo { width: 135px; }
-    .cover-title { font-size: 48px; text-align: center; color: #FF8C42; margin-top: 40px; line-height: 1.3; }
-    .cover-info-box { border: 2px solid #4a90d9; border-radius: 8px; padding: 20px 40px; margin-top: 60px; }
-    .cover-info-box .info-row { display: flex; gap: 20px; margin: 8px 0; }
-    .cover-info-box .label { color: #4a90d9; font-weight: 600; min-width: 80px; }
-    .cover-info-box .value { font-weight: 500; }
-    .cover-bg { display: none; }
-    .cover-diwave { width: 140px; position: absolute; bottom: 40px; right: 40px; }
+    /* ===== 1페이지: 커버 ===== */
+    .cover-page {
+      display: flex; flex-direction: column; align-items: center;
+    }
+.cover-logo { display: block; width: 135px; margin-top: 142px; margin-bottom: 12px; position: relative; z-index: 1; }
+.cover-title {
+  font-family: 'Cafe24Ssurround', 'Pretendard', sans-serif;
+  text-align: center; font-size: 48px; font-weight: 700;
+  line-height: 1; color: #ff7f2f; position: relative; z-index: 1;
+}
+    .cover-title::after {
+      -webkit-text-stroke: 8px #ffffff;
+      content: '쑥쑥 성장\\A로드맵 보고서'; white-space: pre;
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%); width: 100%; z-index: -1;
+    }
+.cover-info-box {
+  border: 2px solid #4a90d9; border-radius: 10px;
+  padding: 18px 36px; display: inline-block;
+  position: absolute; top: 50%; z-index: 1;
+}
+    .cover-info-box .info-row {
+      display: flex; gap: 16px; margin: 6px 0; font-size: 15px;
+    }
+    .cover-info-box .label { font-weight: 700; min-width: 80px; color: #4a90d9; }
+    .cover-info-box .value { color: #333; }
+    .cover-bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+    .cover-diwave { width: 140px; position: absolute; bottom: 50px; z-index: 1; }
 
-    /* 페이지 헤더 */
-    .page-header { width: 100%; }
+    /* ===== 2페이지: 환자정보 ===== */
+    .patient-info {
+      display: flex; padding: 16px; list-style: none;
+      border-top: 1px solid #dfe1e7; border-bottom: 1px solid #dfe1e7;
+      max-width: 544px; margin: auto; justify-content: center; word-break: keep-all;
+    }
+    .patient-info li {
+      display: flex; flex-direction: column; gap: 10px;
+      padding-right: 28px; padding-left: 28px;
+      border-right: 1px solid #dfe1e7;
+    }
+    .patient-info li:first-child { padding-left: 0; }
+    .patient-info li:last-child { border-right: none; padding-right: 0; }
+    .patient-info .tit { font-size: 12px; font-weight: 400; color: #383838; }
+    .patient-info .value { font-size: 16px; font-weight: 700; color: #383838; }
 
-    /* 게이지 바 */
-    .gauge-bar-wrapper { display: flex; align-items: center; gap: 8px; }
-    .gauge-bar { flex: 1; height: 20px; background: #e0e0e0; border-radius: 10px; position: relative; }
-    .gauge-fill { height: 100%; border-radius: 10px; background: linear-gradient(270deg, #2DB7AE 0%, #285989 100%); }
-    .gauge-marker { position: absolute; top: -8px; transform: translateX(-50%); }
+    /* 나이/스코어 */
+    .age-score-section { padding: 16px 0; max-width: 555px; margin: auto; }
+    .age-row {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 400; margin-bottom: 12px;
+      background: #f6f6f6; border-radius: 999px; padding: 11px 20px;
+      color: #383838; gap: 12px;
+    }
+    .age-row span { display: flex; align-items: center; }
+    .age-row .age-arrow { max-width: 22px; }
+    .age-row .age-arrow img { width: 100%; }
+    .age-row .age-diff { color: #383838; font-size: 10px; }
+    .age-row strong { font-weight: 700; font-size: 20px; }
+    .score-row {
+      display: flex; gap: 64px; font-size: 14px;
+      background-color: #f6f6f6; border-radius: 999px;
+      padding: 8px; color: #383838; font-weight: 400;
+      justify-content: center; align-items: center;
+    }
+    .score-row span { display: flex; align-items: center; gap: 23px; }
+    .score-row strong { font-size: 20px; font-weight: 700; }
 
-    /* ... 나머지 CSS ... */
+    /* ===== 게이지 바 ===== */
+    .gauge-section { padding: 0 40px; }
+    .gauge-section .section-title { font-size: 16px; font-weight: 700; margin: 15px 0 10px; }
+    .gauge-row {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+    }
+    .gauge-label-box {
+      width: 104px; height: 46px; display: flex;
+      justify-content: center; align-items: center;
+      padding: 6px 8px; border-radius: 8px; text-align: center;
+      font-size: 11px; font-weight: 700; color: #fff; line-height: 1;
+      background: linear-gradient(270deg, #2DB7AE 0%, #285989 100%);
+    }
+    .gauge-value { width: 80px; text-align: center; font-size: 13px; }
+    .gauge-value strong { font-size: 18px; }
+    .gauge-bar-wrapper {
+      flex: 1; display: flex; align-items: center; gap: 6px;
+    }
+    .small_img, .tall_img {
+      display: flex; flex-direction: column; align-items: center; flex-shrink: 0;
+    }
+    .small_img span, .tall_img span { font-size: 10px; color: #888; white-space: nowrap; }
+    .dino-small { width: 32px; }
+    .dino-tall { width: 40px; }
+    .gauge-bar {
+      flex: 1; height: 16px; border-radius: 8px; position: relative;
+      background: linear-gradient(270deg, #2DB7AE 0%, #285989 100%);
+    }
+    .gauge-fill { height: 100%; border-radius: 8px; background: transparent; }
+    .gauge-marker {
+      position: absolute; top: -28px; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .gauge-marker .marker-value { font-size: 12px; font-weight: 700; }
+    .gauge-marker img { width: 32px; max-width: unset; }
+
+    /* 보정량 */
+    .correction-row { display: flex; justify-content: center; gap: 30px; margin: 6px 0; }
+    .correction {
+      padding: 4px 14px; border: 1px solid #ddd;
+      border-radius: 20px; font-size: 11px; color: #666;
+    }
+
+    /* 스코어 설명 */
+    .score-desc {
+      padding: 10px 40px; font-size: 10px; color: #666;
+      line-height: 1; border-top: 1px solid #eee; margin-top: 8px;
+    }
+    .score-desc p { margin: 4px 0; }
+    .score-desc strong { color: #333; }
+
+    /* ===== 3페이지: 건강 게이지 ===== */
+    .health-gauge { padding: 8px 40px; }
+    .health-gauge .health-title { font-size: 15px; margin-bottom: 6px; }
+    .health-gauge .health-title strong { font-size: 20px; }
+    .health-gauge .health-desc { font-size: 9px; color: #888; margin: 4px 0 0; line-height: 1.5; }
+
+    .level-bar {
+      display: flex; border-radius: 4px; overflow: hidden;
+    }
+    .level-bar span {
+      flex: 1; padding: 8px 4px; text-align: center;
+      font-size: 12px; background: #f0f0f0; color: #999;
+      border-right: 1px solid #ddd;
+    }
+    .level-bar span:last-child { border-right: none; }
+    .level-bar span.active {
+      background: linear-gradient(270deg, #2DB7AE 0%, #285989 100%);
+      color: #fff; font-weight: 700;
+    }
+
+    /* ===== 차트 ===== */
+    .chart-section { padding: 10px 40px; }
+    .chart-section.half { padding: 6px 40px; }
+    .chart-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .chart-title strong { color: #333; }
+    .percentile-text { font-size: 13px; margin: 2px 0 8px; }
+    .percentile-text strong { color: #4a90d9; }
+
+    .chart-with-desc { display: flex; gap: 12px; align-items: flex-start; }
+    .chart-with-desc canvas { border: 1px solid #eee; border-radius: 4px; }
+    .chart-desc-box {
+      width: 210px; padding: 12px; background: #f8f9fa;
+      border-radius: 6px; font-size: 11px; color: #666; line-height: 1.5;
+    }
+    .chart-desc-box strong { display: block; color: #333; margin-bottom: 4px; }
+
+    .chart-legend {
+      display: flex; align-items: center; gap: 16px;
+      justify-content: center; margin-top: 6px; font-size: 11px; color: #666;
+    }
+    .legend-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      display: inline-block; margin-right: 4px;
+    }
+    .legend-dot.current { background: #4ecdc4; }
+    .legend-dot.predicted { background: #ff6b6b; }
+
+    /* ===== 5페이지: 면책 ===== */
+    .disclaimer {
+      position: absolute; bottom: 30px; left: 40px; right: 40px;
+      font-size: 10px; color: #888; line-height: 1.6;
+    }
+    .disclaimer strong { color: #333; }
   </style>
 </head>
 <body>
 
   <!-- ===== 1페이지: 커버 ===== -->
   <div class="pdf-page cover-page">
+  <img class="cover-bg" src="${baseUrl}/report-assets/cover.png" />
+  <img class="cover-diwave" src="${baseUrl}/report-assets/diwave_logo.svg" />
     <img class="cover-logo" src="${baseUrl}/report-assets/osteoage_logo.svg" />
     <h1 class="cover-title">쑥쑥 성장<br/>로드맵 보고서</h1>
     <div class="cover-info-box">
@@ -183,48 +389,172 @@ function generateReportHTML(data) {
       <div class="info-row"><span class="label">검사일자</span><span class="value">${formatDate(analysis.created_at)}</span></div>
       <div class="info-row"><span class="label">검사병원</span><span class="value">${hospitalName}</span></div>
     </div>
-    <img class="cover-diwave" src="${baseUrl}/report-assets/diwave_logo.svg" />
   </div>
 
   <!-- ===== 2페이지: 분석 결과 요약 ===== -->
   <div class="pdf-page">
     <img class="page-header" src="${baseUrl}/report-assets/header.svg" />
-    <!-- 환자정보, 나이, 스코어, 게이지 4종 -->
-    <!-- ReportViewer.vue L56-339의 HTML을 그대로 이식하되, -->
-    <!-- Vue 바인딩({{ }})을 템플릿 리터럴(${})로 변환 -->
+    <div class="page-top-info">
+      <span class="hospital">${hospitalName}</span>
+      <span>${fileId}</span>
+      <span>검사일 ${formatDate(analysis.created_at)}</span>
+    </div>
 
-    <!-- 예시: 게이지 하나 -->
-    <div class="gauge-row">
-      <span>현재 키</span>
-      <span><strong>${analysis.height}</strong> cm</span>
-      <div class="gauge-bar-wrapper">
-        <div class="gauge-bar">
-          <div class="gauge-fill" style="width: ${heightPercentile}%"></div>
-        </div>
+    <ul class="patient-info">
+      <li><div class="tit">성명</div><div class="value">${analysis.patient_name}</div></li>
+      <li><div class="tit">성별</div><div class="value">${gender === 'M' ? '남' : '여'}</div></li>
+      <li><div class="tit">생년월일</div><div class="value">${formatDate(analysis.birth_date)}</div></li>
+      <li><div class="tit">키</div><div class="value">${analysis.height} cm</div></li>
+      <li><div class="tit">몸무게</div><div class="value">${analysis.weight} kg</div></li>
+    </ul>
+
+    <div class="age-score-section">
+      <div class="age-row">
+        <span>만나이 <strong>${age.years}세 ${String(age.months).padStart(2, '0')}개월</strong></span>
+        <span class="age-arrow"><img src="${baseUrl}/report-assets/dino_marker_small.png" style="width:22px;transform:rotate(180deg)" /></span>
+        <span>뼈 나이(AI) <strong>${analysis.bone_age_years}세 ${String(analysis.bone_age_months || 0).padStart(2, '0')}개월</strong></span>
+        <span class="age-diff">${ageDiffText}</span>
+      </div>
+      <div class="score-row">
+        <span>Height Score <strong>${resultData?.Height_Score || '-'}/100점</strong></span>
+        <span>Potential Score <strong>${resultData?.Potential_Score || '-'}/100점</strong></span>
       </div>
     </div>
 
-    <!-- ... 나머지 게이지 (유전기반, 뼈나이기반, 최종예측키) ... -->
+    <div class="gauge-section">
+      <h3 class="section-title">우리 아이 결과표 (백분위)</h3>
+      ${gaugeRowHTML('현재 키', analysis.height, 'cm', heightPercentile)}
+      ${gaugeRowHTML('유전 기반<br/>예측 키', resultData?.Genetic_Predicted_Height || '-', 'cm', geneticPercentile)}
+      ${gaugeRowHTML('뼈나이 기반<br/>예측 키', resultData?.Growth_Curve_Predicted_Height || '-', 'cm', boneAgePercentile)}
+
+      <div class="correction-row">
+        <span class="correction">유전기반 보정량 : ${resultData?.Delta_Genetic >= 0 ? '+' : ''}${resultData?.Delta_Genetic}cm</span>
+        <span class="correction">성숙도 기반 보정량 : ${resultData?.Delta_Maturity >= 0 ? '+' : ''}${resultData?.Delta_Maturity}cm</span>
+      </div>
+
+      ${gaugeRowHTML('최종 예측 키', resultData?.Final_Predicted_Height || '-', 'cm', finalPercentile)}
+    </div>
+
+    <div class="score-desc">
+      <p><strong>Height Score</strong><br/>동일 연령 및 성별 대비 현재 신장의 위치(백분위)를 나타내는 점수입니다. 100점에 가까울수록 또래 100명 중 신장이 큰 편에 속함을 의미합니다.</p>
+      <p><strong>Potential Score</strong><br/>실제 나이 대비 골연령의 성숙도를 바탕으로 산출된 향후 성장 여력 점수입니다.<br/>· 골연령이 실제 나이보다 낮아 성숙이 느릴수록(Late Maturity) 점수가 높으며, 이는 앞으로 성장할 수 있는 잠재적 시간이 더 많이 남았음을 시사합니다.<br/>· 범위: 뼈의 성숙도 차이를 0~100점으로 환산하며, 50점은 평균적인 성숙 속도를 의미합니다.</p>
+    </div>
   </div>
 
-  <!-- ===== 3페이지: 체중/BMI/비만도 + 차트 ===== -->
+  <!-- ===== 3페이지: 체중/BMI/비만도 + 현재키 기반 예측 키 ===== -->
   <div class="pdf-page">
-    <!-- 체중: ${analysis.weight} kg, 판정: ${weightLevel} -->
-    <!-- BMI: ${bmiValue}, 판정: ${bmiLevel} -->
-    <!-- 비만도: ${obesityRate}%, 판정: ${obesityLevel} -->
-    <canvas id="chart3" width="340" height="240"></canvas>
+    <img class="page-header" src="${baseUrl}/report-assets/header.svg" />
+    <div class="page-top-info">
+      <span class="hospital">${hospitalName}</span>
+      <span>${fileId}</span>
+      <span>검사일 ${formatDate(analysis.created_at)}</span>
+    </div>
+
+    <div class="health-gauge">
+      <div class="health-title">체중 <strong>${analysis.weight} kg</strong></div>
+      ${levelBarHTML(['저체중', '정상', '과체중', '비만'], weightLevel)}
+      <p class="health-desc">정상: 연령별 체중 5백분위수 이상이고, 연령별 체질량 지수 85백분위수 미만<br/>저체중: 연령별 체중 5백분위수 미만<br/>과체중: 연령별 체질량 지수 85 ~ 95백분위수<br/>비만: 연령별 체질량 지수 95백분위수 이상</p>
+    </div>
+
+    <div class="health-gauge">
+      <div class="health-title">체질량 지수 <strong>${bmiValue} kg/m&sup2;</strong></div>
+      ${levelBarHTML(['저체중', '정상', '과체중', '비만'], bmiLevel)}
+      <p class="health-desc">체질량 지수(BMI: Body Mass Index) = 체중(kg) / (키(m) x 키(m))<br/>체질량 지수 기준 : 5th 미만(저체중) / 5th ~ 84th(정상) / 85th ~ 94th(과체중) / 95th 이상(비만)</p>
+    </div>
+
+    <div class="health-gauge">
+      <div class="health-title">비만도 <strong>${obesityRate} %</strong></div>
+      ${levelBarHTML(['저체중', '정상', '경도비만', '중등도비만', '고도비만'], obesityLevel)}
+      <p class="health-desc">비만도 (%) = 표준 체중 대비 백분율(%) = 측정 체중 / 표준 체중 x 100<br/>비만도 기준 : 90미만(저체중) / 90~119(정상) / 120~129(경도비만) / 130~149(중등도비만) / 150이상(고도비만)</p>
+    </div>
+
+    <div class="chart-section">
+      <h3 class="chart-title">현재 키 기반 예측 키</h3>
+      <p class="percentile-text">백분위 <strong>${heightPercentile}</strong> : 큰 순서로 상위 <strong>${100 - heightPercentile}%</strong>에 해당하는 키 입니다.</p>
+      <div class="chart-with-desc">
+        <canvas id="chart3" width="480" height="340"></canvas>
+        <div class="chart-desc-box">
+          <strong>현재 키 기반 예측 키</strong>
+          질병관리청 성장도표를 기반으로 현재의 성장 속도가 성인이 될 때까지 유지될 경우를 예측한 결과입니다.
+        </div>
+      </div>
+      <div class="chart-legend">
+        <span class="legend-dot current"></span> 현재 키 백분위
+        <span class="legend-dot predicted"></span> 예측 키 백분위
+      </div>
+    </div>
   </div>
 
-  <!-- ===== 4페이지: 유전기반 + 뼈나이기반 차트 ===== -->
+  <!-- ===== 4페이지: 유전 기반 + 뼈나이 기반 ===== -->
   <div class="pdf-page">
-    <canvas id="chart4a" width="340" height="190"></canvas>
-    <canvas id="chart4b" width="340" height="190"></canvas>
+    <img class="page-header" src="${baseUrl}/report-assets/header.svg" />
+    <div class="page-top-info">
+      <span class="hospital">${hospitalName}</span>
+      <span>${fileId}</span>
+      <span>검사일 ${formatDate(analysis.created_at)}</span>
+    </div>
+
+    <div class="chart-section half">
+      <h3 class="chart-title">유전 기반 예측 키 <strong>${resultData?.Genetic_Predicted_Height ? resultData.Genetic_Predicted_Height + 'cm' : '-'}</strong></h3>
+      <p class="percentile-text">${resultData?.Genetic_Predicted_Height
+        ? `백분위 <strong>${geneticPercentile}</strong> : 큰 순서로 상위 <strong>${100 - geneticPercentile}%</strong>에 해당하는 키 입니다.`
+        : '백분위 <strong>-</strong> : 큰 순서로 상위 <strong>-%</strong>에 해당하는 키 입니다.'}</p>
+      <div class="chart-with-desc">
+        <canvas id="chart4a" width="480" height="270"></canvas>
+        <div class="chart-desc-box">
+          <strong>유전 기반 예측 키</strong>
+          부모의 신장을 바탕으로 산출된 자녀의 유전적 기대 신장(Mid-Parental Height)입니다.
+        </div>
+      </div>
+      <div class="chart-legend">
+        <span class="legend-dot current"></span> 현재 키 백분위
+        <span class="legend-dot predicted"></span> 예측 키 백분위
+      </div>
+    </div>
+
+    <div class="chart-section half">
+      <h3 class="chart-title">뼈나이 기반 예측 키 <strong>${resultData?.Growth_Curve_Predicted_Height}cm</strong></h3>
+      <p class="percentile-text">백분위 <strong>${boneAgePercentile}</strong> : 큰 순서로 상위 <strong>${100 - boneAgePercentile}%</strong>에 해당하는 키 입니다.</p>
+      <div class="chart-with-desc">
+        <canvas id="chart4b" width="480" height="270"></canvas>
+        <div class="chart-desc-box">
+          <strong>뼈나이 기반 예측 키</strong>
+          AI가 판독한 뼈나이 값과 현재 키를 사용하여 추정한 값입니다.
+        </div>
+      </div>
+      <div class="chart-legend">
+        <span class="legend-dot current"></span> 현재 키 백분위
+        <span class="legend-dot predicted"></span> 예측 키 백분위
+      </div>
+    </div>
   </div>
 
-  <!-- ===== 5페이지: 최종 예측키 + 면책 ===== -->
+  <!-- ===== 5페이지: 최종 예측 키 ===== -->
   <div class="pdf-page">
-    <canvas id="chart5" width="340" height="240"></canvas>
-    <p class="disclaimer">본 분석 결과는 ...</p>
+    <img class="page-header" src="${baseUrl}/report-assets/header.svg" />
+    <div class="page-top-info">
+      <span class="hospital">${hospitalName}</span>
+      <span>${fileId}</span>
+      <span>검사일 ${formatDate(analysis.created_at)}</span>
+    </div>
+
+    <div class="chart-section">
+      <h3 class="chart-title">최종 예측 키 <strong>${resultData?.Final_Predicted_Height}cm</strong></h3>
+      <p class="percentile-text">백분위 <strong>${finalPercentile}</strong> : 큰 순서로 상위 <strong>${100 - finalPercentile}%</strong>에 해당하는 키 입니다.</p>
+      <div class="chart-with-desc">
+        <canvas id="chart5" width="480" height="340"></canvas>
+        <div class="chart-desc-box">
+          <strong>최종 예측 키</strong>
+          표준 성장 곡선 기반 예측 키에 유전적 요인 및 골연령 성숙도를 반영하여 보정한 최종 예측키 입니다.
+        </div>
+      </div>
+      <div class="chart-legend">
+        <span class="legend-dot current"></span> 현재 키 백분위
+        <span class="legend-dot predicted"></span> 예측 키 백분위
+      </div>
+    </div>
+
+    <p class="disclaimer">성인 예측 키는 현재 시점의 데이터를 바탕으로 산출된 통계적 참고치입니다. Osteoage는 <strong>한국인 소아·청소년의 표준 데이터를 학습</strong>하여 기존 해외 데이터 기반 모델보다 정밀한 분석을 제공합니다. 그러나 아이의 건강 상태나 성장 치료 여부, 기타 환경적 요인에 따라 실제 성장은 예측 결과와 다를 수 있으므로, 최종적인 의학적 판단은 반드시 전문의와 상담하시기 바랍니다.</p>
   </div>
 
   <!-- ===== 6~15페이지: 공통 이미지 ===== -->
@@ -236,48 +566,49 @@ function generateReportHTML(data) {
 
   <!-- ===== 차트 그리기 스크립트 ===== -->
   <script>
-    // drawGrowthChart: ReportViewer.vue L826-950 그대로 이식
     function drawGrowthChart(canvas, options) {
       if (!canvas) return;
-      const { genderData, currentAge, currentHeight, predictedAge, predictedHeight, xLabel } = options;
-      const ctx = canvas.getContext('2d');
-      const W = canvas.width, H = canvas.height;
-      const margin = { top: 20, right: 10, bottom: 40, left: 50 };
-      const plotW = W - margin.left - margin.right;
-      const plotH = H - margin.top - margin.bottom;
-      const xMin = 36, xMax = 216;
-      const yMin = 70, yMax = 185;
-      const toX = (m) => margin.left + ((m - xMin) / (xMax - xMin)) * plotW;
-      const toY = (v) => margin.top + ((yMax - v) / (yMax - yMin)) * plotH;
+      var genderData = options.genderData;
+      var currentAge = options.currentAge;
+      var currentHeight = options.currentHeight;
+      var predictedAge = options.predictedAge;
+      var predictedHeight = options.predictedHeight;
+      var xLabel = options.xLabel;
+      var ctx = canvas.getContext('2d');
+      var W = canvas.width, H = canvas.height;
+      var margin = { top: 20, right: 10, bottom: 40, left: 50 };
+      var plotW = W - margin.left - margin.right;
+      var plotH = H - margin.top - margin.bottom;
+      var xMin = 36, xMax = 216;
+      var yMin = 70, yMax = 185;
+      function toX(m) { return margin.left + ((m - xMin) / (xMax - xMin)) * plotW; }
+      function toY(v) { return margin.top + ((yMax - v) / (yMax - yMin)) * plotH; }
 
       ctx.fillStyle = '#fff';
       ctx.fillRect(0, 0, W, H);
 
-      // 그리드
       ctx.strokeStyle = '#f0f0f0'; ctx.lineWidth = 0.5;
-      for (let y = yMin; y <= yMax; y += 10) {
+      for (var y = yMin; y <= yMax; y += 10) {
         ctx.beginPath(); ctx.moveTo(margin.left, toY(y));
         ctx.lineTo(W - margin.right, toY(y)); ctx.stroke();
       }
 
-      // 백분위 라인
-      const pKeys = ['p3','p5','p10','p25','p50','p75','p90','p95','p97'];
-      const pLabels = { p3:'3rd', p5:'5th', p10:'10th', p25:'25th', p50:'50th', p75:'75th', p90:'90th', p95:'95th', p97:'97th' };
-      const filtered = genderData.filter(d => d.month >= xMin && d.month <= xMax);
+      var pKeys = ['p3','p5','p10','p25','p50','p75','p90','p95','p97'];
+      var pLabels = { p3:'3rd', p5:'5th', p10:'10th', p25:'25th', p50:'50th', p75:'75th', p90:'90th', p95:'95th', p97:'97th' };
+      var filtered = genderData.filter(function(d) { return d.month >= xMin && d.month <= xMax; });
 
-      pKeys.forEach(key => {
-        const is50 = key === 'p50';
+      pKeys.forEach(function(key) {
+        var is50 = key === 'p50';
         ctx.beginPath();
         ctx.strokeStyle = is50 ? '#4A90D9' : '#c0c0c0';
         ctx.lineWidth = is50 ? 2 : 1;
         if (!is50) ctx.setLineDash([4, 3]); else ctx.setLineDash([]);
-        filtered.forEach((d, i) => {
-          const x = toX(d.month), y = toY(d[key]);
+        filtered.forEach(function(d, i) {
+          var x = toX(d.month), y = toY(d[key]);
           i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
         });
         ctx.stroke(); ctx.setLineDash([]);
-
-        const last = filtered[filtered.length - 1];
+        var last = filtered[filtered.length - 1];
         if (last) {
           ctx.fillStyle = is50 ? '#4A90D9' : '#999';
           ctx.font = is50 ? 'bold 10px Pretendard' : '9px Pretendard';
@@ -285,41 +616,35 @@ function generateReportHTML(data) {
         }
       });
 
-      // X축
       ctx.strokeStyle = '#666'; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(margin.left, H - margin.bottom);
       ctx.lineTo(W - margin.right, H - margin.bottom); ctx.stroke();
       ctx.fillStyle = '#333'; ctx.font = '10px Pretendard'; ctx.textAlign = 'center';
-      for (let a = 3; a <= 18; a++) ctx.fillText(String(a), toX(a * 12), H - margin.bottom + 15);
+      for (var a = 3; a <= 18; a++) ctx.fillText(String(a), toX(a * 12), H - margin.bottom + 15);
       ctx.fillText(xLabel || '만 나이(세)', W / 2, H - 5);
 
-      // Y축
       ctx.beginPath(); ctx.moveTo(margin.left, margin.top);
       ctx.lineTo(margin.left, H - margin.bottom); ctx.stroke();
       ctx.textAlign = 'right';
-      for (let y = yMin; y <= yMax; y += 10) ctx.fillText(String(y), margin.left - 5, toY(y) + 4);
+      for (var y2 = yMin; y2 <= yMax; y2 += 10) ctx.fillText(String(y2), margin.left - 5, toY(y2) + 4);
       ctx.save(); ctx.translate(12, H / 2); ctx.rotate(-Math.PI / 2);
       ctx.textAlign = 'center'; ctx.fillText('신장(cm)', 0, 0); ctx.restore();
 
-      // 현재 키 점 (초록)
       if (currentAge && currentHeight) {
         ctx.beginPath(); ctx.fillStyle = '#4ECDC4';
         ctx.arc(toX(currentAge), toY(currentHeight), 6, 0, Math.PI * 2); ctx.fill();
       }
-      // 예측 키 점 (빨강)
       if (predictedAge && predictedHeight) {
         ctx.beginPath(); ctx.fillStyle = '#FF6B6B';
         ctx.arc(toX(predictedAge), toY(predictedHeight), 6, 0, Math.PI * 2); ctx.fill();
       }
     }
 
-    // 성장 데이터
-    const gData = ${JSON.stringify(gender === 'M' ? growthHeight.male : growthHeight.female)};
-    const curAgeM = ${ageMonths};
-    const curH = ${parseFloat(analysis.height)};
-    const boneAgeM = ${boneM};
+    var gData = ${JSON.stringify(gender === 'M' ? growthHeight.male : growthHeight.female)};
+    var curAgeM = ${ageMonths};
+    var curH = ${parseFloat(analysis.height)};
+    var boneAgeM = ${boneM};
 
-    // 4개 차트 그리기
     drawGrowthChart(document.getElementById('chart3'), {
       genderData: gData, currentAge: curAgeM, currentHeight: curH,
       predictedAge: 216, predictedHeight: ${predicted18}, xLabel: '만 나이(세)'
@@ -346,7 +671,6 @@ function generateReportHTML(data) {
       xLabel: '만 나이(세)'
     });
 
-    // ★ Puppeteer 완료 플래그
     window.__reportReady = true;
   </script>
 </body>

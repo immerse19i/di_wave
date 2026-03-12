@@ -356,7 +356,7 @@ await pool.query(
 exports.generateReport = async (req, res) => {
   try {
     const { id } = req.params;
-    const hospitalId = req.user.hospitalId;
+    const hospitalId = req.user.hospital_id;
 
     const [rows] = await pool.query(
       `SELECT a.*, p.name AS patient_name FROM analyses a
