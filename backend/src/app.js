@@ -61,7 +61,6 @@ const permissionRoutes = require('./routes/permissions');
 app.use('/api/admin/permissions', permissionRoutes);
 
 app.use('/report-fonts', express.static(path.join(__dirname, '..', 'public', 'fonts')));
-
 const { generateReportHTML } = require('./templates/reportTemplate');
 const { pool } = require('./config/database');
 const growthHeightData = require('./data/growth_height.json');

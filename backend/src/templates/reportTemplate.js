@@ -167,23 +167,28 @@ function generateReportHTML(data) {
   <meta charset="UTF-8">
   <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
   <style>
-  @font-face {
-  font-family: 'Cafe24Ssurround';
-  src: url('${baseUrl}/report-fonts/Cafe24Ssurround-v2.0.woff2') format('woff2'),
-       url('${baseUrl}/report-fonts/Cafe24Ssurround-v2.0.woff') format('woff'),
-       url('${baseUrl}/report-fonts/Cafe24Ssurround-v2.0.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
+    @font-face {
+      font-family: 'Cafe24Ssurround';
+      src: url('${baseUrl}/report-fonts/Cafe24Ssurround-v2.0.woff2') format('woff2'),
+           url('${baseUrl}/report-fonts/Cafe24Ssurround-v2.0.woff') format('woff'),
+           url('${baseUrl}/report-fonts/Cafe24Ssurround-v2.0.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
     @page { size: A4; margin: 0; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { margin: 0; font-family: 'Pretendard', sans-serif; background: #fff; }
+    body {
+      margin: 0; font-family: 'Pretendard', sans-serif; background: #fff;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
 
     .pdf-page {
-      width: 210mm; height: 297mm;
+      width: 595px; height: 842px;
       page-break-after: always;
       overflow: hidden; position: relative;
-      background: #fff;
+      background: #fff; padding: 0;
       font-family: 'Pretendard', sans-serif;
       color: #333;
     }
@@ -201,36 +206,37 @@ function generateReportHTML(data) {
     .cover-page {
       display: flex; flex-direction: column; align-items: center;
     }
-.cover-logo { display: block; width: 135px; margin-top: 142px; margin-bottom: 12px; position: relative; z-index: 1; }
-.cover-title {
-  font-family: 'Cafe24Ssurround', 'Pretendard', sans-serif;
-  text-align: center; font-size: 48px; font-weight: 700;
-  line-height: 1; color: #ff7f2f; position: relative; z-index: 1;
-}
-    .cover-title::after {
+    .cover-page .cover-bg {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; z-index: 0;
+    }
+    .cover-page .cover-logo {
+      display: block; width: 135px; margin-top: 142px; margin-bottom: 12px;
+      position: relative; z-index: 1;
+    }
+    .cover-page .cover-title {
+      font-family: 'Cafe24Ssurround', 'Pretendard', sans-serif;
+      text-align: center; font-size: 48px; font-weight: 700;
+      line-height: 1; color: #ff7f2f; position: relative; z-index: 1;
+    }
+    .cover-page .cover-title::after {
       -webkit-text-stroke: 8px #ffffff;
       content: '쑥쑥 성장\\A로드맵 보고서'; white-space: pre;
       position: absolute; top: 50%; left: 50%;
       transform: translate(-50%, -50%); width: 100%; z-index: -1;
     }
-.cover-info-box {
-  border: 2px solid #4a90d9; border-radius: 10px;
-  padding: 18px 36px; display: inline-block;
-  position: absolute; top: 50%; z-index: 1;
-}
-    .cover-info-box .info-row {
+    .cover-page .cover-info-box {
+      border: 2px solid #4a90d9; border-radius: 10px;
+      padding: 18px 36px; display: inline-block;
+      position: absolute; top: 50%; z-index: 1;
+    }
+    .cover-page .cover-info-box .info-row {
       display: flex; gap: 16px; margin: 6px 0; font-size: 15px;
     }
-    .cover-info-box .label { font-weight: 700; min-width: 80px; color: #4a90d9; }
-    .cover-info-box .value { color: #333; }
-    .cover-bg {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  z-index: 0;
-}
-    .cover-diwave { width: 140px; position: absolute; bottom: 50px; z-index: 1; }
+    .cover-page .cover-info-box .label { font-weight: 700; min-width: 80px; color: #4a90d9; }
+    .cover-page .cover-info-box .value { color: #333; }
+    .cover-page .cover-diwave { width: 140px; position: absolute; bottom: 50px; z-index: 1; }
 
     /* ===== 2페이지: 환자정보 ===== */
     .patient-info {
@@ -352,7 +358,7 @@ function generateReportHTML(data) {
     .chart-with-desc { display: flex; gap: 12px; align-items: flex-start; }
     .chart-with-desc canvas { border: 1px solid #eee; border-radius: 4px; }
     .chart-desc-box {
-      width: 210px; padding: 12px; background: #f8f9fa;
+      width: 160px; padding: 12px; background: #f8f9fa;
       border-radius: 6px; font-size: 11px; color: #666; line-height: 1.5;
     }
     .chart-desc-box strong { display: block; color: #333; margin-bottom: 4px; }
@@ -380,8 +386,7 @@ function generateReportHTML(data) {
 
   <!-- ===== 1페이지: 커버 ===== -->
   <div class="pdf-page cover-page">
-  <img class="cover-bg" src="${baseUrl}/report-assets/cover.png" />
-  <img class="cover-diwave" src="${baseUrl}/report-assets/diwave_logo.svg" />
+    <img class="cover-bg" src="${baseUrl}/report-assets/cover.png" />
     <img class="cover-logo" src="${baseUrl}/report-assets/osteoage_logo.svg" />
     <h1 class="cover-title">쑥쑥 성장<br/>로드맵 보고서</h1>
     <div class="cover-info-box">
@@ -389,6 +394,7 @@ function generateReportHTML(data) {
       <div class="info-row"><span class="label">검사일자</span><span class="value">${formatDate(analysis.created_at)}</span></div>
       <div class="info-row"><span class="label">검사병원</span><span class="value">${hospitalName}</span></div>
     </div>
+    <img class="cover-diwave" src="${baseUrl}/report-assets/diwave_logo.svg" />
   </div>
 
   <!-- ===== 2페이지: 분석 결과 요약 ===== -->
@@ -472,7 +478,7 @@ function generateReportHTML(data) {
       <h3 class="chart-title">현재 키 기반 예측 키</h3>
       <p class="percentile-text">백분위 <strong>${heightPercentile}</strong> : 큰 순서로 상위 <strong>${100 - heightPercentile}%</strong>에 해당하는 키 입니다.</p>
       <div class="chart-with-desc">
-        <canvas id="chart3" width="480" height="340"></canvas>
+        <canvas id="chart3" width="340" height="240"></canvas>
         <div class="chart-desc-box">
           <strong>현재 키 기반 예측 키</strong>
           질병관리청 성장도표를 기반으로 현재의 성장 속도가 성인이 될 때까지 유지될 경우를 예측한 결과입니다.
@@ -500,7 +506,7 @@ function generateReportHTML(data) {
         ? `백분위 <strong>${geneticPercentile}</strong> : 큰 순서로 상위 <strong>${100 - geneticPercentile}%</strong>에 해당하는 키 입니다.`
         : '백분위 <strong>-</strong> : 큰 순서로 상위 <strong>-%</strong>에 해당하는 키 입니다.'}</p>
       <div class="chart-with-desc">
-        <canvas id="chart4a" width="480" height="270"></canvas>
+        <canvas id="chart4a" width="340" height="190"></canvas>
         <div class="chart-desc-box">
           <strong>유전 기반 예측 키</strong>
           부모의 신장을 바탕으로 산출된 자녀의 유전적 기대 신장(Mid-Parental Height)입니다.
@@ -516,7 +522,7 @@ function generateReportHTML(data) {
       <h3 class="chart-title">뼈나이 기반 예측 키 <strong>${resultData?.Growth_Curve_Predicted_Height}cm</strong></h3>
       <p class="percentile-text">백분위 <strong>${boneAgePercentile}</strong> : 큰 순서로 상위 <strong>${100 - boneAgePercentile}%</strong>에 해당하는 키 입니다.</p>
       <div class="chart-with-desc">
-        <canvas id="chart4b" width="480" height="270"></canvas>
+        <canvas id="chart4b" width="340" height="190"></canvas>
         <div class="chart-desc-box">
           <strong>뼈나이 기반 예측 키</strong>
           AI가 판독한 뼈나이 값과 현재 키를 사용하여 추정한 값입니다.
@@ -542,7 +548,7 @@ function generateReportHTML(data) {
       <h3 class="chart-title">최종 예측 키 <strong>${resultData?.Final_Predicted_Height}cm</strong></h3>
       <p class="percentile-text">백분위 <strong>${finalPercentile}</strong> : 큰 순서로 상위 <strong>${100 - finalPercentile}%</strong>에 해당하는 키 입니다.</p>
       <div class="chart-with-desc">
-        <canvas id="chart5" width="480" height="340"></canvas>
+        <canvas id="chart5" width="340" height="240"></canvas>
         <div class="chart-desc-box">
           <strong>최종 예측 키</strong>
           표준 성장 곡선 기반 예측 키에 유전적 요인 및 골연령 성숙도를 반영하여 보정한 최종 예측키 입니다.

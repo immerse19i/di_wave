@@ -26,6 +26,7 @@ async function generatePDF(analysisId) {
       format: 'A4',
       printBackground: true,
       preferCSSPageSize: true,
+      scale : 1.334,
       margin: { top: 0, right: 0, bottom: 0, left: 0 }
     });
 
