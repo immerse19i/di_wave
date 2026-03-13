@@ -38,6 +38,8 @@ router.post ('/', verifyToken, upload.single('image'), analysisController.create
 // 목록 조회
 router.get('/', verifyToken, analysisController.getAnalyses);
 
+router.get('/:id/report/pdf', verifyToken, analysisController.generateReport);
+
 // 상세 조회
 router.get('/:id', verifyToken, analysisController.getAnalysis);
 

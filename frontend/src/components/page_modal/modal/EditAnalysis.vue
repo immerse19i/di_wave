@@ -5,11 +5,11 @@
 
     <div class="modal-body">
       <!-- 왼쪽: 기존 X-ray 이미지 -->
-      <div class="image-section">
+      <!-- <div class="image-section">
         <div class="image-preview">
           <img :src="imageUrl" alt="X-ray" class="preview-image" />
         </div>
-      </div>
+      </div> -->
 
       <!-- 오른쪽: 폼 영역 -->
       <div class="form-section">
@@ -384,22 +384,22 @@ onMounted(() => {
    .new-analysis → .edit-analysis 로 변경
    .image-section의 cursor: pointer, placeholder 관련 스타일 제거 */
 .edit-analysis {
-  width: 952px;
-  padding: 20px 0;
+  width: 580px;
+  // padding: 0 0 20px;
 }
 
 .modal-title {
   font-weight: $font-weight-bold;
-  font-size: 24px;
+  font-size: 20px;
   color: $white;
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .modal-body {
   display: flex;
   gap: 20px;
-  min-width: 952px;
+  min-width: 580px;
 }
 
 .image-section {
@@ -456,7 +456,7 @@ onMounted(() => {
       border: 1px solid $dark-line-gray;
       border-radius: $radius-sm;
       color: $white;
-      @include font-14-regular;
+      @include font-12-regular;
       &:focus {
         border-color: $sub-color-2;
       }
@@ -475,7 +475,7 @@ onMounted(() => {
       border: 1px solid $dark-line-gray;
       border-radius: $radius-sm;
       color: $white;
-      @include font-14-regular;
+      @include font-12-regular;
       text-align: center;
       &:focus {
         border-color: $sub-color-2;
@@ -501,14 +501,14 @@ onMounted(() => {
     gap: 13px;
     .btn-gender {
       width: 100px;
-      padding: 10px;
+      padding: 7px;
       background-color: $dark-gray-dark;
       color: $dark-text;
       border-radius: $radius-sm;
-      @include font-14-regular;
+      @include font-12-regular;
       &.active {
-        background: $main-gad;
-        @include font-14-bold;
+        background: $sub-color-3;
+        // @include font-12-;
       }
       &:disabled {
         opacity: 0.5;
@@ -533,7 +533,7 @@ onMounted(() => {
       border: 1px solid $dark-line-gray;
       border-radius: $radius-sm;
       color: $white;
-      @include font-14-regular;
+      @include font-12-regular;
       &:focus {
         border-color: $sub-color-2;
       }
@@ -568,7 +568,7 @@ onMounted(() => {
       border: 1px solid $dark-line-gray;
       border-radius: $radius-sm;
       color: $white;
-      @include font-14-regular;
+      @include font-12-regular;
       &:focus {
         border-color: $sub-color-2;
       }
@@ -590,7 +590,7 @@ onMounted(() => {
       border: 1px solid $dark-line-gray;
       border-radius: $radius-sm;
       color: $white;
-      @include font-14-regular;
+      @include font-12-regular;
       &:focus {
         border-color: $sub-color-2;
       }
@@ -619,12 +619,12 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   gap: 16px;
-  margin-top: 32px;
+  // margin-top: 32px;
   button {
-    width: 140px;
-    padding: 12px;
+    width: 136px;
+    padding: 7.5px;
     border-radius: $radius-sm;
-    @include font-14-bold;
+    @include font-14-medium;
     &:hover {
       opacity: 0.9;
     }

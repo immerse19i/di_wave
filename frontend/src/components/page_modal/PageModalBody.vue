@@ -6,7 +6,11 @@
     @click.self="modal.close"
   >
     <div class="modal-content">
-      <div class="close-btn" @click="modal.close">
+      <div
+        v-if="currentComponent !== EditAnalysis"
+        class="close-btn"
+        @click="modal.close"
+      >
         <img :src="closeIcon" alt="" />
       </div>
       <component :is="currentComponent" />
