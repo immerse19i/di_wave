@@ -32,6 +32,7 @@
       >
         <!-- ===== 1페이지: 커버 ===== -->
         <div class="pdf-page cover-page" ref="page1">
+          <img class="cover-bg" src="/assets/report/cover.png" />
           <img class="cover-logo" src="/assets/report/osteoage_logo.svg" />
           <h1 class="cover-title">쑥쑥 성장<br />로드맵 보고서</h1>
           <div class="cover-info-box">
@@ -48,7 +49,6 @@
               <span class="value">{{ userStore.user?.hospital_name }}</span>
             </div>
           </div>
-          <img class="cover-bg" src="/assets/report/cover.png" />
           <img class="cover-diwave" src="/assets/report/diwave_logo.svg" />
         </div>
 
@@ -586,8 +586,8 @@ import { analysisAPI } from '@/api/analysis';
 import growthHeightData from '@/data/growth_height.json';
 import growthWeightData from '@/data/growth_weight.json';
 import growthBmiData from '@/data/growth_bmi.json';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
+// import html2canvas from 'html2canvas';
+// import { jsPDF } from 'jspdf';
 
 const router = useRouter();
 const route = useRoute();
@@ -984,84 +984,102 @@ const getCurrentHeightPredicted18 = () => {
 };
 
 // ===== PDF 생성 =====
-const generatePDF = async () => {
-  const pdf = new jsPDF('p', 'mm', 'a4');
-  const pageWidth = 210;
-  const pageHeight = 297;
+// const generatePDF = async () => {
+//   const pdf = new jsPDF('p', 'mm', 'a4');
+//   const pageWidth = 210;
+//   const pageHeight = 297;
 
-  // ★ 줌 리셋
-  const savedZoom = zoomIndex.value;
-  zoomIndex.value = 5; // 100%
-  await nextTick();
+//   // ★ 줌 리셋
+//   const savedZoom = zoomIndex.value;
+//   zoomIndex.value = 5; // 100%
+//   await nextTick();
 
-  const pages = [
-    page1.value,
-    page2.value,
-    page3.value,
-    page4.value,
-    page5.value,
-  ];
-  for (let i = 0; i < pages.length; i++) {
-    if (!pages[i]) continue;
-    const canvas = await html2canvas(pages[i], {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#ffffff',
-    });
-    const imgData = canvas.toDataURL('image/png');
-    if (i > 0) pdf.addPage();
-    pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pageHeight);
-  }
-  // ★ 줌 복원
-  zoomIndex.value = savedZoom;
-  // 6~15페이지: 공통 이미지
-  for (let i = 6; i <= 15; i++) {
-    pdf.addPage();
-    const img = await loadImage(
-      `/assets/report/common_${String(i).padStart(2, '0')}.jpg`,
-    );
-    pdf.addImage(img, 'JPEG', 0, 0, pageWidth, pageHeight);
-  }
+//   const pages = [
+//     page1.value,
+//     page2.value,
+//     page3.value,
+//     page4.value,
+//     page5.value,
+//   ];
+//   for (let i = 0; i < pages.length; i++) {
+//     if (!pages[i]) continue;
+//     const canvas = await html2canvas(pages[i], {
+//       scale: 2,
+//       useCORS: true,
+//       allowTaint: true,
+//       backgroundColor: '#ffffff',
+//     });
+//     const imgData = canvas.toDataURL('image/png');
+//     if (i > 0) pdf.addPage();
+//     pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pageHeight);
+//   }
+//   // ★ 줌 복원
+//   zoomIndex.value = savedZoom;
+//   // 6~15페이지: 공통 이미지
+//   for (let i = 6; i <= 15; i++) {
+//     pdf.addPage();
+//     const img = await loadImage(
+//       `/assets/report/common_${String(i).padStart(2, '0')}.jpg`,
+//     );
+//     pdf.addImage(img, 'JPEG', 0, 0, pageWidth, pageHeight);
+//   }
 
-  pdfBlob.value = pdf.output('blob');
-  pdfUrl.value = URL.createObjectURL(pdfBlob.value);
-  loading.value = false;
-};
+//   pdfBlob.value = pdf.output('blob');
+//   pdfUrl.value = URL.createObjectURL(pdfBlob.value);
+//   loading.value = false;
+// };
 
-const loadImage = (src) => {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const c = document.createElement('canvas');
-      c.width = img.width;
-      c.height = img.height;
-      c.getContext('2d').drawImage(img, 0, 0);
-      resolve(c.toDataURL('image/jpeg', 0.95));
-    };
-    img.onerror = reject;
-    img.src = src;
-  });
-};
+// const loadImage = (src) => {
+//   return new Promise((resolve, reject) => {
+//     const img = new Image();
+//     img.crossOrigin = 'anonymous';
+//     img.onload = () => {
+//       const c = document.createElement('canvas');
+//       c.width = img.width;
+//       c.height = img.height;
+//       c.getContext('2d').drawImage(img, 0, 0);
+//       resolve(c.toDataURL('image/jpeg', 0.95));
+//     };
+//     img.onerror = reject;
+//     img.src = src;
+//   });
+// };
 
 // ===== 인쇄 / 다운로드 =====
 
 const handlePrint = async () => {
-  if (!pdfBlob.value) await generatePDF();
-  const win = window.open(pdfUrl.value);
-  if (win) win.onload = () => win.print();
+  try {
+    loading.value = true;
+    const res = await analysisAPI.getReportPdf(route.params.id);
+    const blob = new Blob([res.data], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const win = window.open(url);
+    if (win) win.onload = () => win.print();
+  } catch (error) {
+    console.error('PDF 인쇄 실패:', error);
+  } finally {
+    loading.value = false;
+  }
 };
 
 const handleDownload = async () => {
-  await generatePDF();
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(pdfBlob.value);
-  const name = analysis.value?.patient_name || 'report';
-  const date = formatDate(analysis.value?.created_at, '');
-  a.download = `${name}_${date}_report.pdf`;
-  a.click();
-  URL.revokeObjectURL(a.href);
+  try {
+    loading.value = true;
+    const res = await analysisAPI.getReportPdf(route.params.id);
+    const blob = new Blob([res.data], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const name = analysis.value?.patient_name || 'report';
+    const date = formatDate(analysis.value?.created_at, '');
+    a.download = `${name}_${date}_report.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('PDF 다운로드 실패:', error);
+  } finally {
+    loading.value = false;
+  }
 };
 // ===== 마운트 =====
 onMounted(async () => {
@@ -1331,13 +1349,12 @@ onUnmounted(() => {
     }
   }
   .cover-bg {
-    display: none;
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: -1;
+    // z-index: 0;
     background-size: cover;
     // width: 500px; margin-top: 30px;
   }

@@ -13,6 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Static files (uploads)
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+app.use('/report-assets', express.static(path.join(__dirname, '..', 'public', 'report')));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -58,6 +59,53 @@ app.use('/api/admin/logs', logsRoutes);
 
 const permissionRoutes = require('./routes/permissions');
 app.use('/api/admin/permissions', permissionRoutes);
+
+app.use('/report-fonts', express.static(path.join(__dirname, '..', 'public', 'fonts')));
+const { generateReportHTML } = require('./templates/reportTemplate');
+const { pool } = require('./config/database');
+const growthHeightData = require('./data/growth_height.json');
+const growthWeightData = require('./data/growth_weight.json');
+const growthBmiData = require('./data/growth_bmi.json');
+
+// 내부 리포트 렌더링 (Puppeteer 전용, 인증 없음)
+app.get('/internal/report/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await pool.query(
+      `SELECT a.*, p.name AS patient_name, p.patient_code, p.birth_date, p.gender,
+              h.name AS hospital_name
+       FROM analyses a
+       JOIN patients p ON a.patient_id = p.id
+       JOIN hospitals h ON a.hospital_id = h.id
+       WHERE a.id = ?`,
+      [id]
+    );
+    if (rows.length === 0) return res.status(404).send('Not Found');
+
+    const analysis = rows[0];
+    const resultData = typeof analysis.result_json === 'string'
+      ? JSON.parse(analysis.result_json)
+      : analysis.result_json;
+
+    const html = generateReportHTML({
+      analysis,
+      resultData,
+      hospitalName: analysis.hospital_name,
+      growthHeight: growthHeightData,
+      growthWeight: growthWeightData,
+      growthBmi: growthBmiData,
+      baseUrl: `http://localhost:${config.port}`
+    });
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(html);
+  } catch (error) {
+    console.error('리포트 렌더링 오류:', error);
+    res.status(500).send('Error');
+  }
+});
+
+
 
 // Error handling middleware
 app.use((err, req, res, next) => {
