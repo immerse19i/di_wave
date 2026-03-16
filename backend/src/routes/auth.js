@@ -24,6 +24,9 @@ router.post('/verify-password', verifyToken, authController.verifyPassword);
 // 비밀번호 변경
 router.put('/password', verifyToken, authController.changePassword);
 
+// 프로필 수정
+router.put('/profile', verifyToken, authController.updateProfile);
+
 // 관리자 전용: 계정 잠금 해제
 router.patch('/unlock/:userId', verifyToken, isAdmin, authController.unlockAccount);
 
