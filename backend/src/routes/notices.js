@@ -13,6 +13,10 @@ const storage = multer.diskStorage({
 })
 const upload = multer({ storage })
 
+// ===== 유저용 (verifyToken만) =====
+router.get('/public', verifyToken, noticeController.getPublicNotices)
+router.get('/public/:id', verifyToken, noticeController.getPublicNoticeDetail)
+
 router.use(verifyToken, isAdmin)
 
 // 목록 조회
