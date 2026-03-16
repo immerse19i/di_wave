@@ -332,6 +332,7 @@ onBeforeUnmount(() => {
       padding: 12px 8px;
       border-radius: $radius-sm;
       flex-shrink: 0;
+      min-width: 96px;
       cursor: pointer;
     }
   }
