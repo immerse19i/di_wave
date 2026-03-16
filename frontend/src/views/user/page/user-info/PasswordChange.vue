@@ -127,7 +127,7 @@ const handleChange = async () => {
 @import '@/assets/scss/variables';
 
 .password-change {
-  max-width: 720px;
+  // max-width: 720px;
   margin: 0 auto;
   padding-top: 20px;
 }
