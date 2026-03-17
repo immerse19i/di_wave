@@ -11,6 +11,7 @@ const UserInfo = () => import('@/views/user/page/UserInfo.vue');
 const Profile = () => import('@/views/user/page/user-info/Profile.vue');
 const PasswordChange = () => import('@/views/user/page/user-info/PasswordChange.vue');
 const Notice = () => import('@/views/user/page/user-info/Notice.vue');
+const NoticeDetail = () => import('@/views/user/page/user-info/NoticeDetail.vue');
 const Inquiry = () => import('@/views/user/page/user-info/Inquiry.vue');
 const Credit = () => import('@/views/user/page/user-info/Credit.vue');
 const Info = () => import('@/views/user/page/user-info/Info.vue');
@@ -111,6 +112,7 @@ const routes = [
     { path: 'profile', component: Profile },
     { path: 'password-change', component: PasswordChange },
     { path: 'notice', component: Notice },
+    { path: 'notice/:id', component: NoticeDetail, props: true },
     { path: 'inquiry', component: Inquiry },
     { path: 'credit', component: Credit },
     { path: 'credit-charge', component: CreditCharge },
