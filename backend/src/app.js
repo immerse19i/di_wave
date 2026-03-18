@@ -60,6 +60,9 @@ app.use('/api/admin/logs', logsRoutes);
 const permissionRoutes = require('./routes/permissions');
 app.use('/api/admin/permissions', permissionRoutes);
 
+const inquiryRoutes = require('./routes/inquiries')
+app.use('/api/inquiries', inquiryRoutes)
+
 app.use('/report-fonts', express.static(path.join(__dirname, '..', 'public', 'fonts')));
 const { generateReportHTML } = require('./templates/reportTemplate');
 const { pool } = require('./config/database');
