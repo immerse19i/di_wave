@@ -13,6 +13,7 @@
       </ul>
       <div class="terms_copy">
         <router-link to="/terms" class="terms"> 약관 및 정책 </router-link>
+
         <div class="copy">© DiWAVE Inc. 2026 All Right Reserved</div>
       </div>
     </div>
@@ -25,11 +26,12 @@ footer {
   width: calc(100% - 88px);
   border-top: 1px solid $dark-gray;
   margin: auto;
-  height: 157px;
+  height: 80px;
   .footer_inner {
-    padding: 36px;
+    padding: 8px;
     display: flex;
     justify-content: center;
+    align-items: center;
     width: 100%;
     height: 100%;
     gap: 40px;
@@ -43,15 +45,20 @@ footer {
       @include font-12-regular;
       color: $dark-input-gray;
       line-height: 1.4;
+      display: flex;
+      gap: 8px;
+      //   align-items: Center;
     }
     .terms_copy {
       @include font-12-bold;
       color: $dark-input-gray;
       line-height: 1.4;
-
+      display: flex;
+      gap: 8px;
+      align-items: center;
       .terms {
         color: $dark-input-gray;
-        margin-bottom: 12px;
+        // margin-bottom: 12px;
         text-decoration: underline;
       }
     }
