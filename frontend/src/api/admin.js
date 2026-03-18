@@ -84,6 +84,10 @@ deleteNotice(id) {
   return api.patch(`/admin/notices/${id}/delete`)
 },
 
+// 유저용 공지사항
+getPublicNotices: (params) => api.get('/admin/notices/public', { params }),
+getPublicNoticeDetail: (id) => api.get(`/admin/notices/public/${id}`),
+
 // ===== 안내팝업 =====
 getPopups: (params) => api.get('/admin/popups', { params }),
 getPopupDetail: (id) => api.get(`/admin/popups/${id}`),

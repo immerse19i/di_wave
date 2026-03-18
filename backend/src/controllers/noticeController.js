@@ -263,3 +263,69 @@ exports.deleteNotice = async (req, res) => {
     res.status(500).json({ success: false, message: '삭제 실패' })
   }
 }
+
+// ============ [유저] 공지사항 목록 ============
+exports.getPublicNotices = async (req, res) => {
+  try {
+    const { page = 1, limit = 15 } = req.query
+
+    const [countResult] = await pool.query(
+      `SELECT COUNT(*) as total FROM notices WHERE status = 'published'`
+    )
+    const total = countResult[0].total
+
+    const pageNum = parseInt(page)
+    const limitNum = parseInt(limit) || 15
+    const offset = (pageNum - 1) * limitNum
+
+    const [rows] = await pool.query(
+      `SELECT id, title, is_pinned, has_attachment, published_at
+       FROM notices
+       WHERE status = 'published'
+       ORDER BY is_pinned DESC, published_at DESC
+       LIMIT ? OFFSET ?`,
+      [limitNum, offset]
+    )
+
+    res.json({
+      success: true,
+      data: rows,
+      total,
+      totalPages: Math.ceil(total / limitNum),
+      currentPage: pageNum
+    })
+  } catch (error) {
+    console.error('getPublicNotices error:', error)
+    res.status(500).json({ success: false, message: '공지사항 조회 실패' })
+  }
+}
+
+// ============ [유저] 공지사항 상세 ============
+exports.getPublicNoticeDetail = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    const [rows] = await pool.query(
+      `SELECT id, title, content, is_pinned, has_attachment, published_at
+       FROM notices WHERE id = ? AND status = 'published'`,
+      [id]
+    )
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: '공지사항을 찾을 수 없습니다' })
+    }
+
+    const [attachments] = await pool.query(
+      `SELECT id, file_name, file_path, file_size, file_type, sort_order
+       FROM notice_attachments WHERE notice_id = ? ORDER BY sort_order ASC`,
+      [id]
+    )
+
+    const notice = rows[0]
+    notice.attachments = attachments
+
+    res.json({ success: true, data: notice })
+  } catch (error) {
+    console.error('getPublicNoticeDetail error:', error)
+    res.status(500).json({ success: false, message: '상세 조회 실패' })
+  }
+}

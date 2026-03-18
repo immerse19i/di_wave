@@ -191,6 +191,38 @@ WHERE u.id = ?`,
   }
 };
 
+// 유저 프로필 수정
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, ceo_name, phone, email, address, address_detail, business_number } = req.body;
+
+    // hospital_id 조회
+    const [users] = await pool.query('SELECT hospital_id FROM users WHERE id = ?', [req.user.id]);
+    if (users.length === 0) {
+      return res.status(404).json({ success: false, message: '사용자를 찾을 수 없습니다.' });
+    }
+    const hospitalId = users[0].hospital_id;
+
+    // hospitals 테이블 업데이트
+    await pool.query(
+      `UPDATE hospitals SET name = ?, ceo_name = ?, phone = ?, address = ?, address_detail = ?, business_number = ? WHERE id = ?`,
+      [name, ceo_name, phone, address, address_detail, business_number, hospitalId]
+    );
+
+    // users 테이블 이메일 업데이트
+    await pool.query(
+      'UPDATE users SET email = ? WHERE id = ?',
+      [email, req.user.id]
+    );
+
+    res.json({ success: true, message: '저장되었습니다.' });
+  } catch (error) {
+    console.error('UpdateProfile error:', error);
+    res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
+  }
+};
+
+
 
 // 비밀번호 변경
 exports.changePassword = async (req,res) => {

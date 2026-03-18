@@ -11,6 +11,7 @@ const UserInfo = () => import('@/views/user/page/UserInfo.vue');
 const Profile = () => import('@/views/user/page/user-info/Profile.vue');
 const PasswordChange = () => import('@/views/user/page/user-info/PasswordChange.vue');
 const Notice = () => import('@/views/user/page/user-info/Notice.vue');
+const NoticeDetail = () => import('@/views/user/page/user-info/NoticeDetail.vue');
 const Inquiry = () => import('@/views/user/page/user-info/Inquiry.vue');
 const Credit = () => import('@/views/user/page/user-info/Credit.vue');
 const Info = () => import('@/views/user/page/user-info/Info.vue');
@@ -36,7 +37,8 @@ const AdminInfoEdit = () => import('@/views/admin/AdminInfoEdit.vue')
 const UsageLog = () => import('@/views/admin/UsageLog.vue')
 const UsageLogDetail = () => import('@/views/admin/UsageLogDetail.vue')
 const Permission = () => import('@/views/admin/Permission.vue')
-
+const AdminInquiry = () => import('@/views/admin/AdminInquiry.vue')
+const AdminInquiryDetail = () => import('@/views/admin/AdminInquiryDetail.vue')
 
 const routes = [
   // User Routes
@@ -98,6 +100,8 @@ const routes = [
 { path: 'logs', component: UsageLog },
 { path: 'logs/:id', component: UsageLogDetail, props: true },
 { path: 'permissions', component: Permission },
+{ path: 'inquiries', component: AdminInquiry },
+{ path: 'inquiries/:id', component: AdminInquiryDetail, props: true },
   ],
 },
   // routes 배열에 추가 (/main 라우트 아래에)
@@ -111,6 +115,7 @@ const routes = [
     { path: 'profile', component: Profile },
     { path: 'password-change', component: PasswordChange },
     { path: 'notice', component: Notice },
+    { path: 'notice/:id', component: NoticeDetail, props: true },
     { path: 'inquiry', component: Inquiry },
     { path: 'credit', component: Credit },
     { path: 'credit-charge', component: CreditCharge },
