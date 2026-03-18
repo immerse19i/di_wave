@@ -121,7 +121,7 @@ exports.getInquiries = async (req, res) => {
 
     if (status) {
       const statuses = status.split(',').filter(s =>
-        ['pending', 'answered', 'closed'].includes(s)
+        ['pending', 'answered', 'closed', 'draft'].includes(s)
       )
       if (statuses.length > 0) {
         where.push(`i.status IN (${statuses.map(() => '?').join(',')})`)
@@ -137,8 +137,8 @@ exports.getInquiries = async (req, res) => {
       params.push(endDate)
     }
     if (search && search.trim()) {
-      where.push('(i.title LIKE ? OR h.name LIKE ?)')
-      params.push(`%${search.trim()}%`, `%${search.trim()}%`)
+      where.push('(i.title LIKE ? OR h.name LIKE ? OR u.login_id LIKE ?)')
+      params.push(`%${search.trim()}%`, `%${search.trim()}%`, `%${search.trim()}%`)
     }
 
     const whereClause = where.join(' AND ')
@@ -147,11 +147,11 @@ exports.getInquiries = async (req, res) => {
       `SELECT COUNT(*) as total
        FROM inquiries i
        LEFT JOIN hospitals h ON i.hospital_id = h.id
+       LEFT JOIN users u ON i.user_id = u.id
        WHERE ${whereClause}`, params
     )
     const total = countResult[0].total
 
-    // 정렬
     const allowedSortFields = ['title', 'created_at', 'answered_at', 'status']
     let orderClause = 'ORDER BY i.created_at DESC'
     if (sortField && allowedSortFields.includes(sortField)) {
@@ -165,7 +165,8 @@ exports.getInquiries = async (req, res) => {
 
     const [rows] = await pool.query(
       `SELECT i.id, i.title, i.status, i.created_at, i.answered_at,
-              h.name AS hospital_name, u.login_id
+              h.name AS hospital_name, u.login_id,
+              (SELECT COUNT(*) FROM inquiry_attachments WHERE inquiry_id = i.id) > 0 AS has_attachment
        FROM inquiries i
        LEFT JOIN hospitals h ON i.hospital_id = h.id
        LEFT JOIN users u ON i.user_id = u.id
@@ -181,6 +182,7 @@ exports.getInquiries = async (req, res) => {
     res.status(500).json({ success: false, message: '문의 목록 조회 실패' })
   }
 }
+
 
 // ============ [관리자] 문의 상세 ============
 exports.getInquiryDetail = async (req, res) => {

@@ -28,6 +28,7 @@ router.get('/my/:id', verifyToken, inquiryController.getMyInquiryDetail)
 
 // ===== 관리자용 =====
 router.use(verifyToken, isAdmin)
+router.get('/counts', inquiryController.getInquiryCounts)  // 추가
 router.get('/', inquiryController.getInquiries)
 router.get('/:id', inquiryController.getInquiryDetail)
 router.patch('/:id/answer', inquiryController.answerInquiry)
