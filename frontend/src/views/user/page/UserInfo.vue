@@ -4,9 +4,7 @@
     <div class="user-info-container">
       <!-- 사이드바 -->
       <aside class="sidebar">
-        <div class="bar_title">
-          설정/계정
-        </div>
+        <div class="bar_title">설정/계정</div>
         <ul class="menu_list">
           <li>
             <router-link to="/user-info/profile">
@@ -46,7 +44,7 @@
           </li>
         </ul>
       </aside>
-      
+
       <!-- 컨텐츠 영역 -->
       <main class="content">
         <div class="content-title">
@@ -55,37 +53,36 @@
         <router-view />
       </main>
     </div>
+    <UserFooter />
   </div>
 </template>
 
 <script setup>
 import Header from '@/components/common/Header.vue';
-import {computed} from 'vue';
-import {useRoute} from 'vue-router';
+import UserFooter from '../../../components/common/UserFooter.vue';
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 
 const route = useRoute();
 
-const pageTitle = computed(()=> {
-
+const pageTitle = computed(() => {
   const titles = {
-        'profile': '프로필',
-      'password-change': '비밀번호 변경',
-      'notice': '공지사항',
-      'inquiry': '문의하기',
-      'credit': '크레딧 관리',
-      'credit-charge': '크레딧',
-      'info': '정보'
-  }
-  
-  /** 
+    profile: '프로필',
+    'password-change': '비밀번호 변경',
+    notice: '공지사항',
+    inquiry: '문의하기',
+    credit: '크레딧 관리',
+    'credit-charge': '크레딧',
+    info: '정보',
+  };
+
+  /**
    * @ex user-info/profile -> profile 추출
-   * 
-   * */ 
-    const path = route.path.split('/').pop();
-    return titles[path] || "프로필"
-
-
-})
+   *
+   * */
+  const path = route.path.split('/').pop();
+  return titles[path] || '프로필';
+});
 </script>
 
 <style lang="scss" scoped>
@@ -96,24 +93,23 @@ const pageTitle = computed(()=> {
 
 .user-info-container {
   display: flex;
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh - 140px);
 }
 
 .sidebar {
   width: 240px;
-  color:$white;
+  color: $white;
   // background: $sub-color;
   padding: 42px 56px;
-  padding-right:0;
-  .bar_title{
+  padding-right: 0;
+  .bar_title {
     @include font-20-bold;
-    margin-bottom:16px;
-
+    margin-bottom: 16px;
   }
 
   .menu_list {
     border-top: 1px solid $white;
-    padding-top:16px;
+    padding-top: 16px;
     li a {
       display: flex;
       align-items: center;
@@ -122,13 +118,12 @@ const pageTitle = computed(()=> {
       color: $white;
       border-radius: $radius-md;
       @include font-16-regular;
-      
+
       &.router-link-active {
-        
         @include font-16-bold;
         background: rgba(255, 255, 255, 0.1);
       }
-      
+
       img {
         width: 20px;
         height: 20px;
@@ -140,12 +135,12 @@ const pageTitle = computed(()=> {
 .content {
   flex: 1;
   padding: 24px;
-  padding-top:48px;
-  .content-title{
+  padding-top: 48px;
+  .content-title {
     @include font-20-bold;
-    color:$white;
+    color: $white;
     text-align: center;
-    margin-bottom:20px;
+    margin-bottom: 20px;
   }
 }
 </style>
