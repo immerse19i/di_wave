@@ -243,3 +243,21 @@ exports.answerInquiry = async (req, res) => {
     res.status(500).json({ success: false, message: '답변 등록 실패' })
   }
 }
+// ============ [관리자] 상태별 건수 ============
+exports.getInquiryCounts = async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT
+        COUNT(*) as total,
+        SUM(status = 'pending') as pending,
+        SUM(status = 'answered') as answered,
+        SUM(status = 'draft') as draft
+       FROM inquiries`
+    )
+    res.json({ success: true, data: rows[0] })
+  } catch (error) {
+    console.error('getInquiryCounts error:', error)
+    res.status(500).json({ success: false, message: '건수 조회 실패' })
+  }
+}
+
