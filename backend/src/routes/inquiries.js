@@ -31,6 +31,8 @@ router.use(verifyToken, isAdmin)
 router.get('/counts', inquiryController.getInquiryCounts)  // 추가
 router.get('/', inquiryController.getInquiries)
 router.get('/:id', inquiryController.getInquiryDetail)
-router.patch('/:id/answer', inquiryController.answerInquiry)
+router.patch('/:id/answer', upload.array('attachments', 5), inquiryController.answerInquiry)
+
+
 
 module.exports = router
