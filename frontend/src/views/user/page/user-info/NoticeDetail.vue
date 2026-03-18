@@ -65,7 +65,9 @@
 
     <!-- 목록으로 버튼 -->
     <div class="detail-footer">
-      <button class="list-btn" @click="goList">목록으로</button>
+      <button class="list-btn" @click="goList">
+        <img src="/assets/icons/arrow_back.svg" alt="arrow_back" /> 목록으로
+      </button>
     </div>
   </div>
 </template>
@@ -143,6 +145,7 @@ onMounted(() => {
     .detail-date {
       @include font-14-regular;
       opacity: 0.8;
+      color: $dark-gray;
     }
     &::after {
       content: '';
@@ -163,16 +166,25 @@ onMounted(() => {
     min-height: 300px;
     @include font-14-regular;
     line-height: 1.8;
-
+    position: relative;
     :deep(img) {
       max-width: 100%;
       height: auto;
+    }
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: $stroke-grad;
     }
   }
 
   .detail-attachments {
     margin-top: 12px;
-
+    position: relative;
     .attachment-item {
       display: flex;
       align-items: center;
@@ -192,18 +204,29 @@ onMounted(() => {
         text-decoration: underline;
       }
     }
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: $stroke-grad-1;
+    }
   }
 
   .detail-footer {
     display: flex;
-    justify-content: center;
-    margin-top: 24px;
+    justify-content: left;
+    // margin-top: 24px;
 
     .list-btn {
       @include font-14-medium;
       color: $white;
-      background: $main-gad;
-      padding: 12px 48px;
+      display: flex;
+      align-items: center;
+      // background: $main-gad;
+      padding: 12px 24px;
       border-radius: $radius-sm;
       cursor: pointer;
     }
