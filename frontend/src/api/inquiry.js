@@ -28,9 +28,13 @@ getInquiryCounts() {
 getInquiryDetail(id) {
   return api.get(`/inquiries/${id}`)
 },
-answerInquiry(id, data) {
-  return api.patch(`/inquiries/${id}/answer`, data)
+// 답변 저장 (임시저장/답변완료 공용 - multipart)
+saveAnswer(id, formData) {
+  return api.patch(`/inquiries/${id}/answer`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
 },
+
 
 
 }
