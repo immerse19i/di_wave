@@ -16,5 +16,21 @@ export const inquiryAPI = {
   // 내 문의 상세
   getMyInquiryDetail(id) {
     return api.get(`/inquiries/my/${id}`)
-  }
+  },
+
+// ===== 고객문의관리 =====
+getInquiries(params) {
+  return api.get('/inquiries', { params })
+},
+getInquiryCounts() {
+  return api.get('/inquiries/counts')
+},
+getInquiryDetail(id) {
+  return api.get(`/inquiries/${id}`)
+},
+answerInquiry(id, data) {
+  return api.patch(`/inquiries/${id}/answer`, data)
+},
+
+
 }
