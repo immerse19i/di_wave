@@ -34,7 +34,9 @@
         <div class="pdf-page cover-page" ref="page1">
           <img class="cover-bg" src="/assets/report/cover.png" />
           <img class="cover-logo" src="/assets/report/osteoage_logo.svg" />
-          <h1 class="cover-title">쑥쑥 성장<br />로드맵 보고서</h1>
+          <div class="title-area">
+            <h1 class="cover-title">쑥쑥 성장<br />로드맵 보고서</h1>
+          </div>
           <div class="cover-info-box">
             <div class="info-row">
               <span class="label">성명</span>
@@ -1086,7 +1088,7 @@ onMounted(async () => {
   await loadAnalysis();
   loading.value = false; // ★ 먼저 로딩 해제 → v-else DOM 생성
   await nextTick(); // ★ DOM 업데이트 대기
-  await new Promise((r) => setTimeout(r, 300));
+  await document.fonts.ready;
 
   // 차트 그리기
   const gender = analysis.value.gender;
@@ -1305,6 +1307,10 @@ onUnmounted(() => {
     margin-top: 142px;
     margin-bottom: 12px;
   }
+  .title-area {
+    position: relative;
+    z-index: 1;
+  }
   .cover-title {
     font-family: $font2-cafe;
     text-align: center;
@@ -1333,6 +1339,8 @@ onUnmounted(() => {
     display: inline-block;
     position: absolute;
     top: 50%;
+    z-index: 1;
+
     .info-row {
       display: flex;
       gap: 16px;
@@ -1354,7 +1362,7 @@ onUnmounted(() => {
     left: 0;
     right: 0;
     bottom: 0;
-    // z-index: 0;
+    z-index: 0;
     background-size: cover;
     // width: 500px; margin-top: 30px;
   }
@@ -1362,6 +1370,7 @@ onUnmounted(() => {
     width: 140px;
     position: absolute;
     bottom: 50px;
+    z-index: 1;
   }
 }
 
@@ -1435,13 +1444,18 @@ onUnmounted(() => {
     margin-bottom: 12px;
     background: $dark-gray-light;
     border-radius: 999px;
-    padding: 11px 20px;
+    padding: 8px 20px;
     color: $black;
     gap: 12px;
     span {
       display: flex;
       align-items: center;
     }
+    .age-item {
+      align-items: center;
+      gap: 12px;
+    }
+
     .age-arrow {
       max-width: 22px;
       img {
@@ -1554,6 +1568,7 @@ onUnmounted(() => {
   }
   .dino-small {
     width: 32px;
+    transform: rotateY(-180deg);
   }
   .dino-tall {
     width: 40px;
@@ -1562,19 +1577,22 @@ onUnmounted(() => {
 
 .gauge-bar {
   flex: 1;
-  height: 16px;
-  border-radius: 8px;
+  height: 6px;
   position: relative;
-  background: $pdf-grad;
+  // overflow: hidden;
+  border-radius: 8px;
+  background-color: $dark-gray;
   .gauge-fill {
+    border-radius: 8px;
+    background: $pdf-grad;
     height: 100%;
     border-radius: 8px;
-    background: transparent; // fill은 gradient로 이미 표현
+    // background: transparent; // fill은 gradient로 이미 표현
   }
   .gauge-marker {
     position: absolute;
-    top: -28px;
-    transform: translateX(-50%);
+    top: 50%;
+    transform: translate(-50%, -70%);
     display: flex;
     flex-direction: column;
     align-items: center;
