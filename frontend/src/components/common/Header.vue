@@ -16,7 +16,7 @@
             <img src="/assets/icons/arrow_down.svg" alt="arrow_icon" />
           </button>
           <!-- 드롭다운 -->
-          <div class="dropdown_menu" v-if="isDropdownOpen">
+          <div class="dropdown_menu" v-show="isDropdownOpen">
             <ul class="menu_list">
               <li>
                 <router-link to="/user-info/profile">
@@ -156,6 +156,7 @@ onUnmounted(() => {
         background: $sub-color;
         border-radius: $radius-md;
         z-index: 10;
+        animation: fadeIn 0.12s ease-in-out;
         li a {
           display: flex;
           align-items: center;
@@ -168,6 +169,17 @@ onUnmounted(() => {
     .log_out {
       color: $white;
     }
+  }
+}
+
+// 2026.03.19 드롭다운 애니메이션 추가 - JY
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 </style>
