@@ -248,6 +248,7 @@ function generateReportHTML(data) {
       display: flex; flex-direction: column; gap: 10px;
       padding-right: 28px; padding-left: 28px;
       border-right: 1px solid #dfe1e7;
+      white-space: nowrap;
     }
     .patient-info li:first-child { padding-left: 0; }
     .patient-info li:last-child { border-right: none; padding-right: 0; }
@@ -256,14 +257,15 @@ function generateReportHTML(data) {
 
     /* 나이/스코어 */
     .age-score-section { padding: 16px 0; max-width: 555px; margin: auto; }
-    .age-row {
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 400; margin-bottom: 12px;
-      background: #f6f6f6; border-radius: 999px; padding: 11px 20px;
-      color: #383838; gap: 12px;
-    }
+.age-row {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 400; margin-bottom: 12px;
+  background: #f6f6f6; border-radius: 999px; padding: 8px 20px;
+  color: #383838; gap: 12px;
+}
     .age-row span { display: flex; align-items: center; }
     .age-row .age-arrow { max-width: 22px; }
+    .age-row .age-item { align-items: center; gap: 12px; }
     .age-row .age-arrow img { width: 100%; }
     .age-row .age-diff { color: #383838; font-size: 10px; }
     .age-row strong { font-weight: 700; font-size: 20px; }
@@ -286,52 +288,69 @@ function generateReportHTML(data) {
       width: 104px; height: 46px; display: flex;
       justify-content: center; align-items: center;
       padding: 6px 8px; border-radius: 8px; text-align: center;
-      font-size: 11px; font-weight: 700; color: #fff; line-height: 1;
+      font-size: 14px; font-weight: 700; color: #fff; line-height: 1;
       background: linear-gradient(270deg, #2DB7AE 0%, #285989 100%);
     }
-    .gauge-value { width: 80px; text-align: center; font-size: 13px; }
-    .gauge-value strong { font-size: 18px; }
+.gauge-value { width: 80px; text-align: center; font-size: 14px; font-weight: 400; white-space: nowrap; }
+.gauge-value strong { font-size: 18px; font-weight: 700; }
     .gauge-bar-wrapper {
       flex: 1; display: flex; align-items: center; gap: 6px;
     }
     .small_img, .tall_img {
       display: flex; flex-direction: column; align-items: center; flex-shrink: 0;
     }
-    .small_img span, .tall_img span { font-size: 10px; color: #888; white-space: nowrap; }
-    .dino-small { width: 32px; }
+    .small_img span, .tall_img span { font-size: 12px; color: #888; white-space: nowrap; }
+   .dino-small { width: 32px; transform: rotateY(-180deg); }
     .dino-tall { width: 40px; }
-    .gauge-bar {
-      flex: 1; height: 16px; border-radius: 8px; position: relative;
-      background: linear-gradient(270deg, #2DB7AE 0%, #285989 100%);
-    }
-    .gauge-fill { height: 100%; border-radius: 8px; background: transparent; }
+.gauge-bar {
+  flex: 1; height: 6px; border-radius: 8px; position: relative;
+  background-color: #dfe1e7;
+}
+.gauge-fill { height: 100%; border-radius: 8px; background: linear-gradient(270deg, #2DB7AE 0%, #285989 100%); }
     .gauge-marker {
-      position: absolute; top: -28px; transform: translateX(-50%);
+      position: absolute; top: 50%; transform: translate(-50%, -70%);
       display: flex; flex-direction: column; align-items: center;
     }
-    .gauge-marker .marker-value { font-size: 12px; font-weight: 700; }
+    .gauge-marker .marker-value { font-size: 12px; font-weight: 400; }
     .gauge-marker img { width: 32px; max-width: unset; }
 
     /* 보정량 */
     .correction-row { display: flex; justify-content: center; gap: 30px; margin: 6px 0; }
-    .correction {
-      padding: 4px 14px; border: 1px solid #ddd;
-      border-radius: 20px; font-size: 11px; color: #666;
-    }
+.correction {
+  padding: 4px 14px; position: relative;
+  background: #fff; border-radius: 20px;
+  font-size: 11px; color: #666; z-index: 1;
+}
+.correction::before {
+  content: ''; position: absolute;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: calc(100% + 2px); height: calc(100% + 2px);
+  border-radius: 999px; z-index: -1;
+  background: linear-gradient(270deg, #2DB7AE 0%, #285989 100%);
+}
+.correction::after {
+  content: ''; position: absolute;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 100%; height: 100%;
+  z-index: -1; background: #fff; border-radius: 999px;
+}
 
     /* 스코어 설명 */
-    .score-desc {
-      padding: 10px 40px; font-size: 10px; color: #666;
-      line-height: 1; border-top: 1px solid #eee; margin-top: 8px;
-    }
-    .score-desc p { margin: 4px 0; }
-    .score-desc strong { color: #333; }
+.score-desc {
+  padding: 8px 12px; font-size: 10px; color: #737373;
+  line-height: 1; max-width: calc(100% - 40px);
+  margin: 8px auto 0; background: #f6f6f6;
+}
+.score-desc p { margin: 0 0 8px; font-size: 8px; }
+.score-desc strong { margin: 4px 0; font-size: 10px; display: inline-block; }
 
     /* ===== 3페이지: 건강 게이지 ===== */
-    .health-gauge { padding: 8px 40px; }
-    .health-gauge .health-title { font-size: 15px; margin-bottom: 6px; }
-    .health-gauge .health-title strong { font-size: 20px; }
-    .health-gauge .health-desc { font-size: 9px; color: #888; margin: 4px 0 0; line-height: 1.5; }
+    .health-gauge { padding: 0 40px; display: flex; gap: 21px; margin-bottom: 24px; }
+.health-gauge .right_section { flex: 1; }
+.health-gauge .health-title { font-size: 14px; font-weight: 700; min-width: 109px; color: #737373; }
+.health-gauge .health-title strong { margin-top: 4px; display: block; color: #383838; font-size: 20px; font-weight: 700; }
+.health-gauge .health-title strong .unit { font-size: 14px; font-weight: 400; }
+.health-gauge .health-desc { font-size: 9px; color: #737373; margin: 8px 0 0; line-height: 1; }
 
     .level-bar {
       display: flex; border-radius: 4px; overflow: hidden;
@@ -352,17 +371,17 @@ function generateReportHTML(data) {
     .chart-section.half { padding: 6px 40px; }
     .chart-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
     .chart-title strong { color: #333; }
-    .percentile-text { font-size: 13px; margin: 2px 0 8px; }
-    .percentile-text strong { color: #4a90d9; }
+.percentile-text { font-size: 14px; font-weight: 400; color: #4e545c; margin: 2px 0 8px; }
+.percentile-text strong { color: #305b86; }
+
 
     .chart-with-desc { display: flex; gap: 12px; align-items: flex-start; }
     .chart-with-desc canvas { border: 1px solid #eee; border-radius: 4px; }
-    .chart-desc-box {
-      width: 160px; padding: 12px; background: #f8f9fa;
-      border-radius: 6px; font-size: 11px; color: #666; line-height: 1.5;
-    }
-    .chart-desc-box strong { display: block; color: #333; margin-bottom: 4px; }
-
+.chart-desc-box {
+  width: 156px; padding: 8px; background: #f6f6f6;
+  font-size: 10px; font-weight: 400; color: #666; line-height: 1.5;
+}
+.chart-desc-box strong { display: inline-block; color: #383838; font-size: 11px; margin-bottom: 4px; }
     .chart-legend {
       display: flex; align-items: center; gap: 16px;
       justify-content: center; margin-top: 6px; font-size: 11px; color: #666;
@@ -457,21 +476,29 @@ function generateReportHTML(data) {
     </div>
 
     <div class="health-gauge">
-      <div class="health-title">체중 <strong>${analysis.weight} kg</strong></div>
+      <div class="health-title">체중 <strong>${analysis.weight} <span class="unit">kg</span></strong></div>
+      <div class="right_section">
       ${levelBarHTML(['저체중', '정상', '과체중', '비만'], weightLevel)}
       <p class="health-desc">정상: 연령별 체중 5백분위수 이상이고, 연령별 체질량 지수 85백분위수 미만<br/>저체중: 연령별 체중 5백분위수 미만<br/>과체중: 연령별 체질량 지수 85 ~ 95백분위수<br/>비만: 연령별 체질량 지수 95백분위수 이상</p>
+      
+      </div>
     </div>
 
     <div class="health-gauge">
-      <div class="health-title">체질량 지수 <strong>${bmiValue} kg/m&sup2;</strong></div>
+      <div class="health-title">체질량 지수 <strong>${bmiValue} <span class="unit">kg/m&sup2;</span></strong></div>
+      <div class="right_section">
       ${levelBarHTML(['저체중', '정상', '과체중', '비만'], bmiLevel)}
       <p class="health-desc">체질량 지수(BMI: Body Mass Index) = 체중(kg) / (키(m) x 키(m))<br/>체질량 지수 기준 : 5th 미만(저체중) / 5th ~ 84th(정상) / 85th ~ 94th(과체중) / 95th 이상(비만)</p>
+      
+      </div>
     </div>
 
     <div class="health-gauge">
-      <div class="health-title">비만도 <strong>${obesityRate} %</strong></div>
+      <div class="health-title">비만도 <strong>${obesityRate} <span class="unit">%</span></strong></div>
+      <div class="right_section">
       ${levelBarHTML(['저체중', '정상', '경도비만', '중등도비만', '고도비만'], obesityLevel)}
       <p class="health-desc">비만도 (%) = 표준 체중 대비 백분율(%) = 측정 체중 / 표준 체중 x 100<br/>비만도 기준 : 90미만(저체중) / 90~119(정상) / 120~129(경도비만) / 130~149(중등도비만) / 150이상(고도비만)</p>
+      </div>
     </div>
 
     <div class="chart-section">
