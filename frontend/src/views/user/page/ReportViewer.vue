@@ -34,7 +34,9 @@
         <div class="pdf-page cover-page" ref="page1">
           <img class="cover-bg" src="/assets/report/cover.png" />
           <img class="cover-logo" src="/assets/report/osteoage_logo.svg" />
-          <h1 class="cover-title">쑥쑥 성장<br />로드맵 보고서</h1>
+          <div class="title-area">
+            <h1 class="cover-title">쑥쑥 성장<br />로드맵 보고서</h1>
+          </div>
           <div class="cover-info-box">
             <div class="info-row">
               <span class="label">성명</span>
@@ -356,63 +358,80 @@
           <!-- 체중 판정 -->
           <div class="health-gauge">
             <div class="health-title">
-              체중 <strong>{{ analysis?.weight }} kg</strong>
+              체중
+              <strong
+                >{{ analysis?.weight }} <span class="unit">kg</span></strong
+              >
             </div>
-            <div class="level-bar level-4">
-              <span :class="{ active: weightLevel === '저체중' }">저체중</span>
-              <span :class="{ active: weightLevel === '정상' }">정상</span>
-              <span :class="{ active: weightLevel === '과체중' }">과체중</span>
-              <span :class="{ active: weightLevel === '비만' }">비만</span>
+            <div class="right_section">
+              <div class="level-bar level-4">
+                <span :class="{ active: weightLevel === '저체중' }"
+                  >저체중</span
+                >
+                <span :class="{ active: weightLevel === '정상' }">정상</span>
+                <span :class="{ active: weightLevel === '과체중' }"
+                  >과체중</span
+                >
+                <span :class="{ active: weightLevel === '비만' }">비만</span>
+              </div>
+              <p class="health-desc">
+                정상: 연령별 체중 5백분위수 이상이고, 연령별 체질량 지수
+                85백분위수 미만<br />저체중: 연령별 체중 5백분위수 미만<br />과체중:
+                연령별 체질량 지수 85 ~ 95백분위수<br />비만: 연령별 체질량 지수
+                95백분위수 이상
+              </p>
             </div>
-            <p class="health-desc">
-              정상: 연령별 체중 5백분위수 이상이고, 연령별 체질량 지수
-              85백분위수 미만<br />저체중: 연령별 체중 5백분위수 미만<br />과체중:
-              연령별 체질량 지수 85 ~ 95백분위수<br />비만: 연령별 체질량 지수
-              95백분위수 이상
-            </p>
           </div>
 
           <!-- 체질량 지수 -->
           <div class="health-gauge">
             <div class="health-title">
-              체질량 지수 <strong>{{ bmiValue }} kg/m²</strong>
+              체질량 지수
+              <strong>{{ bmiValue }} <span class="unit">kg/m²</span></strong>
             </div>
-            <div class="level-bar level-4">
-              <span :class="{ active: bmiLevel === '저체중' }">저체중</span>
-              <span :class="{ active: bmiLevel === '정상' }">정상</span>
-              <span :class="{ active: bmiLevel === '과체중' }">과체중</span>
-              <span :class="{ active: bmiLevel === '비만' }">비만</span>
+            <div class="right_section">
+              <div class="level-bar level-4">
+                <span :class="{ active: bmiLevel === '저체중' }">저체중</span>
+                <span :class="{ active: bmiLevel === '정상' }">정상</span>
+                <span :class="{ active: bmiLevel === '과체중' }">과체중</span>
+                <span :class="{ active: bmiLevel === '비만' }">비만</span>
+              </div>
+              <p class="health-desc">
+                체질량 지수(BMI: Body Mass Index) = 체중(kg) / (키(m) x
+                키(m))<br />체질량 지수 기준 : 5th 미만(저체중) / 5th ~
+                84th(정상) / 85th ~ 94th(과체중) / 95th 이상(비만)
+              </p>
             </div>
-            <p class="health-desc">
-              체질량 지수(BMI: Body Mass Index) = 체중(kg) / (키(m) x 키(m))<br />체질량
-              지수 기준 : 5th 미만(저체중) / 5th ~ 84th(정상) / 85th ~
-              94th(과체중) / 95th 이상(비만)
-            </p>
           </div>
 
           <!-- 비만도 -->
           <div class="health-gauge">
             <div class="health-title">
-              비만도 <strong>{{ obesityRate }} %</strong>
+              비만도
+              <strong>{{ obesityRate }} <span class="unit">%</span></strong>
             </div>
-            <div class="level-bar level-5">
-              <span :class="{ active: obesityLevel === '저체중' }">저체중</span>
-              <span :class="{ active: obesityLevel === '정상' }">정상</span>
-              <span :class="{ active: obesityLevel === '경도비만' }"
-                >경도비만</span
-              >
-              <span :class="{ active: obesityLevel === '중등도비만' }"
-                >중등도비만</span
-              >
-              <span :class="{ active: obesityLevel === '고도비만' }"
-                >고도비만</span
-              >
+            <div class="right_section">
+              <div class="level-bar level-5">
+                <span :class="{ active: obesityLevel === '저체중' }"
+                  >저체중</span
+                >
+                <span :class="{ active: obesityLevel === '정상' }">정상</span>
+                <span :class="{ active: obesityLevel === '경도비만' }"
+                  >경도비만</span
+                >
+                <span :class="{ active: obesityLevel === '중등도비만' }"
+                  >중등도비만</span
+                >
+                <span :class="{ active: obesityLevel === '고도비만' }"
+                  >고도비만</span
+                >
+              </div>
+              <p class="health-desc">
+                비만도 (%) = 표준 체중 대비 백분율(%) = 측정 체중 / 표준 체중 x
+                100<br />비만도 기준 : 90미만(저체중) / 90~119(정상) /
+                120~129(경도비만) / 130~149(중등도비만) / 150이상(고도비만)
+              </p>
             </div>
-            <p class="health-desc">
-              비만도 (%) = 표준 체중 대비 백분율(%) = 측정 체중 / 표준 체중 x
-              100<br />비만도 기준 : 90미만(저체중) / 90~119(정상) /
-              120~129(경도비만) / 130~149(중등도비만) / 150이상(고도비만)
-            </p>
           </div>
 
           <!-- 현재 키 기반 예측 키 차트 -->
@@ -1086,7 +1105,7 @@ onMounted(async () => {
   await loadAnalysis();
   loading.value = false; // ★ 먼저 로딩 해제 → v-else DOM 생성
   await nextTick(); // ★ DOM 업데이트 대기
-  await new Promise((r) => setTimeout(r, 300));
+  await document.fonts.ready;
 
   // 차트 그리기
   const gender = analysis.value.gender;
@@ -1305,6 +1324,10 @@ onUnmounted(() => {
     margin-top: 142px;
     margin-bottom: 12px;
   }
+  .title-area {
+    position: relative;
+    z-index: 1;
+  }
   .cover-title {
     font-family: $font2-cafe;
     text-align: center;
@@ -1333,6 +1356,8 @@ onUnmounted(() => {
     display: inline-block;
     position: absolute;
     top: 50%;
+    z-index: 1;
+
     .info-row {
       display: flex;
       gap: 16px;
@@ -1354,7 +1379,7 @@ onUnmounted(() => {
     left: 0;
     right: 0;
     bottom: 0;
-    // z-index: 0;
+    z-index: 0;
     background-size: cover;
     // width: 500px; margin-top: 30px;
   }
@@ -1362,6 +1387,7 @@ onUnmounted(() => {
     width: 140px;
     position: absolute;
     bottom: 50px;
+    z-index: 1;
   }
 }
 
@@ -1382,6 +1408,7 @@ onUnmounted(() => {
     gap: 10px;
     padding-right: 28px;
     padding-left: 28px;
+    white-space: nowrap;
     border-right: 1px solid $line-gray;
     &:first-child {
       padding-left: 0;
@@ -1435,13 +1462,18 @@ onUnmounted(() => {
     margin-bottom: 12px;
     background: $dark-gray-light;
     border-radius: 999px;
-    padding: 11px 20px;
+    padding: 8px 20px;
     color: $black;
     gap: 12px;
     span {
       display: flex;
       align-items: center;
     }
+    .age-item {
+      align-items: center;
+      gap: 12px;
+    }
+
     .age-arrow {
       max-width: 22px;
       img {
@@ -1498,6 +1530,7 @@ onUnmounted(() => {
   gap: 10px;
   margin-bottom: 8px;
   .gauge-label-box {
+    @include font-14-bold;
     width: 104px;
     height: 46px;
     display: flex;
@@ -1506,8 +1539,7 @@ onUnmounted(() => {
     padding: 6px 8px;
     border-radius: 8px;
     text-align: center;
-    font-size: 11px;
-    font-weight: 700;
+
     color: #fff;
     line-height: 1;
     background: $pdf-grad;
@@ -1525,11 +1557,13 @@ onUnmounted(() => {
     // }
   }
   .gauge-value {
+    @include font-14-regular;
     width: 80px;
     text-align: center;
-    font-size: 13px;
+
+    white-space: nowrap;
     strong {
-      font-size: 18px;
+      @include font-18-bold;
     }
   }
 }
@@ -1547,13 +1581,15 @@ onUnmounted(() => {
     align-items: center;
     flex-shrink: 0; // ★ 줄어들지 않게 고정
     span {
-      font-size: 10px;
+      @include font-12-regular;
+      // font-size: 10px;
       color: #888;
       white-space: nowrap;
     }
   }
   .dino-small {
     width: 32px;
+    transform: rotateY(-180deg);
   }
   .dino-tall {
     width: 40px;
@@ -1562,25 +1598,27 @@ onUnmounted(() => {
 
 .gauge-bar {
   flex: 1;
-  height: 16px;
-  border-radius: 8px;
+  height: 6px;
   position: relative;
-  background: $pdf-grad;
+  // overflow: hidden;
+  border-radius: 8px;
+  background-color: $dark-gray;
   .gauge-fill {
+    border-radius: 8px;
+    background: $pdf-grad;
     height: 100%;
     border-radius: 8px;
-    background: transparent; // fill은 gradient로 이미 표현
+    // background: transparent; // fill은 gradient로 이미 표현
   }
   .gauge-marker {
     position: absolute;
-    top: -28px;
-    transform: translateX(-50%);
+    top: 50%;
+    transform: translate(-50%, -70%);
     display: flex;
     flex-direction: column;
     align-items: center;
     .marker-value {
-      font-size: 12px;
-      font-weight: 700;
+      @include font-12-regular;
     }
     img {
       width: 32px;
@@ -1605,56 +1643,108 @@ onUnmounted(() => {
   margin: 6px 0;
   .correction {
     padding: 4px 14px;
-    border: 1px solid #ddd;
+    position: relative;
+    background: $white;
+    // border: 1px solid #ddd;
     border-radius: 20px;
     font-size: 11px;
     color: #666;
+    z-index: 1;
+    &::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: calc(100% + 2px);
+      height: calc(100% + 2px);
+      border-radius: 999px;
+      z-index: -1;
+      background: $bg-grad-blue-green;
+    }
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: $white;
+      border-radius: 999px;
+    }
   }
 }
 
 // ===== 스코어 설명 =====
 .score-desc {
-  padding: 10px 40px;
+  padding: 8px 12px;
   font-size: 10px;
-  color: #666;
+  color: $text-gray-2;
   line-height: 1;
-  border-top: 1px solid #eee;
+  max-width: calc(100% - 40px);
+  margin: Auto;
+  background: $dark-gray-light;
+  // border-top: 1px solid #eee;
   margin-top: 8px;
+
   p {
-    margin: 4px 0;
+    margin: 0 0 8px;
+    font-size: 8px;
   }
   strong {
-    color: #333;
+    margin: 4px 0;
+    font-size: 10px;
+    display: inline-block;
   }
 }
 
 // ===== 3페이지: 건강 게이지 =====
 .health-gauge {
-  padding: 8px 40px;
+  padding: 0 40px;
+  display: flex;
+  gap: 21px;
+  margin-bottom: 24px;
+  .right_section {
+    flex: 1;
+  }
   .health-title {
-    font-size: 15px;
-    margin-bottom: 6px;
+    @include font-14-bold;
+    // font-size: 15px;
+    min-width: 109px;
+
+    color: $text-gray-2;
     strong {
-      font-size: 20px;
+      // font-size: 20px;
+      margin-top: 4px;
+      display: block;
+      color: $black;
+      @include font-20-bold;
+      .unit {
+        @include font-14-regular;
+      }
     }
   }
   .health-desc {
     font-size: 9px;
-    color: #888;
-    margin: 4px 0 0;
-    line-height: 1.5;
+    color: $text-gray-2;
+
+    margin: 8px 0 0;
+    line-height: 1;
   }
 }
 
 .level-bar {
   display: flex;
   border-radius: 4px;
+
   overflow: hidden;
   span {
     flex: 1;
     padding: 8px 4px;
     text-align: center;
-    font-size: 12px;
+    @include font-12-regular;
     background: #f0f0f0;
     color: #999;
     border-right: 1px solid #ddd;
@@ -1684,10 +1774,11 @@ onUnmounted(() => {
     }
   }
   .percentile-text {
-    font-size: 13px;
+    @include font-14-regular;
+    color: $dark-gray-dark;
     margin: 2px 0 8px;
     strong {
-      color: #4a90d9;
+      color: $main-color;
     }
   }
 }
@@ -1701,16 +1792,17 @@ onUnmounted(() => {
     border-radius: 4px;
   }
   .chart-desc-box {
-    width: 160px;
-    padding: 12px;
-    background: #f8f9fa;
-    border-radius: 6px;
-    font-size: 11px;
+    width: 156px;
+    padding: 8px;
+    background: #f6f6f6;
+    // border-radius: 6px;
+    @include font-10-regular;
     color: #666;
     line-height: 1.5;
     strong {
-      display: block;
-      color: #333;
+      display: inline-block;
+      color: $black;
+      font-size: 11px;
       margin-bottom: 4px;
     }
   }

@@ -44,7 +44,7 @@ const message = UseMessageStore();
 }
 
 .message-content {
-  min-width: 360px;
+  min-width: 548px;
   max-width: 480px;
   background-color: $dark-bg;
   border: 1px solid $dark-line-gray;

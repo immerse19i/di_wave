@@ -5,23 +5,55 @@
       <div class="filter-row">
         <span class="filter-label">기간</span>
         <div class="date-picker-wrap">
-          <input type="date" v-model="startDate">
+          <input type="date" v-model="startDate" />
           <span>~</span>
-          <input type="date" v-model="endDate">
+          <input type="date" v-model="endDate" />
         </div>
         <div class="quick-btns">
-          <button :class="{ active: quickRange === 'today' }" @click="setQuickRange('today')">오늘</button>
-          <button :class="{ active: quickRange === '7' }" @click="setQuickRange('7')">7일</button>
-          <button :class="{ active: quickRange === '30' }" @click="setQuickRange('30')">30일</button>
-          <button :class="{ active: quickRange === '90' }" @click="setQuickRange('90')">90일</button>
+          <button
+            :class="{ active: quickRange === 'today' }"
+            @click="setQuickRange('today')"
+          >
+            오늘
+          </button>
+          <button
+            :class="{ active: quickRange === '7' }"
+            @click="setQuickRange('7')"
+          >
+            7일
+          </button>
+          <button
+            :class="{ active: quickRange === '30' }"
+            @click="setQuickRange('30')"
+          >
+            30일
+          </button>
+          <button
+            :class="{ active: quickRange === '90' }"
+            @click="setQuickRange('90')"
+          >
+            90일
+          </button>
         </div>
       </div>
       <div class="filter-row">
         <span class="filter-label">유형</span>
         <div class="radio-group">
-          <label><input type="radio" v-model="filterType" value="all"><span>전체</span></label>
-          <label><input type="radio" v-model="filterType" value="charge"><span>충전</span></label>
-          <label><input type="radio" v-model="filterType" value="use"><span>사용</span></label>
+          <label
+            ><input type="radio" v-model="filterType" value="all" /><span
+              >전체</span
+            ></label
+          >
+          <label
+            ><input type="radio" v-model="filterType" value="charge" /><span
+              >충전</span
+            ></label
+          >
+          <label
+            ><input type="radio" v-model="filterType" value="use" /><span
+              >사용</span
+            ></label
+          >
         </div>
       </div>
     </div>
@@ -29,7 +61,12 @@
     <!-- 테이블 영역 -->
     <div class="table-area">
       <div class="table-header">
-        <button class="charge-btn" @click="router.push('/user-info/credit-charge')">크레딧 충전</button>
+        <button
+          class="charge-btn"
+          @click="router.push('/user-info/credit-charge')"
+        >
+          크레딧 충전
+        </button>
         <div class="balance-box">
           <span class="balance-label">잔여</span>
           <span class="balance-value">{{ currentBalance }}</span>
@@ -49,17 +86,27 @@
             <th>영수증</th>
           </tr>
         </thead>
-        <tbody>
-          <tr v-for="item in paginatedList" :key="item.id">
-            <td>{{ item.date }}</td>
-            <td>{{ item.patientCode || '-' }}</td>
-            <td>{{ item.patientName || '-' }}</td>
-            <td>{{ item.doctor }}</td>
-            <td>{{ item.detail }}</td>
-            <td>{{ item.amount > 0 ? '+' + item.amount : item.amount }}</td>
-            <td>{{ item.balance }}</td>
+        <tbody v-if="creditList.length === 0">
+          <tr>
+            <td colspan="8" class="empty-msg">내역이 없습니다.</td>
+          </tr>
+        </tbody>
+        <tbody v-else>
+          <tr v-for="item in creditList" :key="item.id">
+            <td>{{ formatDate(item.created_at) }}</td>
+            <td>{{ item.patient_code || '-' }}</td>
+            <td>{{ item.patient_name || '-' }}</td>
+            <td>{{ item.physician || '-' }}</td>
+            <td>{{ getDetailText(item) }}</td>
+            <td>{{ getAmountText(item) }}</td>
+            <td>{{ item.balance_after }}</td>
             <td>
-              <img v-if="item.receipt" src="/assets/icons/receipt_icon.svg" alt="영수증" class="receipt-icon">
+              <img
+                v-if="showReceipt(item)"
+                src="/assets/icons/receipt_icon.svg"
+                alt="영수증"
+                class="receipt-icon"
+              />
             </td>
           </tr>
         </tbody>
@@ -67,8 +114,12 @@
 
       <!-- 페이지네이션 -->
       <div class="pagination">
-        <button @click="goPage(1)" :disabled="currentPage === 1">&laquo;</button>
-        <button @click="goPage(currentPage - 1)" :disabled="currentPage === 1">&lt;</button>
+        <button @click="goPage(1)" :disabled="currentPage === 1">
+          &laquo;
+        </button>
+        <button @click="goPage(currentPage - 1)" :disabled="currentPage === 1">
+          &lt;
+        </button>
         <button
           v-for="page in pageRange"
           :key="page"
@@ -77,8 +128,18 @@
         >
           {{ page }}
         </button>
-        <button @click="goPage(currentPage + 1)" :disabled="currentPage === totalPages">&gt;</button>
-        <button @click="goPage(totalPages)" :disabled="currentPage === totalPages">&raquo;</button>
+        <button
+          @click="goPage(currentPage + 1)"
+          :disabled="currentPage === totalPages"
+        >
+          &gt;
+        </button>
+        <button
+          @click="goPage(totalPages)"
+          :disabled="currentPage === totalPages"
+        >
+          &raquo;
+        </button>
       </div>
     </div>
 
@@ -91,17 +152,27 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { creditList } from '@/mock';
+import { ref, computed, watch, onMounted } from 'vue';
+import { creditAPI } from '@/api/credit';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+
 // 필터
-const startDate = ref('2024-01-01');
-const endDate = ref('2024-01-07');
+const startDate = ref('');
+const endDate = ref('');
 const quickRange = ref('30');
 const filterType = ref('all');
 
+// 데이터
+const creditList = ref([]);
+const currentBalance = ref(0);
+const currentPage = ref(1);
+const totalPages = ref(1);
+const total = ref(0);
+const perPage = 12;
+
+// 초기 30일 설정
 const setQuickRange = (range) => {
   quickRange.value = range;
   const today = new Date();
@@ -116,46 +187,101 @@ const setQuickRange = (range) => {
   }
 };
 
-// 필터링된 목록
-const filteredList = computed(() => {
-  return creditList.filter((item) => {
-    if (filterType.value === 'charge' && item.amount <= 0) return false;
-    if (filterType.value === 'use' && item.amount > 0) return false;
-    return true;
-  });
+// API 호출
+const fetchList = async () => {
+  try {
+    const params = {
+      startDate: startDate.value,
+      endDate: endDate.value,
+      page: currentPage.value,
+      limit: perPage,
+    };
+    if (filterType.value !== 'all') {
+      params.type = filterType.value;
+    }
+
+    const res = await creditAPI.getMyCreditHistory(params);
+    creditList.value = res.data.data;
+    totalPages.value = res.data.totalPages;
+    total.value = res.data.total;
+    currentBalance.value = res.data.balance;
+  } catch (error) {
+    console.error('크레딧 내역 조회 실패:', error);
+  }
+};
+
+// 날짜 유효성 보정 + 즉시 조회
+watch(startDate, (val) => {
+  if (val && endDate.value && val > endDate.value) {
+    endDate.value = val;
+  }
+  quickRange.value = ''; // 퀵버튼 해제
+  currentPage.value = 1;
+  fetchList();
 });
 
-// 잔여 크레딧
-const currentBalance = computed(() => {
-  return filteredList.value.length > 0 ? filteredList.value[0].balance : 0;
+watch(endDate, (val) => {
+  if (val && startDate.value && val < startDate.value) {
+    startDate.value = val;
+  }
+  quickRange.value = '';
+  currentPage.value = 1;
+  fetchList();
 });
+
+// 유형 변경 시 1페이지 리셋
+watch(filterType, () => {
+  currentPage.value = 1;
+  fetchList();
+});
+
+// 상세내역 텍스트 매핑
+const getDetailText = (item) => {
+  if (item.type === 'use' && item.analysis_id) return '분석';
+  if (item.type === 'use' && !item.analysis_id) return '차감(관리자)';
+  if (item.type === 'charge' && item.payment_id) return '충전';
+  if (item.type === 'charge' && !item.payment_id) return '지급(관리자)';
+  return '-';
+};
+
+// 충전/사용 표시
+const getAmountText = (item) => {
+  if (item.type === 'use' || item.type === 'refund') {
+    return '-' + item.amount;
+  }
+  return '+' + item.amount;
+};
+
+// 영수증 표시 여부: PG 충전건만
+const showReceipt = (item) => {
+  return item.type === 'charge' && item.payment_id;
+};
+
+// 날짜 포맷
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-';
+  return dateStr.replace('T', ' ').slice(0, 19);
+};
 
 // 페이지네이션
-const currentPage = ref(1);
-const perPage = 12;
-
-const totalPages = computed(() => Math.ceil(filteredList.value.length / perPage));
-
 const pageRange = computed(() => {
   const start = Math.max(1, currentPage.value - 4);
   const end = Math.min(totalPages.value, start + 9);
   const pages = [];
-  for (let i = start; i <= end; i++) {
-    pages.push(i);
-  }
+  for (let i = start; i <= end; i++) pages.push(i);
   return pages;
-});
-
-const paginatedList = computed(() => {
-  const start = (currentPage.value - 1) * perPage;
-  return filteredList.value.slice(start, start + perPage);
 });
 
 const goPage = (page) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page;
+    fetchList();
   }
 };
+
+onMounted(() => {
+  setQuickRange('30'); // 기본 30일 → watch가 fetchList 호출
+});
 </script>
 
 <style scoped lang="scss">
@@ -183,7 +309,7 @@ const goPage = (page) => {
       align-items: center;
       gap: 8px;
 
-      input[type="date"] {
+      input[type='date'] {
         padding: 8px 12px;
         background: $dark-input;
         border: 1px solid $dark-line-gray;
@@ -229,7 +355,7 @@ const goPage = (page) => {
         gap: 6px;
         cursor: pointer;
 
-        input[type="radio"] {
+        input[type='radio'] {
           accent-color: $main-color;
         }
 
@@ -352,5 +478,12 @@ const goPage = (page) => {
     @include font-12-regular;
     color: $dark-input-gray;
   }
+}
+
+.empty-msg {
+  text-align: center;
+  padding: 80px 0 !important;
+  color: $dark-input-gray;
+  @include font-14-regular;
 }
 </style>
