@@ -134,7 +134,9 @@
             <td>{{ formatDate(item.created_at) }}</td>
             <td>{{ item.author_name }}</td>
             <td class="td-delete" @click.stop="handleDelete(item)">
-              <button class="btn-delete-icon">🗑</button>
+              <button class="btn-delete-icon">
+                <img src="/assets/icons/trash_icon.svg" alt="삭제 아이콘" />
+              </button>
             </td>
           </tr>
           <tr v-if="noticeList.length === 0">
@@ -417,6 +419,7 @@ const onResize = () => {
 .filter-row {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 30px;
   margin-bottom: 12px;
 }
@@ -437,15 +440,18 @@ const onResize = () => {
   gap: 4px;
 
   .filter-btn {
-    padding: 8px 20px;
+    padding: 8px 0;
     border-radius: $radius-sm;
+    text-align: center;
     border: 1px solid $dark-line-gray;
     background: none;
     color: $dark-text;
+    min-width: 80px;
     @include font-14-medium;
     cursor: pointer;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 4px;
 
     .check-icon {
@@ -453,8 +459,8 @@ const onResize = () => {
     }
 
     &.active {
-      background: $main-color;
-      border-color: $main-color;
+      background: $sub-color;
+      border-color: $sub-color;
       color: $white;
     }
   }
@@ -592,6 +598,9 @@ const onResize = () => {
 
 // 테이블
 .table-area {
+  padding: 8px 14px;
+  background: $table-bg;
+  border-radius: 12px;
   .data-table {
     width: 100%;
     border-collapse: collapse;
@@ -607,7 +616,7 @@ const onResize = () => {
     }
 
     thead tr {
-      background: $main-gad;
+      background: $bg-op;
     }
     th {
       @include font-14-bold;
@@ -625,9 +634,9 @@ const onResize = () => {
       }
     }
 
-    tbody tr:nth-child(odd) {
-      background: $bg-op;
-    }
+    // tbody tr:nth-child(odd) {
+    //   background: $bg-op;
+    // }
 
     .data-row {
       cursor: pointer;
