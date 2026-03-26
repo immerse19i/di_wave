@@ -163,6 +163,10 @@ onUnmounted(() => {
           padding: 8px 24px;
           @include font-13-medium;
           gap: 8px;
+          border-radius: 8px;
+          &:hover {
+            background: $main-color;
+          }
         }
       }
     }
