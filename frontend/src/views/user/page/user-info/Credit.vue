@@ -100,7 +100,7 @@
             <td>{{ getDetailText(item) }}</td>
             <td>{{ getAmountText(item) }}</td>
             <td>{{ item.balance_after }}</td>
-            <td>
+            <td class="receipt-cell">
               <img
                 v-if="showReceipt(item)"
                 src="/assets/icons/receipt_icon.svg"
@@ -429,6 +429,12 @@ onMounted(() => {
           padding: 10px 8px;
           text-align: center;
           white-space: nowrap;
+
+          &.receipt-cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
         }
       }
 

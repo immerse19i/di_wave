@@ -6,9 +6,18 @@
         <button class="btn-back" @click="goBack">
           <span>&lt;</span> 뒤로가기
         </button>
-        <div class="history-dropdown" ref="historyRef">
+        <div
+          class="history-dropdown"
+          :class="{ open: showHistory }"
+          ref="historyRef"
+        >
           <button class="btn-history" @click="toggleHistory">
-            이전기록 <span class="arrow">&#9662;</span>
+            <span>이전기록</span>
+            <img
+              src="/assets/icons/dropdown_icon.svg"
+              alt=""
+              class="arrow-icon"
+            />
           </button>
           <ul v-if="showHistory" class="history-list">
             <li v-if="previousRecords.length === 0" class="no-record">
@@ -114,28 +123,56 @@
       <!-- 오른쪽: 분석 결과 -->
       <div class="right-panel">
         <!-- 이전 기록 비교 카드 -->
-        <div v-if="isComparing && comparisonRecord" class="result-summary comparison-summary">
+        <div
+          v-if="isComparing && comparisonRecord"
+          class="result-summary comparison-summary"
+        >
           <div class="predicted-height">
-            <span class="date-label">{{ formatDate(comparisonRecord.analysis_date || comparisonRecord.created_at) }}</span>
+            <span class="date-label">{{
+              formatDate(
+                comparisonRecord.analysis_date || comparisonRecord.created_at,
+              )
+            }}</span>
             <span class="label">최종 예측 키</span>
-            <span class="value">{{ comparisonFinalPredictedHeight }}<small>cm</small></span>
+            <span class="value"
+              >{{ comparisonFinalPredictedHeight }}<small>cm</small></span
+            >
           </div>
           <div class="age-info">
             <div>
               <span class="type"> 나이 </span>
-              <b>{{ formatAge(comparisonRecord.chronological_age_years, comparisonRecord.chronological_age_months) }}</b>
+              <b>{{
+                formatAge(
+                  comparisonRecord.chronological_age_years,
+                  comparisonRecord.chronological_age_months,
+                )
+              }}</b>
             </div>
             <div>
               <span class="type"> 뼈 나이(AI) </span>
-              <b class="born">{{ formatAge(comparisonRecord.bone_age_years, comparisonRecord.bone_age_months) }}</b>
+              <b class="born">{{
+                formatAge(
+                  comparisonRecord.bone_age_years,
+                  comparisonRecord.bone_age_months,
+                )
+              }}</b>
             </div>
             <div class="has-tooltip">
               <span class="type"> 유전적 예측 키 </span>
-              <b>{{ comparisonMphHeight ? comparisonMphHeight + ' cm' : '-' }}</b>
+              <b>{{
+                comparisonMphHeight ? comparisonMphHeight + ' cm' : '-'
+              }}</b>
               <div class="tootip_wrap">
                 <span class="tooltip-wrap">
-                  <img src="/assets/icons/question.svg" alt="" class="tooltip-icon" />
-                  <img class="tooltip-img tooltip-right" src="/assets/images/tooltip/parental_height.svg" />
+                  <img
+                    src="/assets/icons/question.svg"
+                    alt=""
+                    class="tooltip-icon"
+                  />
+                  <img
+                    class="tooltip-img tooltip-right"
+                    src="/assets/images/tooltip/parental_height.svg"
+                  />
                 </span>
               </div>
             </div>
@@ -145,26 +182,44 @@
         <!-- 최종 예측 키 (#5) -->
         <div class="result-summary">
           <div class="predicted-height">
-            <span v-if="isComparing" class="date-label">{{ formatDate(analysis.analysis_date || analysis.created_at) }}</span>
+            <span v-if="isComparing" class="date-label">{{
+              formatDate(analysis.analysis_date || analysis.created_at)
+            }}</span>
             <span class="label">최종 예측 키</span>
-            <span class="value">{{ finalPredictedHeight }}<small>cm</small></span>
+            <span class="value"
+              >{{ finalPredictedHeight }}<small>cm</small></span
+            >
           </div>
           <div class="age-info">
             <div>
               <span class="type"> 현재 나이 </span>
-              <b>{{ formatAge(analysis.chronological_age_years, analysis.chronological_age_months) }}</b>
+              <b>{{
+                formatAge(
+                  analysis.chronological_age_years,
+                  analysis.chronological_age_months,
+                )
+              }}</b>
             </div>
             <div>
               <span class="type"> 뼈 나이(AI) </span>
-              <b class="born">{{ formatAge(analysis.bone_age_years, analysis.bone_age_months) }}</b>
+              <b class="born">{{
+                formatAge(analysis.bone_age_years, analysis.bone_age_months)
+              }}</b>
             </div>
             <div class="has-tooltip">
               <span class="type"> 유전적 예측 키 </span>
               <b>{{ mphHeight ? mphHeight + ' cm' : '-' }}</b>
               <div class="tootip_wrap">
                 <span class="tooltip-wrap">
-                  <img src="/assets/icons/question.svg" alt="" class="tooltip-icon" />
-                  <img class="tooltip-img tooltip-right" src="/assets/images/tooltip/parental_height.svg" />
+                  <img
+                    src="/assets/icons/question.svg"
+                    alt=""
+                    class="tooltip-icon"
+                  />
+                  <img
+                    class="tooltip-img tooltip-right"
+                    src="/assets/images/tooltip/parental_height.svg"
+                  />
                 </span>
               </div>
             </div>
@@ -997,17 +1052,32 @@ watch(
     position: relative;
 
     .btn-history {
+      min-width: 115px;
       background: $dark-input;
       color: $white;
-      padding: 6px 16px;
+      padding: 9px 12px;
       border: 1px solid $dark-line-gray;
-      border-radius: $radius-sm;
+      border-radius: 10px;
       @include font-12-regular;
       cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
 
-      .arrow {
-        font-size: 10px;
-        margin-left: 4px;
+      .arrow-icon {
+        width: 16px;
+        height: 16px;
+        transition: transform 0.2s;
+      }
+    }
+
+    // 열린 상태: 버튼 하단 모서리 제거하여 리스트와 연결
+    &.open .btn-history {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+
+      .arrow-icon {
+        transform: rotate(180deg);
       }
     }
 
@@ -1015,17 +1085,19 @@ watch(
       position: absolute;
       top: 100%;
       left: 0;
-      margin-top: 4px;
+      right: 0;
+      margin-top: -1px;
       background: $dark-input;
       border: 1px solid $dark-line-gray;
-      border-radius: $radius-sm;
-      min-width: 160px;
+      border-top: 1px solid $dark-line-gray;
+      border-radius: 0 0 10px 10px;
       z-index: 10;
       list-style: none;
       padding: 0;
+      overflow: hidden;
 
       li {
-        padding: 8px 16px;
+        padding: 12px 9px;
         @include font-12-regular;
         cursor: pointer;
         &:hover {
