@@ -1296,9 +1296,7 @@ watch(
     color: $dark-text;
   }
 
-  &.comparison-summary {
-    border: 1px solid #ff1744;
-  }
+
 }
 
 // 의사 판독
