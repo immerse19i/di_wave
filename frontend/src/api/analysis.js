@@ -32,10 +32,12 @@ updateAnalysisInfo: (id, data) => {
   }
   return api.put(`/analyses/${id}`, data);
 },
-getReportPdf: (id) => api.get(`/analyses/${id}/report/pdf`, {
-  responseType: 'blob',
-  timeout: 60000
-}),
+getReportPdf(id, masked = false) {
+  return api.get(`/analyses/${id}/report/pdf${masked ? '?masked=true' : ''}`, { 
+    responseType: 'blob',
+    timeout: 60000
+  });
+}
 };
 
 

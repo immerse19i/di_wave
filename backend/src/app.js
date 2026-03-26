@@ -77,6 +77,8 @@ const growthBmiData = require('./data/growth_bmi.json');
 app.get('/internal/report/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    const masked = req.query.masked === 'true';
+
     const [rows] = await pool.query(
       `SELECT a.*, p.name AS patient_name, p.patient_code, p.birth_date, p.gender,
               h.name AS hospital_name
@@ -100,7 +102,8 @@ app.get('/internal/report/:id', async (req, res) => {
       growthHeight: growthHeightData,
       growthWeight: growthWeightData,
       growthBmi: growthBmiData,
-      baseUrl: `http://localhost:${config.port}`
+      baseUrl: `http://localhost:${config.port}`,
+      masked
     });
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -110,6 +113,7 @@ app.get('/internal/report/:id', async (req, res) => {
     res.status(500).send('Error');
   }
 });
+
 
 
 

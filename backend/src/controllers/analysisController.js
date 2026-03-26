@@ -385,7 +385,7 @@ exports.generateReport = async (req, res) => {
   try {
     const { id } = req.params;
     const hospitalId = req.user.hospital_id;
-
+const masked = req.query.masked === 'true';
     const [rows] = await pool.query(
       `SELECT a.*, p.name AS patient_name FROM analyses a
        JOIN patients p ON a.patient_id = p.id
@@ -396,7 +396,7 @@ exports.generateReport = async (req, res) => {
       return res.status(404).json({ success: false, message: '분석을 찾을 수 없습니다.' });
     }
 
-    const pdfBuffer = await pdfService.generatePDF(id);
+const pdfBuffer = await pdfService.generatePDF(id, masked);
 
     const patientName = rows[0].patient_name || 'report';
     const date = new Date(rows[0].created_at).toISOString().slice(0, 10).replace(/-/g, '');
