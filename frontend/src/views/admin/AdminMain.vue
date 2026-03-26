@@ -53,7 +53,7 @@ const menuList = [
   {
     label: '승인관리',
     path: '/admin/approval',
-    icon: '/assets/icons/profile.svg',
+    icon: '/assets/icons/approval.svg',
   },
   {
     label: '가입계정목록',
@@ -128,7 +128,7 @@ const handleLogout = async () => {
     }
 
     .header-title {
-      @include font-14-medium;
+      @include font-16-bold;
     }
   }
 
@@ -155,25 +155,25 @@ const handleLogout = async () => {
 
 // 사이드바
 .admin-sidebar {
-  width: 140px;
-  min-width: 140px;
-  background: $dark-input;
-  padding: 8px 0;
+  width: 212px;
+  min-width: 212px;
+  background: $dark-black;
+  padding: 0px 0;
 
   .menu-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 16px;
-    color: $dark-text;
-    @include font-13-medium;
+    gap: 12px;
+    padding: 14px 20px;
+    color: $dark-gray-light;
+    @include font-14-medium;
     text-decoration: none;
     transition: all $transition-fast;
 
     img {
-      width: 16px;
-      height: 16px;
-      opacity: 0.6;
+      width: 24px;
+      height: 24px;
+      opacity: 1;
     }
 
     &:hover {

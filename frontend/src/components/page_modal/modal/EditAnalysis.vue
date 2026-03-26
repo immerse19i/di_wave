@@ -4,12 +4,67 @@
     <h2 class="modal-title">정보 수정</h2>
 
     <div class="modal-body">
-      <!-- 왼쪽: 기존 X-ray 이미지 -->
-      <!-- <div class="image-section">
-        <div class="image-preview">
-          <img :src="imageUrl" alt="X-ray" class="preview-image" />
+      <!-- 왼쪽: 이미지 영역 (드래그앤드롭) -->
+      <div class="image-section">
+        <div
+          class="image-preview"
+          :class="{ 'drag-over': isDragOver }"
+          @click="triggerFileInput"
+          @dragover.prevent="isDragOver = true"
+          @dragleave.prevent="handleDragLeave"
+          @drop.prevent="handleDrop"
+        >
+          <!-- 드래그 오버레이 -->
+          <div v-if="isDragOver" class="drag-overlay">
+            <img
+              src="/assets/icons/upload_icon.svg"
+              alt=""
+              class="upload-icon"
+            />
+            <p v-if="previewUrl" class="replace-text">이미지 교체</p>
+          </div>
+          <!-- 이미지 미리보기 -->
+          <img
+            v-if="previewUrl"
+            :src="previewUrl"
+            alt="X-ray preview"
+            class="preview-image"
+          />
+          <div v-else class="placeholder">
+            <p class="placeholder-title">X-ray 사진을 첨부해 주세요.</p>
+            <p class="placeholder-ext">
+              첨부가능 확장자 : jpg,png,jpeg,svg,dcm
+            </p>
+            <p class="placeholder-sub">*좌측 X-ray 사진을 첨부해 주세요.</p>
+            <button
+              type="button"
+              class="btn-select-image"
+              @click.stop="triggerFileInput"
+            >
+              사진 선택
+            </button>
+            <p class="placeholder-drag">
+              사진 선택 또는 이미지를 드래그하여 업로드 하세요
+            </p>
+          </div>
         </div>
-      </div> -->
+
+        <input
+          type="file"
+          ref="fileInput"
+          @change="handleFileChange"
+          accept=".jpg,.jpeg,.png,.dcm"
+          style="display: none"
+        />
+        <button
+          v-if="previewUrl"
+          type="button"
+          class="btn-select-image"
+          @click="triggerFileInput"
+        >
+          사진 선택
+        </button>
+      </div>
 
       <!-- 오른쪽: 폼 영역 -->
       <div class="form-section">
@@ -187,10 +242,18 @@ const modal = useModalStore();
 const message = UseMessageStore();
 const router = useRouter();
 const dateInput = ref(null);
+const fileInput = ref(null);
 
 // props 대신 modal.role로 analysis 데이터 전달받기
 const analysisData = ref(null);
 const imageUrl = ref('');
+
+// 이미지 업로드 관련
+const previewUrl = ref('');
+const selectedFile = ref(null);
+const isDragOver = ref(false);
+const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'svg', 'dcm'];
+const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
 
 // 원본 데이터 (변경 감지용)
 const originalForm = ref({});
@@ -210,9 +273,75 @@ const form = ref({
   analysisDate: '',
 });
 
+// 파일 선택 트리거
+const triggerFileInput = () => {
+  fileInput.value.click();
+};
+
+// 파일 선택 핸들러
+const handleFileChange = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!ALLOWED_EXTENSIONS.includes(ext)) {
+    message.showAlert('지원하지 않는 파일 형식입니다.');
+    event.target.value = '';
+    return;
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    message.showAlert('용량이 30MB를 초과하였습니다.');
+    event.target.value = '';
+    return;
+  }
+
+  selectedFile.value = file;
+  if (file.type.startsWith('image/')) {
+    previewUrl.value = URL.createObjectURL(file);
+  } else {
+    previewUrl.value = '';
+  }
+};
+
+// 드래그앤드롭 핸들러
+const handleDrop = (event) => {
+  isDragOver.value = false;
+  const file = event.dataTransfer.files[0];
+  if (!file) return;
+
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!ALLOWED_EXTENSIONS.includes(ext)) {
+    message.showAlert('지원하지 않는 파일 형식입니다.');
+    return;
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    message.showAlert('용량이 30MB를 초과하였습니다.');
+    return;
+  }
+
+  selectedFile.value = file;
+  if (file.type.startsWith('image/')) {
+    previewUrl.value = URL.createObjectURL(file);
+  } else {
+    previewUrl.value = '';
+  }
+};
+
+const handleDragLeave = (event) => {
+  const rect = event.currentTarget.getBoundingClientRect();
+  const x = event.clientX;
+  const y = event.clientY;
+  if (x <= rect.left || x >= rect.right || y <= rect.top || y >= rect.bottom) {
+    isDragOver.value = false;
+  }
+};
+
 // 변경 여부 확인
 const hasChanges = () => {
-  return JSON.stringify(form.value) !== JSON.stringify(originalForm.value);
+  return (
+    JSON.stringify(form.value) !== JSON.stringify(originalForm.value) ||
+    selectedFile.value !== null
+  );
 };
 
 // 취소 버튼
@@ -292,9 +421,27 @@ const submitUpdate = async () => {
 
   try {
     modal.isLoading = true;
-    const response = await analysisAPI.updateAnalysisInfo(
-      analysisData.value.id,
-      {
+
+    let payload;
+    if (selectedFile.value) {
+      // 새 이미지가 있으면 FormData로 전송
+      payload = new FormData();
+      payload.append('image', selectedFile.value);
+      payload.append('patientCode', form.value.patientCode);
+      payload.append('patientName', form.value.patientName);
+      payload.append('birthDate', birthDate);
+      payload.append('gender', form.value.gender);
+      payload.append('height', form.value.currentHeight);
+      payload.append('weight', form.value.weight || '');
+      payload.append('fatherHeight', form.value.fatherHeight || '');
+      payload.append('motherHeight', form.value.motherHeight || '');
+      payload.append('physician', form.value.physician || '');
+      payload.append('ageMonths', ageMonths);
+      payload.append('sex', form.value.gender === 'M' ? 1 : 0);
+      payload.append('analysisDate', form.value.analysisDate || '');
+    } else {
+      // 이미지 변경 없으면 JSON
+      payload = {
         patientCode: form.value.patientCode,
         patientName: form.value.patientName,
         birthDate,
@@ -306,8 +453,13 @@ const submitUpdate = async () => {
         physician: form.value.physician,
         ageMonths,
         sex: form.value.gender === 'M' ? 1 : 0,
-        analysisDate: form.value.analysisDate, // 분석일 추가
-      },
+        analysisDate: form.value.analysisDate,
+      };
+    }
+
+    const response = await analysisAPI.updateAnalysisInfo(
+      analysisData.value.id,
+      payload,
     );
 
     message.showAlert('수정이 완료되었습니다.', () => {
@@ -330,11 +482,12 @@ onMounted(() => {
   const data = modal.data || {};
   analysisData.value = data;
 
-  // 이미지 URL
+  // 이미지 URL (기존 이미지를 미리보기로 표시)
   if (data.image_path) {
     const path = data.image_path.replace(/\\/g, '/');
     const idx = path.indexOf('uploads/');
     imageUrl.value = idx !== -1 ? '/' + path.substring(idx) : '';
+    previewUrl.value = imageUrl.value;
   }
 
   // 생년월일 파싱
@@ -348,9 +501,8 @@ onMounted(() => {
     bday = d.getDate().toString();
   }
 
-  // 분석일 파싱
-  let analysisDate = '';
   // 분석일 파싱 — created_at 대신 analysis_date 사용
+  let analysisDate = '';
   if (data.analysis_date) {
     const d = new Date(data.analysis_date);
     analysisDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -380,30 +532,31 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-/* NewAnalysis.vue의 스타일을 그대로 복사하되,
-   .new-analysis → .edit-analysis 로 변경
-   .image-section의 cursor: pointer, placeholder 관련 스타일 제거 */
 .edit-analysis {
-  width: 580px;
-  // padding: 0 0 20px;
+  width: 952px;
+  padding: 20px 0;
 }
 
 .modal-title {
   font-weight: $font-weight-bold;
-  font-size: 20px;
+  font-size: 24px;
   color: $white;
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
 .modal-body {
   display: flex;
   gap: 20px;
-  min-width: 580px;
+  min-width: 952px;
 }
 
+// 왼쪽: 이미지 영역
 .image-section {
   width: 352px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 
   .image-preview {
     width: 100%;
@@ -414,17 +567,93 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
     overflow: hidden;
+    position: relative;
 
+    &.drag-over {
+      border-width: 3px;
+      border-color: $sub-color-2;
+    }
+
+    .drag-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(126, 174, 223, 0.1);
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      justify-content: flex-end;
+      z-index: 1;
+      border-radius: $radius-md;
+      padding-bottom: 71px;
+      .upload-icon {
+        width: 120px;
+        height: 120px;
+      }
+
+      .replace-text {
+        display: block;
+        @include font-14-regular;
+        color: $white;
+      }
+    }
     .preview-image {
       width: 100%;
       height: 100%;
       object-fit: contain;
     }
+
+    .placeholder {
+      text-align: center;
+      padding: 20px;
+
+      .placeholder-ext {
+        @include font-14-regular;
+        color: $white;
+        margin-bottom: 8px;
+      }
+
+      .placeholder-drag {
+        @include font-14-regular;
+        color: $gray2;
+        margin-top: 20px;
+      }
+
+      .placeholder-title {
+        @include font-14-regular;
+        color: $white;
+        margin-bottom: 8px;
+      }
+
+      .placeholder-sub {
+        @include font-12-regular;
+        color: $red;
+        margin-bottom: 20px;
+      }
+    }
+  }
+
+  .btn-select-image {
+    width: 136px;
+    padding: 12px;
+    margin: auto;
+    background: $main-gad;
+    color: $white;
+    border-radius: $radius-sm;
+    @include font-14-bold;
+    transition: opacity $transition-fast;
+
+    &:hover {
+      opacity: 0.9;
+    }
   }
 }
 
-/* 이하 form-section, form-actions 스타일은 NewAnalysis.vue에서 그대로 복사 */
+// 오른쪽: 폼 영역
 .form-section {
   flex: 1;
 
@@ -456,7 +685,13 @@ onMounted(() => {
       border: 1px solid $dark-line-gray;
       border-radius: $radius-sm;
       color: $white;
-      @include font-12-regular;
+      @include font-14-regular;
+      transition: border-color $transition-fast;
+
+      &::placeholder {
+        color: $dark-line-gray;
+      }
+
       &:focus {
         border-color: $sub-color-2;
       }
@@ -468,6 +703,7 @@ onMounted(() => {
     align-items: center;
     gap: 8px;
     flex: 1;
+
     input {
       width: 40px;
       padding: 8px 12px;
@@ -475,15 +711,18 @@ onMounted(() => {
       border: 1px solid $dark-line-gray;
       border-radius: $radius-sm;
       color: $white;
-      @include font-12-regular;
+      @include font-14-regular;
       text-align: center;
+
       &:focus {
         border-color: $sub-color-2;
       }
     }
+
     .input-year {
       width: 60px;
     }
+
     .unit {
       @include font-12-regular;
       color: $dark-text;
@@ -496,19 +735,22 @@ onMounted(() => {
     gap: 16px;
     flex: 1;
   }
+
   .gender-toggle {
     display: flex;
     gap: 13px;
+
     .btn-gender {
       width: 100px;
-      padding: 7px;
+      padding: 10px;
       background-color: $dark-gray-dark;
       color: $dark-text;
       border-radius: $radius-sm;
-      @include font-12-regular;
+      @include font-14-regular;
+      transition: background $transition-fast;
+
       &.active {
         background: $sub-color-3;
-        // @include font-12-;
       }
       &:disabled {
         opacity: 0.5;
@@ -516,6 +758,7 @@ onMounted(() => {
       }
     }
   }
+
   .gender-warning {
     @include font-12-regular;
     color: $red;
@@ -526,6 +769,7 @@ onMounted(() => {
     align-items: end;
     gap: 8px;
     flex: 1;
+
     input {
       width: 170px;
       padding: 10px 12px;
@@ -533,15 +777,18 @@ onMounted(() => {
       border: 1px solid $dark-line-gray;
       border-radius: $radius-sm;
       color: $white;
-      @include font-12-regular;
+      @include font-14-regular;
+
       &:focus {
         border-color: $sub-color-2;
       }
     }
+
     .unit {
       @include font-12-regular;
       color: $dark-text;
     }
+
     .second-label {
       @include font-14-regular;
       color: $sub-color-2;
@@ -550,6 +797,7 @@ onMounted(() => {
       height: 38px;
       align-items: center;
       display: flex;
+
       .required {
         color: $sub-color-2;
         margin-right: 2px;
@@ -561,6 +809,7 @@ onMounted(() => {
     display: flex;
     align-items: end;
     gap: 8px;
+
     input {
       width: 170px;
       padding: 10px 12px;
@@ -568,11 +817,13 @@ onMounted(() => {
       border: 1px solid $dark-line-gray;
       border-radius: $radius-sm;
       color: $white;
-      @include font-12-regular;
+      @include font-14-regular;
+
       &:focus {
         border-color: $sub-color-2;
       }
     }
+
     .unit {
       @include font-12-regular;
       color: $dark-text;
@@ -582,6 +833,7 @@ onMounted(() => {
   .input-date {
     position: relative;
     width: 160px;
+
     input {
       width: 170px;
       padding: 10px 12px;
@@ -590,15 +842,18 @@ onMounted(() => {
       border: 1px solid $dark-line-gray;
       border-radius: $radius-sm;
       color: $white;
-      @include font-12-regular;
+      @include font-14-regular;
+
       &:focus {
         border-color: $sub-color-2;
       }
+
       &::-webkit-calendar-picker-indicator {
         display: none;
         -webkit-appearance: none;
       }
     }
+
     .icon-calendar {
       position: absolute;
       right: 10px;
@@ -608,6 +863,7 @@ onMounted(() => {
       height: 18px;
       opacity: 0.6;
       cursor: pointer;
+
       &:hover {
         opacity: 1;
       }
@@ -619,12 +875,15 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   gap: 16px;
-  // margin-top: 32px;
+  margin-top: 32px;
+
   button {
-    width: 136px;
-    padding: 7.5px;
+    width: 140px;
+    padding: 12px;
     border-radius: $radius-sm;
-    @include font-14-medium;
+    @include font-14-bold;
+    transition: opacity $transition-fast;
+
     &:hover {
       opacity: 0.9;
     }

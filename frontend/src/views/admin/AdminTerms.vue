@@ -34,7 +34,9 @@
             <td>{{ index + 1 }}</td>
             <td class="text-left">{{ term.name }}</td>
             <td>
-              <button class="btn-action" @click="openNameModal(term)">이름수정</button>
+              <button class="btn-action" @click="openNameModal(term)">
+                이름수정
+              </button>
             </td>
             <td>
               <a
@@ -50,19 +52,29 @@
             <td>
               <label class="btn-upload">
                 파일변경
-                <input type="file" accept=".pdf" hidden @change="handleFileUpload(term.type, $event)" />
+                <input
+                  type="file"
+                  accept=".pdf"
+                  hidden
+                  @change="handleFileUpload(term.type, $event)"
+                />
               </label>
             </td>
             <td>
-              <button
-                :class="['btn-toggle', { active: term.is_public }]"
+              <div
+                :class="['toggle-switch', { active: term.is_public }]"
                 @click="handleToggle(term)"
               >
-                {{ term.is_public ? '공개' : '비공개' }}
-              </button>
+                <span class="toggle-label">{{
+                  term.is_public ? '공개' : '비공개'
+                }}</span>
+                <span class="toggle-circle"></span>
+              </div>
             </td>
             <td>
-              <button class="btn-action" @click="goToHistory(term)">이전약관</button>
+              <button class="btn-action" @click="goToHistory(term)">
+                이전약관
+              </button>
             </td>
           </tr>
           <tr v-if="termsList.length === 0">
@@ -73,7 +85,11 @@
     </div>
 
     <!-- 이름수정 모달 -->
-    <div class="modal-overlay" v-if="showNameModal" @click.self="closeNameModal">
+    <div
+      class="modal-overlay"
+      v-if="showNameModal"
+      @click.self="closeNameModal"
+    >
       <div class="modal-box">
         <h3 class="modal-title">약관 이름 수정</h3>
         <input
@@ -91,11 +107,17 @@
     </div>
 
     <!-- 업로드 완료 팝업 -->
-    <div class="modal-overlay" v-if="showUploadPopup" @click.self="showUploadPopup = false">
+    <div
+      class="modal-overlay"
+      v-if="showUploadPopup"
+      @click.self="showUploadPopup = false"
+    >
       <div class="modal-box">
         <p class="modal-message">업로드 완료되었습니다.</p>
         <div class="modal-actions">
-          <button class="btn-confirm" @click="showUploadPopup = false">확인</button>
+          <button class="btn-confirm" @click="showUploadPopup = false">
+            확인
+          </button>
         </div>
       </div>
     </div>
@@ -103,90 +125,90 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { termsAPI } from '@/api/terms'
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { termsAPI } from '@/api/terms';
 
-const router = useRouter()
+const router = useRouter();
 
-const termsList = ref([])
-const showNameModal = ref(false)
-const showUploadPopup = ref(false)
-const editTarget = ref(null)
-const editName = ref('')
+const termsList = ref([]);
+const showNameModal = ref(false);
+const showUploadPopup = ref(false);
+const editTarget = ref(null);
+const editName = ref('');
 
 // 목록 조회
 const fetchTerms = async () => {
   try {
-    const res = await termsAPI.getAdminTerms()
-    termsList.value = res.data.data
+    const res = await termsAPI.getAdminTerms();
+    termsList.value = res.data.data;
   } catch (e) {
-    console.error('약관 목록 조회 실패:', e)
+    console.error('약관 목록 조회 실패:', e);
   }
-}
+};
 
 // PDF 파일 URL
-const getFileUrl = (id) => termsAPI.getFileUrl(id)
+const getFileUrl = (id) => termsAPI.getFileUrl(id);
 
 // 이름수정 모달
 const openNameModal = (term) => {
-  editTarget.value = term
-  editName.value = term.name
-  showNameModal.value = true
-}
+  editTarget.value = term;
+  editName.value = term.name;
+  showNameModal.value = true;
+};
 
 const closeNameModal = () => {
-  showNameModal.value = false
-  editTarget.value = null
-  editName.value = ''
-}
+  showNameModal.value = false;
+  editTarget.value = null;
+  editName.value = '';
+};
 
 const submitName = async () => {
-  if (!editName.value.trim() || !editTarget.value) return
+  if (!editName.value.trim() || !editTarget.value) return;
   try {
-    await termsAPI.updateName(editTarget.value.id, editName.value.trim())
-    await fetchTerms()
-    closeNameModal()
+    await termsAPI.updateName(editTarget.value.id, editName.value.trim());
+    await fetchTerms();
+    closeNameModal();
   } catch (e) {
-    console.error('이름 수정 실패:', e)
+    console.error('이름 수정 실패:', e);
   }
-}
+};
 
 // 파일 업로드
 const handleFileUpload = async (type, event) => {
-  const file = event.target.files[0]
-  if (!file) return
-  const formData = new FormData()
-  formData.append('file', file)
+  const file = event.target.files[0];
+  if (!file) return;
+  const formData = new FormData();
+  formData.append('file', file);
   try {
-    await termsAPI.uploadFile(type, formData)
-    showUploadPopup.value = true
-    await fetchTerms()
+    await termsAPI.uploadFile(type, formData);
+    showUploadPopup.value = true;
+    await fetchTerms();
   } catch (e) {
-    console.error('파일 업로드 실패:', e)
-    alert('업로드에 실패했습니다.')
+    console.error('파일 업로드 실패:', e);
+    alert('업로드에 실패했습니다.');
   }
-  event.target.value = '' // input 초기화
-}
+  event.target.value = ''; // input 초기화
+};
 
 // 공개/비공개 토글
 const handleToggle = async (term) => {
   try {
-    const res = await termsAPI.togglePublic(term.id)
-    term.is_public = res.data.data.is_public
+    const res = await termsAPI.togglePublic(term.id);
+    term.is_public = res.data.data.is_public;
   } catch (e) {
-    console.error('토글 실패:', e)
+    console.error('토글 실패:', e);
   }
-}
+};
 
 // 이전약관 페이지 이동
 const goToHistory = (term) => {
-  router.push(`/admin/terms/history/${term.type}`)
-}
+  router.push(`/admin/terms/history/${term.type}`);
+};
 
 onMounted(() => {
-  fetchTerms()
-})
+  fetchTerms();
+});
 </script>
 
 <style lang="scss" scoped>
@@ -213,6 +235,9 @@ onMounted(() => {
 
 // 테이블
 .content_list {
+  padding: 12px 16px;
+  background: $table-bg;
+  border-radius: 12px;
   table {
     width: 100%;
     border-collapse: collapse;
@@ -220,22 +245,21 @@ onMounted(() => {
     border-top-left-radius: 8px;
     overflow: hidden;
 
-    th, td {
+    th,
+    td {
       text-align: center;
       padding: 12px 8px;
       @include font-12-regular;
+      color: $dark-text;
     }
 
     thead tr {
-      background: $main-gad;
+      background: $bg-op;
     }
 
     th {
       @include font-14-bold;
-    }
-
-    tbody tr:nth-child(odd) {
-      background: $bg-op;
+      color: $gray;
     }
 
     .text-left {
@@ -253,13 +277,13 @@ onMounted(() => {
 
 // 파일 링크
 .file-link {
-  color: $main-color;
+  color: $dark-text;
   text-decoration: underline;
   cursor: pointer;
   @include font-12-regular;
 
   &:hover {
-    color: $sub-color;
+    color: $white;
   }
 }
 
@@ -270,11 +294,11 @@ onMounted(() => {
 
 // 버튼들
 .btn-action {
-  padding: 6px 16px;
-  background: $main-gad;
+  padding: 6px 14px;
+  background: $main-color;
   color: $white;
   border-radius: $radius-sm;
-  @include font-14-medium;
+  @include font-12-bold;
   cursor: pointer;
   border: none;
 
@@ -288,7 +312,7 @@ onMounted(() => {
   background: $main-color;
   color: $white;
   border-radius: $radius-sm;
-  @include font-14-medium;
+  @include font-12-bold;
   cursor: pointer;
   display: inline-block;
 
@@ -297,23 +321,49 @@ onMounted(() => {
   }
 }
 
-.btn-toggle {
-  padding: 6px 16px;
-  background: $dark-input;
-  color: $dark-text;
-  border: 1px solid $dark-line-gray;
-  border-radius: $radius-sm;
-  @include font-14-medium;
+// 토글 스위치
+.toggle-switch {
+  display: inline-flex;
+  align-items: center;
+  width: 68px;
+  height: 24px;
+  border-radius: 12px;
+  background: #a0a0a0;
   cursor: pointer;
+  position: relative;
+  transition: background 0.2s;
+
+  .toggle-label {
+    font-family: $font-family;
+    font-size: 10px;
+    font-weight: $font-weight-medium;
+    line-height: 100%;
+    color: $white;
+    position: absolute;
+    right: 10px;
+  }
+
+  .toggle-circle {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: $white;
+    position: absolute;
+    left: 4px;
+    transition: left 0.2s;
+  }
 
   &.active {
     background: $main-color;
-    color: $white;
-    border-color: $main-color;
-  }
 
-  &:hover {
-    opacity: 0.8;
+    .toggle-label {
+      left: 10px;
+      right: auto;
+    }
+
+    .toggle-circle {
+      left: calc(100% - 20px);
+    }
   }
 }
 

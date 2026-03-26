@@ -45,9 +45,10 @@ const message = UseMessageStore();
 
 .message-content {
   min-width: 548px;
-  max-width: 480px;
+  max-width: 548px;
+  min-height: 173px;
   background-color: $dark-bg;
-  border: 1px solid $dark-line-gray;
+  // border: 1px solid $dark-line-gray;
   border-radius: $radius-md;
   padding: 40px;
   position: absolute;
@@ -85,6 +86,7 @@ const message = UseMessageStore();
   color: $white;
   @include font-14-medium;
   cursor: pointer;
+  min-width: 136px;
 
   &:hover {
     background: $sub-color;
@@ -92,10 +94,12 @@ const message = UseMessageStore();
 }
 
 .btn-cancel {
+  min-width: 136px;
   padding: 12px 40px;
   background: transparent;
-  border: 1px solid $dark-line-gray;
+  // border: 1px solid $dark-line-gray;
   border-radius: $radius-sm;
+  background: $dark-gray-dark;
   color: $dark-text;
   @include font-14-medium;
   cursor: pointer;

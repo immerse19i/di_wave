@@ -123,7 +123,7 @@
             <td>{{ item.status === 'draft' ? 'O' : '' }}</td>
             <td class="td-title">{{ item.title }}</td>
             <td>
-              <span v-if="item.has_attachment" class="attach-icon">📎</span>
+              <img v-if="item.has_attachment" src="/assets/icons/attach_icon.svg" alt="첨부" class="attach-icon" />
             </td>
             <td>{{ getPinnedDisplay(item) }}</td>
             <td>
@@ -131,10 +131,12 @@
                 {{ statusLabel(item.status) }}
               </span>
             </td>
-            <td>{{ formatDate(item.created_at) }}</td>
+            <td class="td-date">{{ formatDate(item.created_at) }}</td>
             <td>{{ item.author_name }}</td>
             <td class="td-delete" @click.stop="handleDelete(item)">
-              <button class="btn-delete-icon">🗑</button>
+              <button class="btn-delete-icon">
+                <img src="/assets/icons/trash_icon.svg" alt="삭제 아이콘" />
+              </button>
             </td>
           </tr>
           <tr v-if="noticeList.length === 0">
@@ -190,10 +192,10 @@ const statusOptions = [
   { label: '임시저장', value: 'draft' },
 ];
 const statusFilter = ref({
-  published: false,
-  private: false,
-  deleted: false,
-  draft: false,
+  published: true,
+  private: true,
+  deleted: true,
+  draft: true,
 });
 const isAllStatusSelected = computed(() =>
   Object.values(statusFilter.value).every((v) => v),
@@ -203,9 +205,13 @@ const toggleAllStatus = () => {
   Object.keys(statusFilter.value).forEach(
     (k) => (statusFilter.value[k] = newVal),
   );
+  currentPage.value = 1;
+  fetchList();
 };
 const toggleStatus = (key) => {
   statusFilter.value[key] = !statusFilter.value[key];
+  currentPage.value = 1;
+  fetchList();
 };
 
 // ---- 날짜 필터 ----
@@ -417,6 +423,7 @@ const onResize = () => {
 .filter-row {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 30px;
   margin-bottom: 12px;
 }
@@ -437,15 +444,18 @@ const onResize = () => {
   gap: 4px;
 
   .filter-btn {
-    padding: 8px 20px;
+    padding: 8px 0;
     border-radius: $radius-sm;
+    text-align: center;
     border: 1px solid $dark-line-gray;
     background: none;
     color: $dark-text;
+    min-width: 80px;
     @include font-14-medium;
     cursor: pointer;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 4px;
 
     .check-icon {
@@ -453,8 +463,8 @@ const onResize = () => {
     }
 
     &.active {
-      background: $main-color;
-      border-color: $main-color;
+      background: $sub-color;
+      border-color: $sub-color;
       color: $white;
     }
   }
@@ -475,23 +485,29 @@ const onResize = () => {
   .radio-custom {
     width: 16px;
     height: 16px;
-    border: 2px solid $dark-line-gray;
+    background: $dark-line-gray;
+    border: none;
     border-radius: 50%;
     position: relative;
-  }
 
-  input[type='radio']:checked + .radio-custom {
-    border-color: $main-color;
     &::after {
       content: '';
-      width: 8px;
-      height: 8px;
-      background: $main-color;
+      width: 6px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.5);
       border-radius: 50%;
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+    }
+  }
+
+  input[type='radio']:checked + .radio-custom {
+    background: $main-color;
+
+    &::after {
+      background: $white;
     }
   }
 }
@@ -525,25 +541,21 @@ const onResize = () => {
   display: flex;
   gap: 12px;
   margin-bottom: 24px;
-
+  justify-content: center;
   .search-box {
     flex: 1;
     display: flex;
     padding: 8px 16px;
     border-radius: $radius-sm;
     background: $bg-op;
-    border: 1px solid;
-    border-image-source: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.09) 0%,
-      rgba(255, 255, 255, 0.06) 100%
-    );
-
+    border: 1px solid $dark-line-gray;
+    max-width: 618px;
     .search-input {
       width: 100%;
       background: none;
       border: none;
       color: $white;
+
       @include font-14-regular;
       &::placeholder {
         color: $dark-input-gray;
@@ -551,8 +563,7 @@ const onResize = () => {
     }
 
     &:has(input:focus) {
-      border-image-source: none;
-      border-color: $main-color;
+      border-color: $sub-color-2;
     }
   }
 
@@ -592,6 +603,9 @@ const onResize = () => {
 
 // 테이블
 .table-area {
+  padding: 12px 16px;
+  background: $table-bg;
+  border-radius: 12px;
   .data-table {
     width: 100%;
     border-collapse: collapse;
@@ -604,13 +618,15 @@ const onResize = () => {
       text-align: center;
       padding: 12px 8px;
       @include font-12-regular;
+      color: $dark-text;
     }
 
     thead tr {
-      background: $main-gad;
+      background: $bg-op;
     }
     th {
       @include font-14-bold;
+      color: $gray;
     }
 
     th.sortable {
@@ -625,9 +641,9 @@ const onResize = () => {
       }
     }
 
-    tbody tr:nth-child(odd) {
-      background: $bg-op;
-    }
+    // tbody tr:nth-child(odd) {
+    //   background: $bg-op;
+    // }
 
     .data-row {
       cursor: pointer;
@@ -648,8 +664,16 @@ const onResize = () => {
       white-space: nowrap;
     }
 
+    .td-date {
+      white-space: pre-line;
+    }
+
     .attach-icon {
-      font-size: 14px;
+      width: 24px;
+      height: 24px;
+      vertical-align: middle;
+      display: block;
+      margin: 0 auto;
     }
 
     // 상태 배지
@@ -657,18 +681,7 @@ const onResize = () => {
       padding: 2px 8px;
       border-radius: $radius-sm;
       @include font-12-regular;
-    }
-    .status-published {
-      color: $main-color;
-    }
-    .status-draft {
-      color: #ffd54f;
-    }
-    .status-private {
       color: $dark-text;
-    }
-    .status-deleted {
-      color: #e57373;
     }
 
     .td-delete {

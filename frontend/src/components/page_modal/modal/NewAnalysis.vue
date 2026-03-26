@@ -6,7 +6,25 @@
     <div class="modal-body">
       <!-- 왼쪽: 이미지 영역 -->
       <div class="image-section">
-        <div class="image-preview" @click="triggerFileInput">
+        <div
+          class="image-preview"
+          :class="{ 'drag-over': isDragOver }"
+          @click="triggerFileInput"
+          @dragover.prevent="isDragOver = true"
+          @dragleave.prevent="handleDragLeave"
+          @drop.prevent="handleDrop"
+        >
+          <!-- 드래그 오버레이 (위에 덮임) -->
+          <!-- 드래그 오버레이 (위에 덮임) -->
+          <div v-if="isDragOver" class="drag-overlay">
+            <img
+              src="/assets/icons/upload_icon.svg"
+              alt=""
+              class="upload-icon"
+            />
+            <p v-if="previewUrl" class="replace-text">이미지 교체</p>
+          </div>
+          <!-- 기존 이미지/플레이스홀더 (항상 표시) -->
           <img
             v-if="previewUrl"
             :src="previewUrl"
@@ -15,6 +33,9 @@
           />
           <div v-else class="placeholder">
             <p class="placeholder-title">X-ray 사진을 첨부해 주세요.</p>
+            <p class="placeholder-ext">
+              첨부가능 확장자 : jpg,png,jpeg,svg,dcm
+            </p>
             <p class="placeholder-sub">*좌측 X-ray 사진을 첨부해 주세요.</p>
             <button
               type="button"
@@ -23,8 +44,12 @@
             >
               사진 선택
             </button>
+            <p class="placeholder-drag">
+              사진 선택 또는 이미지를 드래그하여 업로드 하세요
+            </p>
           </div>
         </div>
+
         <input
           type="file"
           ref="fileInput"
@@ -243,6 +268,41 @@ const dateInput = ref(null);
 const previewUrl = ref('');
 const selectedFile = ref(null);
 const isLoading = ref(false);
+const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'svg', 'dcm'];
+const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
+const isDragOver = ref(false);
+
+const handleDrop = (event) => {
+  isDragOver.value = false;
+  const file = event.dataTransfer.files[0];
+  if (!file) return;
+
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!ALLOWED_EXTENSIONS.includes(ext)) {
+    message.showAlert('지원하지 않는 파일 형식입니다.');
+    return;
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    message.showAlert('용량이 30MB를 초과하였습니다.');
+    return;
+  }
+
+  selectedFile.value = file;
+  if (file.type.startsWith('image/')) {
+    previewUrl.value = URL.createObjectURL(file);
+  } else {
+    previewUrl.value = '';
+  }
+};
+
+const handleDragLeave = (event) => {
+  const rect = event.currentTarget.getBoundingClientRect();
+  const x = event.clientX;
+  const y = event.clientY;
+  if (x <= rect.left || x >= rect.right || y <= rect.top || y >= rect.bottom) {
+    isDragOver.value = false;
+  }
+};
 
 // 오늘 날짜로 분석일 초기화
 const today = new Date();
@@ -266,8 +326,6 @@ const form = ref({
 const triggerFileInput = () => {
   fileInput.value.click();
 };
-const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'svg', 'dcm'];
-const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
 
 const handleFileChange = (event) => {
   const file = event.target.files[0];
@@ -517,7 +575,38 @@ const checkCreditAndSubmit = async () => {
     justify-content: center;
     cursor: pointer;
     overflow: hidden;
+    position: relative;
 
+    &.drag-over {
+      border-width: 3px;
+      border-color: $sub-color-2;
+    }
+
+    .drag-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(126, 174, 223, 0.1);
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      justify-content: flex-end;
+      z-index: 1;
+      border-radius: $radius-md;
+      padding-bottom: 71px;
+      .upload-icon {
+        width: 120px;
+        height: 120px;
+      }
+
+      .replace-text {
+        display: block;
+        @include font-14-regular;
+        color: $white;
+      }
+    }
     .preview-image {
       width: 100%;
       height: 100%;
@@ -527,6 +616,18 @@ const checkCreditAndSubmit = async () => {
     .placeholder {
       text-align: center;
       padding: 20px;
+
+      .placeholder-ext {
+        @include font-14-regular;
+        color: $white;
+        margin-bottom: 8px;
+      }
+
+      .placeholder-drag {
+        @include font-14-regular;
+        color: $gray2;
+        margin-top: 20px;
+      }
 
       .placeholder-title {
         @include font-14-regular;

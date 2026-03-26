@@ -4,9 +4,10 @@
  */
 
 function generateReportHTML(data) {
-  const { analysis, resultData, hospitalName, growthHeight, growthWeight, growthBmi, baseUrl } = data;
+  const { analysis, resultData, hospitalName, growthHeight, growthWeight, growthBmi, baseUrl, masked } = data;
 
-  // ===== 유틸 함수 =====
+
+    // ===== 유틸 함수 =====
   const formatDate = (dateStr, sep = '.') => {
     if (!dateStr) return '';
     const d = new Date(dateStr);
@@ -26,6 +27,34 @@ function generateReportHTML(data) {
     if (months < 0) { years--; months += 12; }
     return { years, months };
   };
+
+
+  // ===== 마스킹 함수 =====
+  const maskName = (name) => {
+    if (!name || !masked) return name;
+    if (name.length <= 1) return '*';
+    if (name.length === 2) return name[0] + '*';
+    return name[0] + '**' + name[name.length - 1];
+  };
+
+  const maskHospital = (name) => {
+    if (!name || !masked) return name;
+    if (name.length <= 3) return '***';
+    return '***' + name.slice(3);
+  };
+
+  const maskBirthDate = (dateStr) => {
+    if (!dateStr || !masked) return formatDate(dateStr);
+    const d = new Date(dateStr);
+    return `${d.getFullYear()}.**.**`;
+  };
+
+  const maskFileId = (patientName, birthDate, analysisId) => {
+    if (!masked) return `${patientName}_${formatDate(birthDate, '')}_a${analysisId}`;
+    return `***_********_a${analysisId}`;
+  };
+
+
 
   // ===== 백분위 계산 =====
   const getPercentile = (value, data, months, gender) => {
@@ -103,6 +132,13 @@ function generateReportHTML(data) {
   const diffMo = absD % 12;
   const diffText = (diffY > 0 ? `${diffY}세 ` : '') + `${String(diffMo).padStart(2, '0')}개월`;
   const ageDiffText = `뼈나이가 ${diffText} ${diff >= 0 ? '많습니다' : '적습니다'}.`;
+  // 파일 ID & 표시값
+  const displayName = maskName(analysis.patient_name);
+  const displayHospital = maskHospital(hospitalName);
+  const displayBirthDate = maskBirthDate(analysis.birth_date);
+  const fileId = maskFileId(analysis.patient_name, analysis.birth_date, analysis.id);
+
+
 
   // 현재키의 18세 예측값
   const getCurrentHeightPredicted18 = () => {
@@ -128,7 +164,7 @@ function generateReportHTML(data) {
   const predicted18 = getCurrentHeightPredicted18();
 
   // 파일 ID
-  const fileId = `${analysis.patient_name}_${formatDate(analysis.birth_date, '')}_a${analysis.id}`;
+  // const fileId = `${analysis.patient_name}_${formatDate(analysis.birth_date, '')}_a${analysis.id}`;
 
   // ===== 게이지 행 헬퍼 =====
   const gaugeRowHTML = (label, value, unit, percentile) => `
@@ -409,9 +445,9 @@ function generateReportHTML(data) {
     <img class="cover-logo" src="${baseUrl}/report-assets/osteoage_logo.svg" />
     <h1 class="cover-title">쑥쑥 성장<br/>로드맵 보고서</h1>
     <div class="cover-info-box">
-      <div class="info-row"><span class="label">성명</span><span class="value">${analysis.patient_name}</span></div>
+      <div class="info-row"><span class="label">성명</span><span class="value">${displayName}</span></div>
       <div class="info-row"><span class="label">검사일자</span><span class="value">${formatDate(analysis.created_at)}</span></div>
-      <div class="info-row"><span class="label">검사병원</span><span class="value">${hospitalName}</span></div>
+      <div class="info-row"><span class="label">검사병원</span><span class="value">${displayHospital}</span></div>
     </div>
     <img class="cover-diwave" src="${baseUrl}/report-assets/diwave_logo.svg" />
   </div>
@@ -420,15 +456,15 @@ function generateReportHTML(data) {
   <div class="pdf-page">
     <img class="page-header" src="${baseUrl}/report-assets/header.svg" />
     <div class="page-top-info">
-      <span class="hospital">${hospitalName}</span>
+      <span class="hospital">${displayHospital}</span>
       <span>${fileId}</span>
       <span>검사일 ${formatDate(analysis.created_at)}</span>
     </div>
 
     <ul class="patient-info">
-      <li><div class="tit">성명</div><div class="value">${analysis.patient_name}</div></li>
+      <li><div class="tit">성명</div><div class="value">${displayName}</div></li>
       <li><div class="tit">성별</div><div class="value">${gender === 'M' ? '남' : '여'}</div></li>
-      <li><div class="tit">생년월일</div><div class="value">${formatDate(analysis.birth_date)}</div></li>
+      <li><div class="tit">생년월일</div><div class="value">${displayBirthDate}</div></li>
       <li><div class="tit">키</div><div class="value">${analysis.height} cm</div></li>
       <li><div class="tit">몸무게</div><div class="value">${analysis.weight} kg</div></li>
     </ul>
@@ -470,7 +506,7 @@ function generateReportHTML(data) {
   <div class="pdf-page">
     <img class="page-header" src="${baseUrl}/report-assets/header.svg" />
     <div class="page-top-info">
-      <span class="hospital">${hospitalName}</span>
+      <span class="hospital">${displayHospital}</span>
       <span>${fileId}</span>
       <span>검사일 ${formatDate(analysis.created_at)}</span>
     </div>
@@ -522,7 +558,7 @@ function generateReportHTML(data) {
   <div class="pdf-page">
     <img class="page-header" src="${baseUrl}/report-assets/header.svg" />
     <div class="page-top-info">
-      <span class="hospital">${hospitalName}</span>
+      <span class="hospital">${displayHospital}</span>
       <span>${fileId}</span>
       <span>검사일 ${formatDate(analysis.created_at)}</span>
     </div>
@@ -566,7 +602,7 @@ function generateReportHTML(data) {
   <div class="pdf-page">
     <img class="page-header" src="${baseUrl}/report-assets/header.svg" />
     <div class="page-top-info">
-      <span class="hospital">${hospitalName}</span>
+      <span class="hospital">${displayHospital}</span>
       <span>${fileId}</span>
       <span>검사일 ${formatDate(analysis.created_at)}</span>
     </div>
