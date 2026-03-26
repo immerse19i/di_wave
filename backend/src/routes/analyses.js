@@ -47,7 +47,7 @@ router.get('/:id', verifyToken, analysisController.getAnalysis);
 router.patch('/:id/doctor-bone-age', verifyToken, analysisController.updateDoctorBoneAge);
 
 // 분석 정보 수정 (재분석)
-router.put('/:id', verifyToken, analysisController.updateAnalysisInfo);
+router.put('/:id', verifyToken, upload.single('image'), analysisController.updateAnalysisInfo);
 
 
 

@@ -63,3 +63,120 @@ exports.getMyCreditHistory = async (req, res) => {
     res.status(500).json({ success: false, message: '서버 오류' })
   }
 }
+
+
+// POST /api/credits/expire-check - 만료 크레딧 처리
+exports.expireCheck = async (req, res) => {
+  const conn = await pool.getConnection()
+  try {
+    const hospitalId = req.user.hospital_id
+
+    await conn.beginTransaction()
+
+    // 만료된 배치 조회 (expires_at 지남 + 잔여량 > 0)
+    const [expired] = await conn.query(
+      `SELECT id, remaining_amount FROM credit_transactions
+       WHERE hospital_id = ? AND type = 'charge'
+         AND expires_at IS NOT NULL AND expires_at < NOW()
+         AND remaining_amount > 0`,
+      [hospitalId]
+    )
+
+    let totalExpired = 0
+    for (const batch of expired) {
+      totalExpired += batch.remaining_amount
+      await conn.query(
+        'UPDATE credit_transactions SET remaining_amount = 0 WHERE id = ?',
+        [batch.id]
+      )
+    }
+
+    // balance 차감
+    if (totalExpired > 0) {
+      await conn.query(
+        'UPDATE credits SET balance = balance - ? WHERE hospital_id = ?',
+        [totalExpired, hospitalId]
+      )
+
+      // 만료 거래 내역 기록
+      const [credit] = await conn.query(
+        'SELECT balance FROM credits WHERE hospital_id = ?',
+        [hospitalId]
+      )
+      await conn.query(
+        `INSERT INTO credit_transactions (hospital_id, type, amount, balance_after, description)
+         VALUES (?, 'use', ?, ?, '크레딧 만료 소멸')`,
+        [hospitalId, totalExpired, credit[0].balance]
+      )
+    }
+
+    await conn.commit()
+    res.json({ success: true, data: { expiredAmount: totalExpired } })
+  } catch (error) {
+    await conn.rollback()
+    console.error('ExpireCheck error:', error)
+    res.status(500).json({ success: false, message: '서버 오류' })
+  } finally {
+    conn.release()
+  }
+}
+
+// GET /api/credits/expiring - 만료 예정 배치 조회
+exports.getExpiring = async (req, res) => {
+  try {
+    const hospitalId = req.user.hospital_id
+
+    const [rows] = await pool.query(
+      `SELECT expires_at, remaining_amount FROM credit_transactions
+       WHERE hospital_id = ? AND type = 'charge'
+         AND expires_at IS NOT NULL AND expires_at > NOW()
+         AND remaining_amount > 0
+       ORDER BY expires_at ASC`,
+      [hospitalId]
+    )
+
+    res.json({ success: true, data: rows })
+  } catch (error) {
+    console.error('GetExpiring error:', error)
+    res.status(500).json({ success: false, message: '서버 오류' })
+  }
+}
+
+// GET /api/credits/unnotified-grants - 미알림 지급건 조회
+exports.getUnnotifiedGrants = async (req, res) => {
+  try {
+    const hospitalId = req.user.hospital_id
+
+    const [rows] = await pool.query(
+      `SELECT id, amount, created_at, expires_at FROM credit_transactions
+       WHERE hospital_id = ? AND source = 'admin_grant'
+         AND is_notified = 0 AND type = 'charge'
+       ORDER BY created_at ASC`,
+      [hospitalId]
+    )
+
+    res.json({ success: true, data: rows })
+  } catch (error) {
+    console.error('GetUnnotifiedGrants error:', error)
+    res.status(500).json({ success: false, message: '서버 오류' })
+  }
+}
+
+// PATCH /api/credits/mark-notified - 알림 확인 처리
+exports.markNotified = async (req, res) => {
+  try {
+    const hospitalId = req.user.hospital_id
+
+    await pool.query(
+      `UPDATE credit_transactions SET is_notified = 1
+       WHERE hospital_id = ? AND source = 'admin_grant'
+         AND is_notified = 0 AND type = 'charge'`,
+      [hospitalId]
+    )
+
+    res.json({ success: true })
+  } catch (error) {
+    console.error('MarkNotified error:', error)
+    res.status(500).json({ success: false, message: '서버 오류' })
+  }
+}
