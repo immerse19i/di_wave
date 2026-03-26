@@ -6,6 +6,14 @@
         <img src="/assets/icons/arrow_back.svg" alt="뒤로" /> 뒤로가기
       </button>
       <div class="toolbar-right">
+        <label
+          class="mask-toggle"
+          @click.prevent="hidePersonalInfo = !hidePersonalInfo"
+        >
+          <input type="checkbox" :checked="hidePersonalInfo" />
+          <span class="checkmark"></span>
+          <span>개인정보 숨기기</span>
+        </label>
         <div class="zoom-controls">
           <button @click="zoomOut">
             <img src="/assets/icons/zoom_out.svg" alt="-" />
@@ -40,7 +48,7 @@
           <div class="cover-info-box">
             <div class="info-row">
               <span class="label">성명</span>
-              <span class="value">{{ analysis?.patient_name }}</span>
+              <span class="value">{{ displayName }}</span>
             </div>
             <div class="info-row">
               <span class="label">검사일자</span>
@@ -48,7 +56,7 @@
             </div>
             <div class="info-row">
               <span class="label">검사병원</span>
-              <span class="value">{{ userStore.user?.hospital_name }}</span>
+              <span class="value">{{ displayHospital }}</span>
             </div>
           </div>
           <img class="cover-diwave" src="/assets/report/diwave_logo.svg" />
@@ -58,11 +66,9 @@
         <div class="pdf-page" ref="page2">
           <img class="page-header" src="/assets/report/header.svg" />
           <div class="page-top-info">
-            <span class="hospital">{{ userStore.user?.hospital_name }}</span>
+            <span class="hospital">{{ displayHospital }}</span>
             <span class="file-id"
-              >{{ analysis?.patient_name }}_{{
-                formatDate(analysis?.birth_date, '')
-              }}_a{{ analysis?.id }}</span
+              ><span class="file-id">{{ displayFileId }}</span></span
             >
             <span class="exam-date"
               >검사일 {{ formatDate(analysis?.created_at) }}</span
@@ -73,7 +79,7 @@
           <ul class="patient-info">
             <li>
               <div class="tit">성명</div>
-              <div class="value">{{ analysis?.patient_name }}</div>
+              <div class="value">{{ displayName }}</div>
             </li>
             <li>
               <div class="tit">성별</div>
@@ -83,7 +89,7 @@
             </li>
             <li>
               <div class="tit">생년월일</div>
-              <div class="value">{{ formatDate(analysis?.birth_date) }}</div>
+              <div class="value">{{ displayBirthDate }}</div>
             </li>
             <li>
               <div class="tit">키</div>
@@ -344,11 +350,9 @@
         <div class="pdf-page" ref="page3">
           <img class="page-header" src="/assets/report/header.svg" />
           <div class="page-top-info">
-            <span class="hospital">{{ userStore.user?.hospital_name }}</span>
+            <span class="hospital">{{ displayHospital }}</span>
             <span class="file-id"
-              >{{ analysis?.patient_name }}_{{
-                formatDate(analysis?.birth_date, '')
-              }}_a{{ analysis?.id }}</span
+              ><span class="file-id">{{ displayFileId }}</span></span
             >
             <span class="exam-date"
               >검사일 {{ formatDate(analysis?.created_at) }}</span
@@ -461,11 +465,9 @@
         <div class="pdf-page" ref="page4">
           <img class="page-header" src="/assets/report/header.svg" />
           <div class="page-top-info">
-            <span class="hospital">{{ userStore.user?.hospital_name }}</span>
+            <span class="hospital">{{ displayHospital }}</span>
             <span class="file-id"
-              >{{ analysis?.patient_name }}_{{
-                formatDate(analysis?.birth_date, '')
-              }}_a{{ analysis?.id }}</span
+              ><span class="file-id">{{ displayFileId }}</span></span
             >
             <span class="exam-date"
               >검사일 {{ formatDate(analysis?.created_at) }}</span
@@ -537,11 +539,9 @@
         <div class="pdf-page" ref="page5">
           <img class="page-header" src="/assets/report/header.svg" />
           <div class="page-top-info">
-            <span class="hospital">{{ userStore.user?.hospital_name }}</span>
+            <span class="hospital">{{ displayHospital }}</span>
             <span class="file-id"
-              >{{ analysis?.patient_name }}_{{
-                formatDate(analysis?.birth_date, '')
-              }}_a{{ analysis?.id }}</span
+              ><span class="file-id">{{ displayFileId }}</span></span
             >
             <span class="exam-date"
               >검사일 {{ formatDate(analysis?.created_at) }}</span
@@ -613,6 +613,7 @@ const route = useRoute();
 const userStore = useAuthStore();
 
 // ===== 상태 =====
+const hidePersonalInfo = ref(false);
 const loading = ref(true);
 const pdfUrl = ref(null);
 const pdfBlob = ref(null);
@@ -669,6 +670,58 @@ const calcAge = (birthDate) => {
   }
   return { years, months };
 };
+
+// ===== 마스킹 =====
+const maskName = (name) => {
+  if (!name) return '';
+  if (name.length <= 1) return '*';
+  if (name.length === 2) return name[0] + '*';
+  return name[0] + '*'.repeat(name.length - 2) + name[name.length - 1];
+};
+
+const maskHospital = (name) => {
+  if (!name) return '';
+  if (name.length <= 3) return '*'.repeat(name.length);
+  return '***' + name.slice(3);
+};
+
+const maskBirthDate = (dateStr) => {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}.**.**`;
+};
+
+const maskFileId = () => {
+  const name = analysis.value?.patient_name || '';
+  const code = analysis.value?.patient_code || '';
+  const id = analysis.value?.id || '';
+  const suffix = `${code}_a${id}`;
+  const starLen = Math.max(name.length + 1, 6);
+  return '*'.repeat(starLen) + suffix;
+};
+
+const displayName = computed(() =>
+  hidePersonalInfo.value
+    ? maskName(analysis.value?.patient_name)
+    : analysis.value?.patient_name,
+);
+
+const displayHospital = computed(() =>
+  hidePersonalInfo.value
+    ? maskHospital(userStore.user?.hospital_name)
+    : userStore.user?.hospital_name,
+);
+
+const displayBirthDate = computed(() =>
+  hidePersonalInfo.value
+    ? maskBirthDate(analysis.value?.birth_date)
+    : formatDate(analysis.value?.birth_date),
+);
+
+const displayFileId = computed(() => {
+  if (hidePersonalInfo.value) return maskFileId();
+  return `${analysis.value?.patient_name}_${formatDate(analysis.value?.birth_date, '')}_a${analysis.value?.id}`;
+});
 
 // ===== 데이터 로드 =====
 const loadAnalysis = async () => {
@@ -1069,7 +1122,10 @@ const getCurrentHeightPredicted18 = () => {
 const handlePrint = async () => {
   try {
     loading.value = true;
-    const res = await analysisAPI.getReportPdf(route.params.id);
+    const res = await analysisAPI.getReportPdf(
+      route.params.id,
+      hidePersonalInfo.value,
+    );
     const blob = new Blob([res.data], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const win = window.open(url);
@@ -1084,12 +1140,17 @@ const handlePrint = async () => {
 const handleDownload = async () => {
   try {
     loading.value = true;
-    const res = await analysisAPI.getReportPdf(route.params.id);
+    const res = await analysisAPI.getReportPdf(
+      route.params.id,
+      hidePersonalInfo.value,
+    );
     const blob = new Blob([res.data], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    const name = analysis.value?.patient_name || 'report';
+    const name = hidePersonalInfo.value
+      ? maskName(analysis.value?.patient_name)
+      : analysis.value?.patient_name || 'report';
     const date = formatDate(analysis.value?.created_at, '');
     a.download = `${name}_${date}_report.pdf`;
     a.click();
@@ -1842,6 +1903,34 @@ onUnmounted(() => {
   line-height: 1.6;
   strong {
     color: #333;
+  }
+}
+
+.mask-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  @include font-14-regular;
+  color: $white;
+  user-select: none;
+
+  input[type='checkbox'] {
+    display: none;
+  }
+
+  .checkmark {
+    width: 18px;
+    height: 18px;
+    border: 1px solid $dark-line-gray;
+    border-radius: $radius-sm;
+    display: inline-block;
+  }
+
+  input:checked + .checkmark {
+    background: url(/assets/icons/check.svg) no-repeat center / 12px;
+    background-color: $main-color;
+    border-color: $main-color;
   }
 }
 </style>

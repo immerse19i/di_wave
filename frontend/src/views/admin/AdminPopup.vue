@@ -336,21 +336,18 @@ const onResize = () => {
   display: flex;
   gap: 12px;
   margin-bottom: 16px;
-
+  justify-content: center;
+  align-items: Center;
   .search-box {
     flex: 1;
     display: flex;
     align-items: center;
-    padding: 8px 16px;
+    padding: 4px 16px;
+    padding-left: 4px;
     border-radius: $radius-sm;
     background: $bg-op;
-    border: 1px solid;
-    border-image-source: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.09) 0%,
-      rgba(255, 255, 255, 0.06) 100%
-    );
-
+    border: 1px solid $dark-line-gray;
+    max-width: 590px;
     .search-icon {
       margin-right: 8px;
       font-size: 16px;
@@ -369,16 +366,15 @@ const onResize = () => {
     }
 
     &:has(input:focus) {
-      border-image-source: none;
-      border-color: $main-color;
+      border-color: $sub-color-2;
     }
   }
 
   .btn-search {
     color: $white;
     background: $main-gad;
-    min-width: 100px;
-    padding: 8px 16px;
+    min-width: 136px;
+    padding: 7.5px 16px;
     border-radius: $radius-sm;
     @include font-14-medium;
     cursor: pointer;
@@ -417,6 +413,9 @@ const onResize = () => {
 
 // 테이블
 .table-area {
+  padding: 12px 16px;
+  background: $table-bg;
+  border-radius: 12px;
   .data-table {
     width: 100%;
     border-collapse: collapse;
@@ -433,10 +432,11 @@ const onResize = () => {
     }
 
     thead tr {
-      background: $main-gad;
+      background: $bg-op;
     }
     th {
       @include font-14-bold;
+      color: $gray;
     }
 
     th.sortable {
@@ -449,10 +449,6 @@ const onResize = () => {
         margin-left: 4px;
         font-size: 10px;
       }
-    }
-
-    tbody tr:nth-child(odd) {
-      background: $bg-op;
     }
 
     .data-row {

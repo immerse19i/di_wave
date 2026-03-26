@@ -13,12 +13,12 @@ async function getBrowser() {
   return browser;
 }
 
-async function generatePDF(analysisId) {
+async function generatePDF(analysisId, masked = false) {
   const b = await getBrowser();
   const page = await b.newPage();
 
   try {
-    const url = `http://localhost:${config.port}/internal/report/${analysisId}`;
+     const url = `http://localhost:${config.port}/internal/report/${analysisId}${masked ? '?masked=true' : ''}`;
     await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
     await page.waitForFunction('window.__reportReady === true', { timeout: 10000 });
 

@@ -78,20 +78,20 @@
     </div>
 
     <!-- 페이지네이션 -->
-    <div class="pagination" v-if="pagination.totalPages > 1">
+    <div class="pagination">
       <button
         class="page-btn arrow"
         :disabled="pagination.page <= 1"
-        @click="goToPage(pagination.page - 1)"
+        @click="goToPage(1)"
       >
-        &laquo;
+        <img src="/assets/icons/arrow_first.svg" alt="first" />
       </button>
       <button
         class="page-btn arrow"
         :disabled="pagination.page <= 1"
         @click="goToPage(pagination.page - 1)"
       >
-        &lt;
+        <img src="/assets/icons/arrow_prev.svg" alt="prev" />
       </button>
       <button
         v-for="pageNum in visiblePages"
@@ -106,14 +106,14 @@
         :disabled="pagination.page >= pagination.totalPages"
         @click="goToPage(pagination.page + 1)"
       >
-        &gt;
+        <img src="/assets/icons/arrow_next.svg" alt="next" />
       </button>
       <button
         class="page-btn arrow"
         :disabled="pagination.page >= pagination.totalPages"
         @click="goToPage(pagination.totalPages)"
       >
-        &raquo;
+        <img src="/assets/icons/arrow_last.svg" alt="last" />
       </button>
     </div>
   </div>
@@ -152,7 +152,7 @@ const filteredList = computed(() => {
 });
 
 const visiblePages = computed(() => {
-  const total = pagination.value.totalPages;
+  const total = Math.max(1, pagination.value.totalPages);
   const current = pagination.value.page;
   const pages = [];
   let start = Math.max(1, current - 4);
@@ -348,22 +348,29 @@ onMounted(() => {
 
 // 테이블
 .content_list {
+  background: $table-bg;
+  padding: 16px 12px;
+  border-radius: 12px;
   table {
     width: 100%;
     border-collapse: collapse;
     border-top-right-radius: 8px;
     border-top-left-radius: 8px;
     overflow: hidden;
-
+    background: unset;
+    // th {
+    // }
     th,
     td {
+      background: none;
       text-align: center;
       padding: 12px 8px;
       @include font-12-regular;
     }
 
     thead tr {
-      background: $main-gad;
+      // background: $main-gad;
+      background: $bg-op;
     }
 
     th {
@@ -380,10 +387,6 @@ onMounted(() => {
         margin-left: 4px;
         font-size: 10px;
       }
-    }
-
-    tbody tr:nth-child(odd) {
-      background: $bg-op;
     }
 
     tbody tr.clickable-row {
@@ -434,18 +437,26 @@ onMounted(() => {
     @include font-12-regular;
     cursor: pointer;
 
+    &.arrow {
+      @include font-14-bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      img {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
     &:hover:not(:disabled) {
       background-color: rgba(255, 255, 255, 0.08);
     }
 
     &.active {
-      background: $main-color;
+      background: $main-gad;
       color: $white;
       @include font-12-bold;
-    }
-
-    &.arrow {
-      @include font-14-bold;
     }
 
     &:disabled {

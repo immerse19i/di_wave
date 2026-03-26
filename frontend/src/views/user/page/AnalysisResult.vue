@@ -6,9 +6,18 @@
         <button class="btn-back" @click="goBack">
           <span>&lt;</span> 뒤로가기
         </button>
-        <div class="history-dropdown" ref="historyRef">
+        <div
+          class="history-dropdown"
+          :class="{ open: showHistory }"
+          ref="historyRef"
+        >
           <button class="btn-history" @click="toggleHistory">
-            이전기록 <span class="arrow">&#9662;</span>
+            <span>이전기록</span>
+            <img
+              src="/assets/icons/dropdown_icon.svg"
+              alt=""
+              class="arrow-icon"
+            />
           </button>
           <ul v-if="showHistory" class="history-list">
             <li v-if="previousRecords.length === 0" class="no-record">
@@ -60,7 +69,15 @@
           v-if="isComparing && comparisonRecord"
           class="xray-image comparison-image"
         >
-          <div class="img_box">
+          <div
+            class="img_box"
+            @wheel.prevent="onWheel($event, 'comparison')"
+            @mousedown="onMouseDown($event, 'comparison')"
+            @mousemove="onMouseMove($event, 'comparison')"
+            @mouseup="onMouseUp('comparison')"
+            @mouseleave="onMouseUp('comparison')"
+            @dblclick="onDblClick('comparison')"
+          >
             <span class="image-date">
               {{
                 formatDate(
@@ -74,25 +91,100 @@
             <img
               :src="getImageUrl(comparisonRecord.image_path)"
               alt="Previous X-ray"
+              :style="getImageStyle('comparison')"
+              draggable="false"
             />
           </div>
         </div>
         <!-- 현재 이미지 -->
         <div class="xray-image">
-          <div class="img_box">
+          <div
+            class="img_box"
+            @wheel.prevent="onWheel($event, 'current')"
+            @mousedown="onMouseDown($event, 'current')"
+            @mousemove="onMouseMove($event, 'current')"
+            @mouseup="onMouseUp('current')"
+            @mouseleave="onMouseUp('current')"
+            @dblclick="onDblClick('current')"
+          >
             <span class="image-date">
               {{ formatDate(analysis.analysis_date || analysis.created_at) }}
             </span>
-            <img :src="getImageUrl(analysis.image_path)" alt="X-ray" />
+            <img
+              :src="getImageUrl(analysis.image_path)"
+              alt="X-ray"
+              :style="getImageStyle('current')"
+              draggable="false"
+            />
           </div>
         </div>
       </div>
 
       <!-- 오른쪽: 분석 결과 -->
       <div class="right-panel">
+        <!-- 이전 기록 비교 카드 -->
+        <div
+          v-if="isComparing && comparisonRecord"
+          class="result-summary comparison-summary"
+        >
+          <div class="predicted-height">
+            <span class="date-label">{{
+              formatDate(
+                comparisonRecord.analysis_date || comparisonRecord.created_at,
+              )
+            }}</span>
+            <span class="label">최종 예측 키</span>
+            <span class="value"
+              >{{ comparisonFinalPredictedHeight }}<small>cm</small></span
+            >
+          </div>
+          <div class="age-info">
+            <div>
+              <span class="type"> 나이 </span>
+              <b>{{
+                formatAge(
+                  comparisonRecord.chronological_age_years,
+                  comparisonRecord.chronological_age_months,
+                )
+              }}</b>
+            </div>
+            <div>
+              <span class="type"> 뼈 나이(AI) </span>
+              <b class="born">{{
+                formatAge(
+                  comparisonRecord.bone_age_years,
+                  comparisonRecord.bone_age_months,
+                )
+              }}</b>
+            </div>
+            <div class="has-tooltip">
+              <span class="type"> 유전적 예측 키 </span>
+              <b>{{
+                comparisonMphHeight ? comparisonMphHeight + ' cm' : '-'
+              }}</b>
+              <div class="tootip_wrap">
+                <span class="tooltip-wrap">
+                  <img
+                    src="/assets/icons/question.svg"
+                    alt=""
+                    class="tooltip-icon"
+                  />
+                  <img
+                    class="tooltip-img tooltip-right"
+                    src="/assets/images/tooltip/parental_height.svg"
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- 최종 예측 키 (#5) -->
         <div class="result-summary">
           <div class="predicted-height">
+            <span v-if="isComparing" class="date-label">{{
+              formatDate(analysis.analysis_date || analysis.created_at)
+            }}</span>
             <span class="label">최종 예측 키</span>
             <span class="value"
               >{{ finalPredictedHeight }}<small>cm</small></span
@@ -101,7 +193,6 @@
           <div class="age-info">
             <div>
               <span class="type"> 현재 나이 </span>
-
               <b>{{
                 formatAge(
                   analysis.chronological_age_years,
@@ -136,7 +227,10 @@
         </div>
 
         <!-- 뼈나이 예측 - 의사 (#6) -->
-        <div class="doctor-boneage">
+        <div
+          class="doctor-boneage"
+          :class="{ 'has-changes': isDoctorBoneAgeChanged }"
+        >
           <span class="label">뼈 나이 예측(의사)</span>
           <div class="dropdowns">
             <select v-model="doctorBoneAgeYears">
@@ -152,6 +246,8 @@
             </select>
             <span>M</span>
           </div>
+          <button class="btn-default" @click="resetToDefault">기본값</button>
+          <button class="btn-save" @click="saveDoctorBoneAge">저장</button>
           <span class="doctor-note">*의료진 최종 확인 필수</span>
         </div>
 
@@ -407,16 +503,19 @@
   <div v-else class="loading">데이터를 불러오는 중...</div>
 </template>
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue';
+
+import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router';
 import { analysisAPI } from '@/api/analysis';
-import { useModalStore } from '@/store/modal'; // ← 추가
+import { useModalStore } from '@/store/modal';
+import { UseMessageStore } from '@/store/message';
 import growthHeightData from '@/data/growth_height.json';
 import Chart from 'chart.js/auto';
 import ToggleSwitch from '../../../components/common/ToggleSwitch.vue';
 import ScoreGauge from '../../../components/common/ScoreGauge.vue';
 
 const modal = useModalStore(); // ← 추가
+const message = UseMessageStore();
 
 const route = useRoute();
 const router = useRouter();
@@ -438,6 +537,101 @@ const isComparing = ref(false);
 const doctorBoneAgeYears = ref(0);
 const doctorBoneAgeMonths = ref(0);
 
+// 저장된 의사 뼈나이 (변경 감지용)
+const savedDoctorYears = ref(0);
+const savedDoctorMonths = ref(0);
+const skipGuard = ref(false);
+
+// 변경 여부
+const isDoctorBoneAgeChanged = computed(() => {
+  return (
+    doctorBoneAgeYears.value !== savedDoctorYears.value ||
+    doctorBoneAgeMonths.value !== savedDoctorMonths.value
+  );
+});
+
+// ── Zoom/Pan ──
+const zoomState = reactive({
+  current: {
+    scale: 1,
+    tx: 0,
+    ty: 0,
+    panning: false,
+    sx: 0,
+    sy: 0,
+    ltx: 0,
+    lty: 0,
+  },
+  comparison: {
+    scale: 1,
+    tx: 0,
+    ty: 0,
+    panning: false,
+    sx: 0,
+    sy: 0,
+    ltx: 0,
+    lty: 0,
+  },
+});
+const ZOOM_MIN = 1;
+const ZOOM_MAX = 5;
+const ZOOM_STEP = 0.15;
+
+const resetZoom = (target) => {
+  const s = zoomState[target];
+  s.scale = 1;
+  s.tx = 0;
+  s.ty = 0;
+  s.panning = false;
+};
+
+const onWheel = (e, target) => {
+  const s = zoomState[target];
+  const delta = e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP;
+  s.scale = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, s.scale + delta));
+  if (s.scale <= ZOOM_MIN) {
+    s.tx = 0;
+    s.ty = 0;
+  }
+};
+
+const onMouseDown = (e, target) => {
+  if (e.button !== 0 && e.button !== 1) return;
+  e.preventDefault();
+  const s = zoomState[target];
+  if (s.scale <= 1) return;
+  s.panning = true;
+  s.sx = e.clientX;
+  s.sy = e.clientY;
+  s.ltx = s.tx;
+  s.lty = s.ty;
+};
+
+const onMouseMove = (e, target) => {
+  const s = zoomState[target];
+  if (!s.panning) return;
+  s.tx = s.ltx + (e.clientX - s.sx);
+  s.ty = s.lty + (e.clientY - s.sy);
+};
+
+const onMouseUp = (target) => {
+  zoomState[target].panning = false;
+};
+
+const onDblClick = (target) => {
+  resetZoom(target);
+};
+
+const getImageStyle = (target) => {
+  const s = zoomState[target];
+  return {
+    transform: `scale(${s.scale}) translate(${s.tx / s.scale}px, ${s.ty / s.scale}px)`,
+    cursor: s.panning ? 'grabbing' : 'grab',
+    transition: s.panning ? 'none' : 'transform 0.15s ease-out',
+    transformOrigin: 'center center',
+  };
+};
+
 // 데이터 로드
 const fetchAnalysis = async () => {
   try {
@@ -447,6 +641,8 @@ const fetchAnalysis = async () => {
     // 의사 판독값 초기화 (AI값으로)
     doctorBoneAgeYears.value = analysis.value.bone_age_years || 0;
     doctorBoneAgeMonths.value = analysis.value.bone_age_months || 0;
+    savedDoctorYears.value = analysis.value.bone_age_years || 0; // 추가
+    savedDoctorMonths.value = analysis.value.bone_age_months || 0; // 추가
 
     // 이전기록 조회
     fetchPreviousRecords();
@@ -488,6 +684,28 @@ const mphHeight = computed(() => {
   );
 });
 
+// 비교 기록 result_json 파싱
+const comparisonResultData = computed(() => {
+  if (!comparisonRecord.value?.result_json) return {};
+  return typeof comparisonRecord.value.result_json === 'string'
+    ? JSON.parse(comparisonRecord.value.result_json)
+    : comparisonRecord.value.result_json;
+});
+
+// 비교 기록 유전적 예측 키
+const comparisonMphHeight = computed(() => {
+  return (
+    comparisonResultData.value?.Genetic_Predicted_Height ??
+    comparisonResultData.value?.MPH ??
+    null
+  );
+});
+
+// 비교 기록 최종 예측 키
+const comparisonFinalPredictedHeight = computed(
+  () => comparisonResultData.value?.Final_Predicted_Height ?? '-',
+);
+
 // AI 결과에서 스코어/예측값 추출
 const heightScore = computed(() => resultData.value?.Height_Score ?? '-');
 const potentialScore = computed(() => resultData.value?.Potential_Score ?? '-');
@@ -520,17 +738,36 @@ const finalPercent = computed(() =>
 );
 
 // 의사 판독값 변경 시 서버에 저장
-watch([doctorBoneAgeYears, doctorBoneAgeMonths], async ([years, months]) => {
+// 기본값 복원 (AI 원본)
+const resetToDefault = () => {
+  const boneAge = resultData.value?.BoneAge;
+  if (!boneAge) return;
+  const match = boneAge.match(/(\d+)Y\s*(\d+)M/);
+  if (match) {
+    doctorBoneAgeYears.value = parseInt(match[1]);
+    doctorBoneAgeMonths.value = parseInt(match[2]);
+  }
+};
+
+// 의사 뼈나이 저장
+const saveDoctorBoneAge = async () => {
   if (!analysis.value?.id) return;
   try {
     await analysisAPI.updateDoctorBoneAge(analysis.value.id, {
-      bone_age_years: years,
-      bone_age_months: months,
+      bone_age_years: doctorBoneAgeYears.value,
+      bone_age_months: doctorBoneAgeMonths.value,
     });
+    savedDoctorYears.value = doctorBoneAgeYears.value;
+    savedDoctorMonths.value = doctorBoneAgeMonths.value;
+    // briefingText 등 화면 갱신을 위해 analysis 값도 업데이트
+    analysis.value.bone_age_years = doctorBoneAgeYears.value;
+    analysis.value.bone_age_months = doctorBoneAgeMonths.value;
+    message.showAlert('저장되었습니다.');
   } catch (e) {
     console.error('의사 뼈나이 저장 오류:', e);
+    message.showAlert('저장에 실패했습니다.');
   }
-});
+};
 
 // 분석 브리핑 텍스트
 const briefingText = computed(() => {
@@ -682,6 +919,7 @@ const goToRecord = async (id) => {
     const res = await analysisAPI.getDetail(id);
     comparisonRecord.value = res.data.data;
     isComparing.value = true;
+    resetZoom('comparison');
     nextTick(() => drawGrowthChart());
   } catch (e) {
     console.error('비교 기록 조회 오류:', e);
@@ -691,11 +929,24 @@ const goToRecord = async (id) => {
 const closeComparison = () => {
   comparisonRecord.value = null;
   isComparing.value = false;
+  resetZoom('comparison');
   nextTick(() => drawGrowthChart());
 };
 
-const goToReport = () =>
+const goToReport = () => {
+  if (isDoctorBoneAgeChanged.value) {
+    message.showConfirm(
+      '변경내용이 저장되지 않았습니다.\n수정된 내용을 저장하고 리포트를 생성하시겠습니까?',
+      async () => {
+        await saveDoctorBoneAge();
+        skipGuard.value = true;
+        router.push(`/main/analysis/${route.params.id}/report`);
+      },
+    );
+    return;
+  }
   router.push(`/main/analysis/${route.params.id}/report`);
+};
 const openEditModal = () => {
   modal.open('edit_analysis', 'page', analysis.value);
 };
@@ -718,6 +969,21 @@ const getImageUrl = (path) => {
   return `/${relativePath}`; // 상대경로 (같은 도메인)
 };
 
+// 미저장 이탈 방지
+onBeforeRouteLeave((to) => {
+  if (skipGuard.value) return true;
+  if (!isDoctorBoneAgeChanged.value) return true;
+
+  message.showConfirm(
+    '뼈 나이 예측(의사) 정보가 저장되지 않았습니다.\n현재 페이지를 벗어나시겠습니까?',
+    () => {
+      skipGuard.value = true;
+      router.push(to.fullPath);
+    },
+  );
+  return false;
+});
+
 onMounted(async () => {
   await fetchAnalysis();
   nextTick(() => drawGrowthChart());
@@ -728,6 +994,8 @@ watch(
   () => route.params.id,
   async (newId) => {
     if (newId) {
+      resetZoom('current');
+      resetZoom('comparison');
       await fetchAnalysis();
       nextTick(() => drawGrowthChart());
     }
@@ -784,17 +1052,32 @@ watch(
     position: relative;
 
     .btn-history {
+      min-width: 115px;
       background: $dark-input;
       color: $white;
-      padding: 6px 16px;
+      padding: 9px 12px;
       border: 1px solid $dark-line-gray;
-      border-radius: $radius-sm;
+      border-radius: 10px;
       @include font-12-regular;
       cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
 
-      .arrow {
-        font-size: 10px;
-        margin-left: 4px;
+      .arrow-icon {
+        width: 16px;
+        height: 16px;
+        transition: transform 0.2s;
+      }
+    }
+
+    // 열린 상태: 버튼 하단 모서리 제거하여 리스트와 연결
+    &.open .btn-history {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+
+      .arrow-icon {
+        transform: rotate(180deg);
       }
     }
 
@@ -802,17 +1085,19 @@ watch(
       position: absolute;
       top: 100%;
       left: 0;
-      margin-top: 4px;
+      right: 0;
+      margin-top: -1px;
       background: $dark-input;
       border: 1px solid $dark-line-gray;
-      border-radius: $radius-sm;
-      min-width: 160px;
+      border-top: 1px solid $dark-line-gray;
+      border-radius: 0 0 10px 10px;
       z-index: 10;
       list-style: none;
       padding: 0;
+      overflow: hidden;
 
       li {
-        padding: 8px 16px;
+        padding: 12px 9px;
         @include font-12-regular;
         cursor: pointer;
         &:hover {
@@ -891,7 +1176,9 @@ watch(
       position: relative;
       // width: 100%;
       height: 100%;
+      overflow: hidden;
     }
+
     .image-date {
       position: absolute;
       top: 12px;
@@ -910,6 +1197,7 @@ watch(
       // height: 100%;
       object-fit: contain;
       object-position: center;
+      user-select: none;
     }
   }
 }
@@ -964,7 +1252,9 @@ watch(
   .predicted-height {
     display: flex;
     align-items: center;
-    gap: 20px;
+    column-gap: 20px;
+    row-gap: 4px;
+    flex-wrap: wrap;
     .label {
       @include font-20-bold;
       display: block;
@@ -998,6 +1288,16 @@ watch(
         font-size: 20px;
       }
     }
+  }
+
+  .date-label {
+    width: 100%;
+    @include font-12-regular;
+    color: $dark-text;
+  }
+
+  &.comparison-summary {
+    border: 1px solid #ff1744;
   }
 }
 
@@ -1044,11 +1344,41 @@ watch(
       @include font-14-bold;
     }
   }
-
-  .doctor-note {
-    color: $red;
-    @include font-12-regular;
+  &.has-changes {
+    border: 1px solid $sub-color-2;
   }
+
+  .btn-default {
+    @include font-14-bold;
+    background: $sub-color;
+    color: $white;
+    padding: 6px 16px;
+    border-radius: $radius-sm;
+    cursor: pointer;
+    min-width: 71px;
+    &:hover {
+      opacity: 0.85;
+    }
+  }
+
+  .btn-save {
+    @include font-14-bold;
+    background: $main-gad;
+    color: $white;
+    min-width: 71px;
+    padding: 6px 16px;
+    border-radius: $radius-sm;
+    border: 1px solid $sub-color-2;
+    cursor: pointer;
+    &:hover {
+      opacity: 0.85;
+    }
+  }
+}
+
+.doctor-note {
+  color: $red;
+  @include font-12-regular;
 }
 
 // 분석 브리핑

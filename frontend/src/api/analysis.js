@@ -22,12 +22,22 @@ export const analysisAPI = {
     // 분석 상세 조회
     getDetail: (id) => api.get(`/analyses/${id}`),
     updateDoctorBoneAge: (id, data) => api.patch(`/analyses/${id}/doctor-bone-age`, data),
-// 분석 정보 수정 (재분석)
-updateAnalysisInfo: (id, data) => api.put(`/analyses/${id}`, data),
-getReportPdf: (id) => api.get(`/analyses/${id}/report/pdf`, {
-  responseType: 'blob',
-  timeout: 60000
-}),
+// 분석 정보 수정 (재분석, FormData 또는 JSON)
+updateAnalysisInfo: (id, data) => {
+  if (data instanceof FormData) {
+    return api.put(`/analyses/${id}`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 120000
+    });
+  }
+  return api.put(`/analyses/${id}`, data);
+},
+getReportPdf(id, masked = false) {
+  return api.get(`/analyses/${id}/report/pdf${masked ? '?masked=true' : ''}`, { 
+    responseType: 'blob',
+    timeout: 60000
+  });
+}
 };
 
 

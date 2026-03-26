@@ -98,6 +98,9 @@ onMounted(() => {
 }
 
 .table-wrap {
+  padding: 12px 16px;
+  background: $table-bg;
+  border-radius: 12px;
   .data-table {
     width: 100%;
     border-collapse: collapse;
@@ -108,19 +111,17 @@ onMounted(() => {
     th,
     td {
       text-align: center;
-      padding: 14px 8px;
-      @include font-14-regular;
+      padding: 12px 8px;
+      @include font-12-regular;
+      color: $dark-text;
     }
 
     thead tr {
-      background: $main-gad;
+      background: $bg-op;
     }
     th {
       @include font-14-bold;
-    }
-
-    tbody tr:nth-child(odd) {
-      background: $bg-op;
+      color: $gray;
     }
 
     .empty-row {
@@ -134,32 +135,44 @@ onMounted(() => {
 .toggle-switch {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border-radius: 20px;
+  width: 68px;
+  height: 24px;
+  border-radius: 12px;
+  background: #a0a0a0;
   cursor: pointer;
-  background: $dark-line-gray;
-  transition: background 0.3s;
+  position: relative;
+  transition: background 0.2s;
 
   .toggle-label {
-    @include font-12-regular;
-    color: $dark-text;
-    min-width: 42px;
+    font-family: $font-family;
+    font-size: 10px;
+    font-weight: $font-weight-medium;
+    line-height: 100%;
+    color: $white;
+    position: absolute;
+    right: 10px;
   }
 
   .toggle-knob {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     background: $white;
-    transition: transform 0.3s;
+    position: absolute;
+    left: 4px;
+    transition: left 0.2s;
   }
 
   &.active {
     background: $main-color;
 
     .toggle-label {
-      color: $white;
+      left: 10px;
+      right: auto;
+    }
+
+    .toggle-knob {
+      left: calc(100% - 20px);
     }
   }
 }

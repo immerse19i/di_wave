@@ -414,8 +414,8 @@ onMounted(() => fetchList());
     }
 
     &.active {
-      background: $main-color;
-      border-color: $main-color;
+      background: $sub-color;
+      border-color: $sub-color;
       color: $white;
     }
   }
@@ -436,23 +436,29 @@ onMounted(() => fetchList());
   .radio-custom {
     width: 16px;
     height: 16px;
-    border: 2px solid $dark-line-gray;
+    background: $dark-line-gray;
+    border: none;
     border-radius: 50%;
     position: relative;
-  }
 
-  input[type='radio']:checked + .radio-custom {
-    border-color: $main-color;
     &::after {
       content: '';
-      width: 8px;
-      height: 8px;
-      background: $main-color;
+      width: 6px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.5);
       border-radius: 50%;
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+    }
+  }
+
+  input[type='radio']:checked + .radio-custom {
+    background: $main-color;
+
+    &::after {
+      background: $white;
     }
   }
 }
@@ -487,12 +493,7 @@ onMounted(() => fetchList());
     padding: 8px 16px;
     border-radius: $radius-sm;
     background: $bg-op;
-    border: 1px solid;
-    border-image-source: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.09) 0%,
-      rgba(255, 255, 255, 0.06) 100%
-    );
+    border: 1px solid $dark-line-gray;
 
     input {
       width: 100%;
@@ -507,7 +508,7 @@ onMounted(() => fetchList());
 
     &:has(input:focus) {
       border-image-source: none;
-      border-color: $main-color;
+      border-color: $sub-color-2;
     }
   }
 
@@ -524,16 +525,21 @@ onMounted(() => fetchList());
 
 // 테이블
 .content_list {
+  padding: 12px 16px;
+  background: $table-bg;
+  border-radius: 12px;
   .table-top {
     display: flex;
     justify-content: flex-end;
-    align-items: center;
-    gap: 16px;
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 8px;
     margin-bottom: 8px;
   }
 
   .btn-add {
-    padding: 8px 20px;
+    padding: 7px 20px;
+    min-width: 100px;
     background: $main-gad;
     color: $white;
     border-radius: $radius-sm;
@@ -542,7 +548,8 @@ onMounted(() => fetchList());
   }
 
   .total-count {
-    @include font-14-regular;
+    @include font-14-bold;
+
     color: $dark-text;
   }
 
@@ -561,10 +568,11 @@ onMounted(() => fetchList());
     }
 
     thead tr {
-      background: $main-gad;
+      background: $bg-op;
     }
     th {
       @include font-14-bold;
+      color: $gray;
     }
 
     th.sortable {
@@ -577,10 +585,6 @@ onMounted(() => fetchList());
         margin-left: 4px;
         font-size: 10px;
       }
-    }
-
-    tbody tr:nth-child(odd) {
-      background: $bg-op;
     }
 
     tbody tr.clickable-row {

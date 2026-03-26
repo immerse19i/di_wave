@@ -624,11 +624,14 @@ exports.adjustCredit = async (req, res) => {
 
     // credit_transactions 기록
     const txType = type === 'charge' ? 'charge' : 'use';
+    const expiresAt = type === 'charge' ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null;
+    const source = 'admin_grant';
     await conn.query(
-      `INSERT INTO credit_transactions (hospital_id, type, amount, balance_after, description)
-       VALUES (?, ?, ?, ?, ?)`,
-      [id, txType, Number(amount), newBalance, reason]
+      `INSERT INTO credit_transactions (hospital_id, type, amount, balance_after, description, expires_at, source, is_notified, remaining_amount)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, txType, Number(amount), newBalance, reason, expiresAt, source, 0, type === 'charge' ? Number(amount) : null]
     );
+
 
     // admin_logs 기록
     const typeLabel = type === 'charge' ? '지급' : '차감';

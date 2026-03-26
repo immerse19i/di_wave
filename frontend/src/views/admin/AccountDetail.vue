@@ -93,7 +93,7 @@
             </a>
             <span v-else>-</span>
             <button
-              class="btn-outline"
+              class="btn-outline preview"
               @click="previewLicense"
               v-if="account.business_license_path"
             >
@@ -1080,7 +1080,7 @@ const formatShortDate = (dateStr) => {
 
 .hospital-name {
   @include font-20-bold;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .join-date {
@@ -1101,6 +1101,7 @@ const formatShortDate = (dateStr) => {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
+    column-gap: 36px;
     margin-bottom: 12px;
 
     &.full {
@@ -1111,12 +1112,12 @@ const formatShortDate = (dateStr) => {
   .form-field {
     display: flex;
     align-items: center;
-    gap: 0;
+    gap: 16px;
 
     .field-label {
-      min-width: 120px;
+      min-width: 152px;
       padding: 12px 16px;
-      background: $main-gad;
+      background: $bg-op;
       @include font-14-medium;
       border-radius: $radius-sm 0 0 $radius-sm;
       white-space: nowrap;
@@ -1127,7 +1128,7 @@ const formatShortDate = (dateStr) => {
       padding: 12px 16px;
       background: $dark-input;
       border: 1px solid $dark-line-gray;
-      border-radius: 0 $radius-sm $radius-sm 0;
+      border-radius: $radius-sm;
       color: $white;
       @include font-14-regular;
 
@@ -1145,7 +1146,7 @@ const formatShortDate = (dateStr) => {
   .address-wrap {
     flex: 1;
     display: flex;
-
+    gap: 12px;
     .address-input {
       flex: 1;
       border-radius: 0;
@@ -1156,8 +1157,9 @@ const formatShortDate = (dateStr) => {
       padding: 12px 20px;
       background: $main-gad;
       color: $white;
+      min-width: 96px;
       @include font-14-medium;
-      border-radius: 0 $radius-sm $radius-sm 0;
+      border-radius: $radius-sm;
       cursor: pointer;
       white-space: nowrap;
     }
@@ -1178,7 +1180,8 @@ const formatShortDate = (dateStr) => {
   }
 
   .btn-save {
-    padding: 10px 32px;
+    padding: 7.5px 32px;
+    min-width: 132px;
     background: $main-gad;
     color: $white;
     border-radius: $radius-sm;
@@ -1199,9 +1202,9 @@ const formatShortDate = (dateStr) => {
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 
     .mgmt-label {
-      min-width: 120px;
-      padding: 10px 16px;
-      background: $main-gad;
+      min-width: 152px;
+      padding: 12px 16px;
+      background: $bg-op;
       @include font-14-medium;
       border-radius: $radius-sm;
       margin-right: 16px;
@@ -1226,25 +1229,32 @@ const formatShortDate = (dateStr) => {
 
 .btn-outline {
   padding: 8px 16px;
-  background: none;
-  border: 1px solid $dark-line-gray;
+  background: $main-gad;
+  border: unset;
   color: $white;
   border-radius: $radius-sm;
   @include font-14-medium;
   cursor: pointer;
 
+  min-width: 96px;
   &:hover:not(:disabled) {
     border-color: $main-color;
   }
 
   &:disabled {
-    opacity: 0.3;
+    // opacity: 0.3;
     cursor: not-allowed;
+    color: $gray2;
+    background: $dark-gray-dark;
   }
 
   &.active {
     border-color: $main-color;
     background: $main-color;
+  }
+
+  &.preview {
+    border-color: $sub-color-2;
   }
 }
 
@@ -1252,12 +1262,13 @@ const formatShortDate = (dateStr) => {
   padding: 8px 16px;
   background: $main-color;
   color: $white;
+  min-width: 96px;
   border-radius: $radius-sm;
   @include font-14-medium;
   cursor: pointer;
-  &:hover {
-    background: $sub-color;
-  }
+  // &:hover {
+  //   background: $sub-color;
+  // }
 }
 // 상태변경 팝업
 .popup-overlay {

@@ -97,22 +97,46 @@ const [result] = await pool.query(
         );
 
         // 6. 크레딧 차감
+        // 6. FIFO 크레딧 차감 (만료 임박 배치부터 소진)
+        let remainingCost = config.credit.perAnalysis;
+
+        // 잔여량 있는 charge 배치 조회 (만료 빠른 순, NULL=무기한은 마지막)
+        const [batches] = await pool.query(
+            `SELECT id, remaining_amount, expires_at FROM credit_transactions
+             WHERE hospital_id = ? AND type = 'charge' AND remaining_amount > 0
+               AND (expires_at IS NULL OR expires_at > NOW())
+             ORDER BY expires_at IS NULL ASC, expires_at ASC, id ASC`,
+            [hospitalId]
+        );
+
+        for (const batch of batches) {
+            if (remainingCost <= 0) break;
+            const deduct = Math.min(batch.remaining_amount, remainingCost);
+            await pool.query(
+                'UPDATE credit_transactions SET remaining_amount = remaining_amount - ? WHERE id = ?',
+                [deduct, batch.id]
+            );
+            remainingCost -= deduct;
+        }
+
+        // credits balance 차감
         await pool.query(
             'UPDATE credits SET balance = balance - ? WHERE hospital_id = ?',
             [config.credit.perAnalysis, hospitalId]
-        )
+        );
 
-// 7. 크레딧 거래 내역 기록
-const [updatedCredit] = await pool.query(
-    'SELECT balance FROM credits WHERE hospital_id = ?',
-    [hospitalId]
-);
+        // 크레딧 거래 내역 기록
+        const [updatedCredit] = await pool.query(
+            'SELECT balance FROM credits WHERE hospital_id = ?',
+            [hospitalId]
+        );
 
         await pool.query(
             `INSERT INTO credit_transactions (hospital_id, type, amount, balance_after, description, analysis_id)
-            VALUES (?, 'use' , ?, ?, ?, ?)`,
+             VALUES (?, 'use', ?, ?, ?, ?)`,
             [hospitalId, config.credit.perAnalysis, updatedCredit[0].balance, '뼈나이 분석', analysisId]
         );
+
 
         res.status(201).json({
             success: true,
@@ -305,8 +329,11 @@ const {
       patientId = newPatient.insertId;
     }
 
-    // 3. AI 재분석 (기존 이미지 사용, 크레딧 차감 없음)
-    const aiResult = await predictBoneAge(analysis.image_path, {
+    // 3. 이미지 경로 결정 (새 이미지가 있으면 사용, 없으면 기존 이미지)
+    const imagePath = req.file ? req.file.path : analysis.image_path;
+
+    // 4. AI 재분석 (크레딧 차감 없음)
+    const aiResult = await predictBoneAge(imagePath, {
       sex: parseInt(sex),
       height: parseFloat(height),
       ageMonths: parseInt(ageMonths),
@@ -318,17 +345,17 @@ const {
       return res.status(500).json({ success: false, message: 'AI 재분석 실패' });
     }
 
-    // 4. 뼈 나이 파싱
+    // 5. 뼈 나이 파싱
     const boneAgeMatch = aiResult.data.BoneAge.match(/(\d+)Y\s*(\d+)M/);
     const boneAgeYears = boneAgeMatch ? parseInt(boneAgeMatch[1]) : null;
     const boneAgeMonths = boneAgeMatch ? parseInt(boneAgeMatch[2]) : null;
 
-    // 5. analyses 업데이트
+    // 6. analyses 업데이트
 await pool.query(
   `UPDATE analyses SET patient_id = ?, height = ?, weight = ?, physician = ?,
    analysis_date = ?, father_height = ?, mother_height = ?,
    chronological_age_years = ?, chronological_age_months = ?,
-   bone_age_years = ?, bone_age_months = ?, result_json = ?
+   bone_age_years = ?, bone_age_months = ?, result_json = ?${req.file ? ', image_path = ?' : ''}
    WHERE id = ? AND hospital_id = ?`,
   [
     patientId, parseFloat(height), weight ? parseFloat(weight) : null,
@@ -338,6 +365,7 @@ await pool.query(
     motherHeight ? parseFloat(motherHeight) : null,
     Math.floor(ageMonths / 12), ageMonths % 12,
     boneAgeYears, boneAgeMonths, JSON.stringify(aiResult.data),
+    ...(req.file ? [req.file.path] : []),
     id, hospitalId
   ]
 );
@@ -357,7 +385,7 @@ exports.generateReport = async (req, res) => {
   try {
     const { id } = req.params;
     const hospitalId = req.user.hospital_id;
-
+const masked = req.query.masked === 'true';
     const [rows] = await pool.query(
       `SELECT a.*, p.name AS patient_name FROM analyses a
        JOIN patients p ON a.patient_id = p.id
@@ -368,7 +396,7 @@ exports.generateReport = async (req, res) => {
       return res.status(404).json({ success: false, message: '분석을 찾을 수 없습니다.' });
     }
 
-    const pdfBuffer = await pdfService.generatePDF(id);
+const pdfBuffer = await pdfService.generatePDF(id, masked);
 
     const patientName = rows[0].patient_name || 'report';
     const date = new Date(rows[0].created_at).toISOString().slice(0, 10).replace(/-/g, '');

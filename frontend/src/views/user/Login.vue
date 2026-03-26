@@ -77,6 +77,7 @@ import { UseMessageStore } from '@/store/message';
 import { authAPI } from '@/api/auth';
 import LoginFooter from '../../components/common/LoginFooter.vue';
 import { useAuthStore } from '@/store/auth';
+import { creditAPI } from '@/api/credit';
 const modal = useModalStore();
 const router = useRouter();
 const message = UseMessageStore();
@@ -120,6 +121,67 @@ const handleLogin = async () => {
     auth.setToken(data.token);
     const { data: userData } = await authAPI.getMe();
     auth.setUser(userData);
+
+    // 만료 크레딧 자동 처리
+    try {
+      await creditAPI.expireCheck();
+    } catch (e) {}
+
+    // 관리자 지급 알림 체크
+    try {
+      const { data: grantRes } = await creditAPI.getUnnotifiedGrants();
+      if (grantRes.data && grantRes.data.length > 0) {
+        const totalAmount = grantRes.data.reduce((sum, g) => sum + g.amount, 0);
+        await new Promise((resolve) => {
+          message.showAlert(
+            `크레딧이 ${totalAmount}개 지급 되었습니다.\n유효기간은 지급일로부터 30일이며, 만료 후에는 자동 소멸됩니다.\n해당 크레딧은 서비스성 크레딧으로,\n환불 및 현금 전환이 불가하오니 이용에 유의하시기 바랍니다.`,
+            resolve,
+          );
+        });
+        try {
+          await creditAPI.markNotified();
+        } catch (e) {}
+      }
+    } catch (e) {}
+
+    // 만료 예정 크레딧 팝업 (일주일 보지 않기 체크)
+    try {
+      let skipExpiring = false;
+      const dismissed = localStorage.getItem('creditExpiryDismissed');
+      if (dismissed) {
+        const { dismissedAt } = JSON.parse(dismissed);
+        if (Date.now() - dismissedAt < 7 * 24 * 60 * 60 * 1000)
+          skipExpiring = true;
+      }
+
+      if (!skipExpiring) {
+        const { data: expiringRes } = await creditAPI.getExpiring();
+        if (expiringRes.data && expiringRes.data.length > 0) {
+          for (const batch of expiringRes.data) {
+            const dateStr = new Date(batch.expires_at).toLocaleDateString(
+              'ko-KR',
+            );
+            await new Promise((resolve) => {
+              message.showConfirm(
+                `${dateStr} 만료 예정인 크레딧이 ${batch.remaining_amount}개 있습니다.`,
+                resolve,
+                () => {
+                  localStorage.setItem(
+                    'creditExpiryDismissed',
+                    JSON.stringify({ dismissedAt: Date.now() }),
+                  );
+                  resolve();
+                },
+              );
+            });
+            // 일주일 보지 않기 선택했으면 나머지 팝업 스킵
+            const rechk = localStorage.getItem('creditExpiryDismissed');
+            if (rechk) break;
+          }
+        }
+      }
+    } catch (e) {}
+
     router.push('/main');
   } catch (error) {
     const code = error.response?.data?.code;
