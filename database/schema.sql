@@ -90,6 +90,10 @@ CREATE TABLE credit_transactions (
     analysis_id INT,
     payment_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at DATETIME DEFAULT NULL,
+    source ENUM('payment', 'admin_grant') DEFAULT 'payment',
+    is_notified TINYINT(1) DEFAULT 0,
+    remaining_amount INT DEFAULT NULL,
     FOREIGN KEY (hospital_id) REFERENCES hospitals(id) ON DELETE CASCADE
 );
 
@@ -197,6 +201,8 @@ CREATE INDEX idx_analyses_hospital ON analyses(hospital_id);
 CREATE INDEX idx_analyses_patient ON analyses(patient_id);
 CREATE INDEX idx_analyses_status ON analyses(status);
 CREATE INDEX idx_credit_transactions_hospital ON credit_transactions(hospital_id);
+CREATE INDEX idx_credit_transactions_expires ON credit_transactions(expires_at);
+CREATE INDEX idx_credit_transactions_source ON credit_transactions(source);
 CREATE INDEX idx_usage_logs_hospital ON usage_logs(hospital_id);
 CREATE INDEX idx_usage_logs_created ON usage_logs(created_at);
 CREATE INDEX idx_notice_attachments_notice ON notice_attachments(notice_id);
