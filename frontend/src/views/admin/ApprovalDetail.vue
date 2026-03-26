@@ -573,26 +573,32 @@ onMounted(() => {
   }
 
   .radio-custom {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
+    background: $dark-line-gray;
+    border: none;
     border-radius: 50%;
-    border: 2px solid $dark-text;
     position: relative;
     flex-shrink: 0;
-  }
-
-  input[type='radio']:checked + .radio-custom {
-    border-color: $main-color;
 
     &::after {
       content: '';
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      width: 8px;
-      height: 8px;
+      width: 6px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.5);
       border-radius: 50%;
-      background: $main-color;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+
+  input[type='radio']:checked + .radio-custom {
+    background: $main-color;
+
+    &::after {
+      background: $white;
     }
   }
 }

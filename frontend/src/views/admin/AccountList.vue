@@ -436,23 +436,29 @@ onMounted(() => fetchList());
   .radio-custom {
     width: 16px;
     height: 16px;
-    border: 2px solid $dark-line-gray;
+    background: $dark-line-gray;
+    border: none;
     border-radius: 50%;
     position: relative;
-  }
 
-  input[type='radio']:checked + .radio-custom {
-    border-color: $main-color;
     &::after {
       content: '';
-      width: 8px;
-      height: 8px;
-      background: $main-color;
+      width: 6px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.5);
       border-radius: 50%;
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+    }
+  }
+
+  input[type='radio']:checked + .radio-custom {
+    background: $main-color;
+
+    &::after {
+      background: $white;
     }
   }
 }

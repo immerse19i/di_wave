@@ -350,33 +350,26 @@ const onResize = () => {
 // ① 상태 대시보드
 .status-cards {
   display: flex;
-  gap: 0;
+  gap: 12px;
   margin-bottom: 24px;
 
   .status-card {
-    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 24px 16px;
-    background: $bg-op;
-    border: 1px solid $dark-line-gray;
+    width: 197px;
+    height: 136px;
+    background: #2f3844;
+    // border: 1px solid $dark-line-gray;
+    border-radius: 12px;
+    gap: 19px;
+    color: $white;
     cursor: pointer;
-    transition: background 0.2s;
-
-    &:first-child {
-      border-radius: $radius-sm 0 0 $radius-sm;
-    }
-    &:last-child {
-      border-radius: 0 $radius-sm $radius-sm 0;
-    }
-    &:not(:last-child) {
-      border-right: none;
-    }
+    // transition: background 0.2s;
 
     &.active {
-      background: $main-gad;
+      background: #3591b3;
       border-color: transparent;
     }
 
@@ -385,11 +378,12 @@ const onResize = () => {
     }
 
     .card-label {
-      @include font-16-bold;
+      @include font-20-bold;
       margin-bottom: 8px;
     }
     .card-count {
-      @include font-20-bold;
+      @include font-16-regular;
+      font-size: 20px;
     }
   }
 }
@@ -427,23 +421,29 @@ const onResize = () => {
   .radio-custom {
     width: 16px;
     height: 16px;
-    border: 2px solid $dark-line-gray;
+    background: $dark-line-gray;
+    border: none;
     border-radius: 50%;
     position: relative;
-  }
 
-  input[type='radio']:checked + .radio-custom {
-    border-color: $main-color;
     &::after {
       content: '';
-      width: 8px;
-      height: 8px;
-      background: $main-color;
+      width: 6px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.5);
       border-radius: 50%;
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+    }
+  }
+
+  input[type='radio']:checked + .radio-custom {
+    background: $main-color;
+
+    &::after {
+      background: $white;
     }
   }
 }
@@ -479,12 +479,7 @@ const onResize = () => {
     padding: 8px 16px;
     border-radius: $radius-sm;
     background: $bg-op;
-    border: 1px solid;
-    border-image-source: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.09) 0%,
-      rgba(255, 255, 255, 0.06) 100%
-    );
+    border: 1px solid $dark-line-gray;
     gap: 8px;
 
     .search-icon {
@@ -505,8 +500,7 @@ const onResize = () => {
     }
 
     &:has(input:focus) {
-      border-image-source: none;
-      border-color: $main-color;
+      border-color: $sub-color-2;
     }
   }
 
@@ -536,6 +530,9 @@ const onResize = () => {
 
 // ⑤ 테이블
 .table-area {
+  padding: 12px 16px;
+  background: $table-bg;
+  border-radius: 12px;
   .data-table {
     width: 100%;
     border-collapse: collapse;
@@ -551,14 +548,11 @@ const onResize = () => {
     }
 
     thead tr {
-      background: $main-gad;
+      background: $bg-op;
     }
     th {
       @include font-14-bold;
-    }
-
-    tbody tr:nth-child(odd) {
-      background: $bg-op;
+      color: $gray;
     }
 
     .data-row {
@@ -569,7 +563,7 @@ const onResize = () => {
     }
 
     .td-title {
-      text-align: left;
+      text-align: center;
       max-width: 300px;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -581,21 +575,19 @@ const onResize = () => {
     }
 
     .status-badge {
-      padding: 4px 12px;
-      border-radius: 20px;
-      @include font-12-bold;
+      padding: 4px;
+      border-radius: 4px;
+      @include font-12-regular;
+      color: $white;
     }
     .status-pending {
-      background: $main-color;
-      color: $white;
+      background: #3591b3;
     }
     .status-answered {
-      background: $dark-line-gray;
-      color: $white;
+      background: #7d7d7d;
     }
     .status-draft {
-      background: #e57373;
-      color: $white;
+      background: #ff4545;
     }
 
     .empty-row {

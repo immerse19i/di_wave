@@ -286,25 +286,30 @@ onUnmounted(() => {
       transform: translateY(-50%);
       width: 16px;
       height: 16px;
-      border: 2px solid $dark-line-gray;
+      background: $dark-line-gray;
+      border: none;
+      border-radius: 50%;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 6px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.5);
       border-radius: 50%;
     }
   }
 
   input[type='radio']:checked + span::before {
-    border-color: $main-color;
+    background: $main-color;
   }
 
   input[type='radio']:checked + span::after {
-    content: '';
-    position: absolute;
-    left: 4px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 8px;
-    height: 8px;
-    background: $main-color;
-    border-radius: 50%;
+    background: $white;
   }
 }
 
@@ -339,12 +344,7 @@ onUnmounted(() => {
     padding: 8px 16px;
     border-radius: $radius-sm;
     background: $bg-op;
-    border: 1px solid;
-    border-image-source: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.09) 0%,
-      rgba(255, 255, 255, 0.06) 100%
-    );
+    border: 1px solid $dark-line-gray;
 
     .search-icon {
       margin-right: 8px;
@@ -364,8 +364,7 @@ onUnmounted(() => {
     }
 
     &:has(input:focus) {
-      border-image-source: none;
-      border-color: $main-color;
+      border-color: $sub-color-2;
     }
   }
 
@@ -391,6 +390,9 @@ onUnmounted(() => {
 
 // 테이블
 .table-wrap {
+  padding: 12px 16px;
+  background: $table-bg;
+  border-radius: 12px;
   .data-table {
     width: 100%;
     border-collapse: collapse;
@@ -406,14 +408,11 @@ onUnmounted(() => {
     }
 
     thead tr {
-      background: $main-gad;
+      background: $bg-op;
     }
     th {
       @include font-14-bold;
-    }
-
-    tbody tr:nth-child(odd) {
-      background: $bg-op;
+      color: $gray;
     }
 
     .empty-row {
