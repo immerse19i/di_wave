@@ -75,13 +75,13 @@ const menuList = [
     path: '/admin/popups',
     icon: '/assets/icons/notice.svg',
   },
-  { label: '이용약관', path: '/admin/terms', icon: '/assets/icons/info.svg' },
+  { label: '이용약관', path: '/admin/terms', icon: '/assets/icons/terms_icon.svg' },
   { label: '정보 수정', path: '/admin/info', icon: '/assets/icons/info.svg' },
-  { label: '사용기록', path: '/admin/logs', icon: '/assets/icons/info.svg' },
+  { label: '사용기록', path: '/admin/logs', icon: '/assets/icons/usage_log_icon.svg' },
   {
     label: '권한',
     path: '/admin/permissions',
-    icon: '/assets/icons/password.svg',
+    icon: '/assets/icons/permission_icon.svg',
   },
 ];
 
