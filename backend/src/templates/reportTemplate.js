@@ -258,8 +258,9 @@ function generateReportHTML(data) {
       display: flex; flex-direction: column; align-items: center;
     }
     .cover-page .cover-bg {
-      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-      z-index: 0; background-size: cover;
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; z-index: 0;
     }
     .cover-page .cover-logo {
       display: block; width: 135px; margin-top: 142px; margin-bottom: 12px;
