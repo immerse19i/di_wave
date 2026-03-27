@@ -795,24 +795,26 @@ const drawGrowthChart = () => {
 
   // 백분위 라인 색상
   const lines = [
-    { key: 'p3', color: 'rgba(255,165,0,0.6)', label: '3rd' },
-    { key: 'p10', color: 'rgba(255,200,0,0.5)', label: '10th' },
-    { key: 'p25', color: 'rgba(100,200,255,0.5)', label: '25th' },
-    { key: 'p50', color: 'rgba(100,200,255,0.8)', label: '50th' },
-    { key: 'p75', color: 'rgba(100,200,255,0.5)', label: '75th' },
-    { key: 'p90', color: 'rgba(255,200,0,0.5)', label: '90th' },
-    { key: 'p97', color: 'rgba(255,165,0,0.6)', label: '97th' },
+    { key: 'p3', color: '#6DB8BC', label: '3rd', width: 2.5 },
+    { key: 'p5', color: '#6DB8BC', label: '5th', width: 1.5 },
+    { key: 'p10', color: '#6DB8BC', label: '10th', width: 1.5 },
+    { key: 'p25', color: '#6DB8BC', label: '25th', width: 1.5 },
+    { key: 'p50', color: '#F9B358', label: '50th', width: 2 },
+    { key: 'p75', color: '#6DB8BC', label: '75th', width: 1.5 },
+    { key: 'p90', color: '#6DB8BC', label: '90th', width: 1.5 },
+    { key: 'p95', color: '#6DB8BC', label: '95th', width: 1.5 },
+    { key: 'p97', color: '#6DB8BC', label: '97th', width: 2.5 },
   ];
 
   const datasets = lines.map((line) => ({
     label: line.label,
     data: data.map((d) => ({ x: d.month / 12, y: d[line.key] })),
     borderColor: line.color,
-    borderWidth: 1.5,
+    borderWidth: line.width, // ← 개별 두께 적용
     pointRadius: 0,
     fill: false,
     tension: 0.3,
-    showLine: true, // ← 이거 추가
+    showLine: true,
   }));
 
   // 현재 데이터 포인트 (초록점)
@@ -1295,8 +1297,6 @@ watch(
     @include font-12-regular;
     color: $dark-text;
   }
-
-
 }
 
 // 의사 판독
