@@ -6,7 +6,7 @@ const config = require('../config/config');
 
 // 상수 정의 
 const MAX_LOGIN_ATTEMPTS = 5;
-const LOCK_TIME = 30 * 60 * 1000;
+const LOCK_TIME = 10 * 60 * 1000;
 
 // 메일 전송 설정
 const transporter = nodemailer.createTransport({
@@ -81,7 +81,7 @@ if(!user.is_active){
     if(user.locked_until && new Date(user.locked_until) > new Date()){
       const remainingTime = Math.ceil((new Date(user.locked_until) - new Date()) / 60000);
       return res.status(423).json({
-        message: `계정이 잠겼습니다. ${remainingTime}분 후 다시 시도하세요`,
+        message: `로그인 시도가 5회 이상 실패하여\n보안을 위해 로그인이 제한되었습니다. ${remainingTime}분 후 다시 시도해 주세요.`,
         locked : true,
         remainingMinutes: remainingTime,
       });
@@ -109,7 +109,7 @@ if(!user.is_active){
   );
 
   return res.status(423).json({
-    message: '5회 로그인 실패로 계정이 30분간 잠겼습니다.',
+    message: '로그인 시도가 5회 이상 실패하여\n보안을 위해 로그인이 제한되었습니다. 10분 후 다시 시도해 주세요.',
     locked: true,
     remainingMinutes: 30
   });

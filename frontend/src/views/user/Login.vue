@@ -184,8 +184,12 @@ const handleLogin = async () => {
 
     router.push('/main');
   } catch (error) {
+    const status = error.response?.status;
     const code = error.response?.data?.code;
-    if (code === 'PENDING_APPROVAL' || code === 'REJECTED') {
+    if (status === 423) {
+      message.showAlert(error.response?.data?.message);
+      return;
+    } else if (code === 'PENDING_APPROVAL' || code === 'REJECTED') {
       message.showAlert(
         '아직 가입 승인 대기 중입니다.\n승인 완료 후 이메일로 안내해 드립니다.',
       );
