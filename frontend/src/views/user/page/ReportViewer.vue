@@ -1587,7 +1587,7 @@ onUnmounted(() => {
     right: 0;
     bottom: 0;
     z-index: 0;
-    background-size: cover;
+    object-fit: cover;
     // width: 500px; margin-top: 30px;
   }
   .cover-diwave {
