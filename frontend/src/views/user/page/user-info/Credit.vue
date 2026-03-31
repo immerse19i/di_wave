@@ -382,16 +382,21 @@ onMounted(() => {
   }
 
   .table-area {
+    padding: 16px 12px;
+    background: $table-bg;
+    border-radius: 20px;
     .table-header {
       display: flex;
+      flex-direction: column;
       justify-content: flex-end;
-      align-items: center;
+      align-items: flex-end;
       gap: 16px;
       margin-bottom: 12px;
 
       .charge-btn {
         @include font-14-medium;
         padding: 8px 20px;
+        min-width: 136px;
         background: $main-gad;
         color: $white;
         border-radius: $radius-sm;
@@ -399,19 +404,21 @@ onMounted(() => {
 
       .balance-box {
         display: flex;
-
+        text-align: center;
         .balance-label {
           @include font-14-regular;
           padding: 8px 16px;
-          background: $dark-gray-dark;
-          border-radius: $radius-sm 0 0 $radius-sm;
+          min-width: 116px;
+          background: $bg-op;
+          // border-radius: $radius-sm 0 0 $radius-sm;
         }
 
         .balance-value {
+          min-width: 116px;
           @include font-14-bold;
           padding: 8px 16px;
-          background: $dark-input;
-          border-radius: 0 $radius-sm $radius-sm 0;
+          border: 1px solid $dark-gray-dark;
+          // border-radius: 0 $radius-sm $radius-sm 0;
         }
       }
     }
@@ -419,10 +426,10 @@ onMounted(() => {
     table {
       width: 100%;
       border-collapse: collapse;
-
+      border-radius: 8px 8px 0 0;
+      overflow: hidden;
       thead tr {
-        background: $main-color;
-
+        background: $main-gad;
         th {
           @include font-12-bold;
           padding: 12px 8px;
