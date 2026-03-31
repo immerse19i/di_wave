@@ -125,6 +125,7 @@ const applyInput = (e) => {
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 126px;
   padding: 8px 12px;
   background: $dark-input;
   border: 1px solid $dark-line-gray;
