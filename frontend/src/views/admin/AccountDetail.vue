@@ -382,13 +382,9 @@
           <!-- 기간 필터 -->
           <div class="filter-row">
             <span class="filter-label">기간</span>
-            <input
-              type="date"
-              v-model="chFilter.startDate"
-              class="date-input"
-            />
+            <DatePicker v-model="chFilter.startDate" :max-date="chFilter.endDate" />
             <span class="date-sep">~</span>
-            <input type="date" v-model="chFilter.endDate" class="date-input" />
+            <DatePicker v-model="chFilter.endDate" :min-date="chFilter.startDate" />
             <div class="quick-btns">
               <button
                 v-for="q in quickPeriods"
@@ -528,6 +524,14 @@
         </div>
       </div>
     </div>
+
+    <!-- 사업자등록증 미리보기 모달 -->
+    <FilePreviewModal
+      :visible="showPreview"
+      :fileUrl="fileUrl"
+      :fileName="licenseName"
+      @close="showPreview = false"
+    />
   </div>
 </template>
 
@@ -544,6 +548,8 @@ import {
 import { useRouter, onBeforeRouteLeave } from 'vue-router';
 import { adminAPI } from '@/api/admin';
 import { UseMessageStore } from '@/store/message';
+import DatePicker from '@/components/common/DatePicker.vue';
+import FilePreviewModal from '@/components/common/FilePreviewModal.vue';
 
 const props = defineProps({ id: [String, Number] });
 const router = useRouter();
@@ -704,8 +710,9 @@ const handleLicenseUpload = async (e) => {
 };
 
 // 미리보기
+const showPreview = ref(false);
 const previewLicense = () => {
-  window.open(fileUrl.value, '_blank');
+  showPreview.value = true;
 };
 
 // 로그인 제한 해제

@@ -20,6 +20,13 @@ export const adminAPI = {
   rejectHospital(id, data) {
     return api.patch(`/admin/hospitals/${id}/reject`, data)
   },
+// 계정 생성 (관리자)
+createAccount(formData) {
+  return api.post('/admin/hospitals/accounts', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+},
+
 // 가입계정 목록
 getAccounts(params) {
   return api.get('/admin/hospitals/accounts', { params })

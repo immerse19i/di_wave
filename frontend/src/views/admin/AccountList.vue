@@ -47,19 +47,9 @@
           <span class="radio-custom"></span>
           가입일
         </label>
-        <input
-          type="date"
-          v-model="startDate"
-          :disabled="dateMode === 'none'"
-          class="date-input"
-        />
+        <DatePicker v-model="startDate" :max-date="endDate" :disabled="dateMode !== 'date'" :class="{ 'date-active': dateMode === 'date' }" />
         <span class="date-separator">~</span>
-        <input
-          type="date"
-          v-model="endDate"
-          :disabled="dateMode === 'none'"
-          class="date-input"
-        />
+        <DatePicker v-model="endDate" :min-date="startDate" :disabled="dateMode !== 'date'" :class="{ 'date-active': dateMode === 'date' }" />
       </div>
     </div>
 
@@ -195,6 +185,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { adminAPI } from '@/api/admin';
 import { UseMessageStore } from '@/store/message';
+import DatePicker from '@/components/common/DatePicker.vue';
 
 const router = useRouter();
 const message = UseMessageStore();
@@ -224,8 +215,9 @@ const toggleStatus = (key) => {
 
 // 가입일 필터
 const dateMode = ref('none');
-const startDate = ref('');
-const endDate = ref('');
+const today = new Date().toISOString().slice(0, 10);
+const startDate = ref(today);
+const endDate = ref(today);
 
 // 검색/정렬/페이징
 const searchKeyword = ref('');
@@ -342,7 +334,7 @@ const goToDetail = (id) => {
 };
 
 const openAddAccount = () => {
-  // TODO: 계정추가 팝업
+  router.push('/admin/accounts/add');
 };
 
 const formatDate = (dateStr) => {
@@ -378,14 +370,14 @@ onMounted(() => fetchList());
 .filter-area {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 48px;
   margin-bottom: 16px;
 }
 
 .filter-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 16px;
 }
 
 .filter-label {
@@ -399,6 +391,7 @@ onMounted(() => fetchList());
 
   .filter-btn {
     padding: 8px 20px;
+    min-width: 80px;
     border-radius: $radius-sm;
     border: 1px solid $dark-line-gray;
     background: none;
@@ -407,6 +400,7 @@ onMounted(() => fetchList());
     cursor: pointer;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 4px;
 
     .check-icon {
@@ -425,9 +419,10 @@ onMounted(() => fetchList());
 .radio-label {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 12px;
   cursor: pointer;
-  @include font-14-regular;
+  @include font-12-regular;
+  white-space: nowrap;
 
   input[type='radio'] {
     display: none;
@@ -440,6 +435,7 @@ onMounted(() => fetchList());
     border: none;
     border-radius: 50%;
     position: relative;
+    flex-shrink: 0;
 
     &::after {
       content: '';
@@ -463,18 +459,12 @@ onMounted(() => fetchList());
   }
 }
 
-.date-input {
-  padding: 8px 12px;
-  background: $dark-input;
-  border: 1px solid $dark-line-gray;
-  border-radius: $radius-sm;
-  color: $white;
-  @include font-14-regular;
+.filter-group :deep(.dp-input-wrap) {
+  width: 126px;
+}
 
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
+.date-active :deep(.dp-input-wrap:focus-within) {
+  border-color: $sub-color-2;
 }
 
 .date-separator {

@@ -22,6 +22,7 @@ const AdminNoticeWrite = () => import('@/views/admin/AdminNoticeWrite.vue')
 // Admin Views
 const AdminLogin = () => import('@/views/admin/Login.vue');
 const Register = ()=> import('@/views/user/Register.vue');
+const Reapply = () => import('@/views/user/Reapply.vue');
 const AnalysisResult = () => import('@/views/user/page/AnalysisResult.vue');
 const AdminDashboard = () => import('@/views/admin/Approval.vue');
 const AdminMain = () => import('@/views/admin/AdminMain.vue')
@@ -39,6 +40,7 @@ const UsageLogDetail = () => import('@/views/admin/UsageLogDetail.vue')
 const Permission = () => import('@/views/admin/Permission.vue')
 const AdminInquiry = () => import('@/views/admin/AdminInquiry.vue')
 const AdminInquiryDetail = () => import('@/views/admin/AdminInquiryDetail.vue')
+const AccountAdd = () => import('@/views/admin/AccountAdd.vue')
 
 const routes = [
   // User Routes
@@ -89,6 +91,7 @@ const routes = [
     { path: 'terms/history/:type', component: AdminTermsHistory },
     { path: 'approval/:id', component: ApprovalDetail, props: true },  // ← 추가
     { path: 'accounts', component: AccountList },
+    { path: 'accounts/add', component: AccountAdd },
     { path: 'accounts/:id', component: AccountDetail, props: true },
     { path: 'notices', component: AdminNotice },
     { path: 'notices/write', component: AdminNoticeWrite },
@@ -126,6 +129,12 @@ const routes = [
   path: '/register',
   name: 'Register',
   component: Register,
+  meta: { requiresAuth: false },
+},
+{
+  path: '/reapply',
+  name: 'Reapply',
+  component: Reapply,
   meta: { requiresAuth: false },
 },
 //약관 페이지

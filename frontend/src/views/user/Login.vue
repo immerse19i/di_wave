@@ -189,9 +189,18 @@ const handleLogin = async () => {
     if (status === 423) {
       message.showAlert(error.response?.data?.message);
       return;
-    } else if (code === 'PENDING_APPROVAL' || code === 'REJECTED') {
+    } else if (code === 'PENDING_APPROVAL') {
       message.showAlert(
         '아직 가입 승인 대기 중입니다.\n승인 완료 후 이메일로 안내해 드립니다.',
+      );
+    } else if (code === 'REJECTED') {
+      const rejectedToken = error.response?.data?.token;
+      if (rejectedToken) {
+        localStorage.setItem('token', rejectedToken);
+      }
+      message.showAlert(
+        '가입이 반려되었습니다.\n사유 확인 후 재신청이 가능합니다.',
+        () => router.push('/reapply'),
       );
     } else if (code === 'SUSPENDED') {
       message.showAlert('정지된 계정입니다.\n관리자에게 문의해 주세요.');

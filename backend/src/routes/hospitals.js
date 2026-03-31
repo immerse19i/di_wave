@@ -24,6 +24,9 @@ router.get('/', hospitalController.getHospitals);
 
 
 
+// 계정 생성 (관리자)
+router.post('/accounts', upload.single('businessLicense'), hospitalController.createAccount);
+
 // 가입계정 목록
 router.get('/accounts', hospitalController.getAccounts);
 

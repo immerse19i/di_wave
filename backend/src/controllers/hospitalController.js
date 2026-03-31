@@ -11,6 +11,125 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// POST /api/admin/hospitals/accounts - 관리자 계정 생성
+exports.createAccount = async (req, res) => {
+  const conn = await pool.getConnection();
+  try {
+    const { loginId, password, email, hospitalName, ceoName, phone, address, addressDetail, businessNumber } = req.body;
+
+    // 필수 필드 체크
+    if (!loginId || !password || !email || !hospitalName || !ceoName || !phone || !address || !businessNumber) {
+      return res.status(400).json({ success: false, message: '필수 정보를 모두 입력해 주세요.' });
+    }
+
+    // ID 중복 체크
+    const [existId] = await conn.query('SELECT id FROM users WHERE login_id = ?', [loginId]);
+    if (existId.length > 0) {
+      return res.status(400).json({ success: false, message: '이미 사용 중인 ID입니다.' });
+    }
+
+    // 이메일 중복 체크
+    const [existEmail] = await conn.query('SELECT id FROM users WHERE email = ?', [email]);
+    if (existEmail.length > 0) {
+      return res.status(400).json({ success: false, message: '이미 사용 중인 이메일입니다.' });
+    }
+
+    // 사업자번호 중복 체크
+    const [existBiz] = await conn.query('SELECT id FROM hospitals WHERE business_number = ?', [businessNumber]);
+    if (existBiz.length > 0) {
+      return res.status(400).json({ success: false, message: '이미 등록된 사업자번호입니다.' });
+    }
+
+    await conn.beginTransaction();
+
+    // 비밀번호 해시
+    const bcrypt = require('bcrypt');
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 사업자등록증 경로
+    let licensePath = null;
+    if (req.file) {
+      licensePath = `uploads/business/${req.file.filename}`;
+    }
+
+    // hospitals INSERT (승인완료 상태로 바로 생성)
+    const [hospitalResult] = await conn.query(
+      `INSERT INTO hospitals (name, ceo_name, phone, address, address_detail, business_number, business_license_path, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'approved')`,
+      [hospitalName, ceoName, phone, address, addressDetail, businessNumber, licensePath]
+    );
+    const hospitalId = hospitalResult.insertId;
+
+    // users INSERT (활성 상태로 바로 생성)
+    await conn.query(
+      `INSERT INTO users (hospital_id, login_id, email, password, name, role, is_active)
+       VALUES (?, ?, ?, ?, ?, 'hospital', TRUE)`,
+      [hospitalId, loginId, email, hashedPassword, hospitalName]
+    );
+
+    // credits 초기 레코드
+    await conn.query('INSERT INTO credits (hospital_id, balance) VALUES (?, 0)', [hospitalId]);
+
+    // admin_logs 기록
+    await conn.query(
+      `INSERT INTO admin_logs (hospital_id, target_type, target_id, category, details, operator, actor_type)
+       VALUES (?, 'account', ?, '계정 생성', '관리자에 의한 계정 생성', ?, 'admin')`,
+      [hospitalId, hospitalId, req.user.name || 'admin']
+    );
+
+    await conn.commit();
+
+    // 승인완료 이메일 발송
+    try {
+      await transporter.sendMail({
+        from: process.env.MAIL_FROM,
+        to: email,
+        subject: '[OsteoAge] 가입 승인 완료 안내',
+        html: `
+          <div style="max-width:600px; font-family:'Inter',Arial,sans-serif; color:#353535;">
+            <p style="font-size:14px; line-height:1.6;">
+              안녕하세요, <strong>${hospitalName}</strong>님.<br/>
+              OsteoAge 서비스 가입이 승인되었습니다.
+            </p>
+            <table style="border-collapse:collapse; width:100%; margin:20px 0;">
+              <tr>
+                <td style="padding:8px 12px; background:#f5f5f5; border:1px solid #ddd; font-weight:bold;">병원명</td>
+                <td style="padding:8px 12px; border:1px solid #ddd;">${hospitalName}</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 12px; background:#f5f5f5; border:1px solid #ddd; font-weight:bold;">ID</td>
+                <td style="padding:8px 12px; border:1px solid #ddd;">${loginId}</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 12px; background:#f5f5f5; border:1px solid #ddd; font-weight:bold;">승인결과</td>
+                <td style="padding:8px 12px; border:1px solid #ddd; color:#305b86; font-weight:bold;">승인완료</td>
+              </tr>
+            </table>
+            <p style="font-size:13px; line-height:1.8;">
+              지금 바로 로그인하여 서비스를 이용하실 수 있습니다.
+            </p>
+            <p style="font-size:12px; color:#353535; margin-top:24px;">
+              디웨이브주식회사<br/>
+              csadmin@diwave.io<br/>
+              02-2088-8728 [문의가능시간 : 10:00~17:00 (토·일·공휴일 휴무)]
+            </p>
+          </div>
+        `,
+      });
+    } catch (mailErr) {
+      console.error('승인 이메일 발송 실패:', mailErr);
+    }
+
+    res.status(201).json({ success: true, message: '계정이 생성되었습니다.' });
+  } catch (error) {
+    await conn.rollback();
+    console.error('CreateAccount error:', error);
+    res.status(500).json({ success: false, message: '서버 오류' });
+  } finally {
+    conn.release();
+  }
+};
+
 // GET /api/admin/hospitals - 목록 (필터/검색/정렬/페이지네이션)
 exports.getHospitals = async (req, res) => {
   try {
