@@ -164,6 +164,7 @@ const startDate = ref('');
 const endDate = ref('');
 const quickRange = ref('30');
 const filterType = ref('all');
+const isQuickRangeChange = ref(false);
 
 // 데이터
 const creditList = ref([]);
@@ -176,6 +177,7 @@ const perPage = 12;
 // 초기 30일 설정
 const setQuickRange = (range) => {
   quickRange.value = range;
+  isQuickRangeChange.value = true;
   const today = new Date();
   endDate.value = today.toISOString().split('T')[0];
 
@@ -186,6 +188,7 @@ const setQuickRange = (range) => {
     start.setDate(start.getDate() - Number(range));
     startDate.value = start.toISOString().split('T')[0];
   }
+  isQuickRangeChange.value = false;
 };
 
 // API 호출
@@ -216,7 +219,7 @@ watch(startDate, (val) => {
   if (val && endDate.value && val > endDate.value) {
     endDate.value = val;
   }
-  quickRange.value = ''; // 퀵버튼 해제
+  if (!isQuickRangeChange.value) quickRange.value = '';
   currentPage.value = 1;
   fetchList();
 });
@@ -225,7 +228,7 @@ watch(endDate, (val) => {
   if (val && startDate.value && val < startDate.value) {
     startDate.value = val;
   }
-  quickRange.value = '';
+  if (!isQuickRangeChange.value) quickRange.value = '';
   currentPage.value = 1;
   fetchList();
 });
@@ -321,14 +324,17 @@ onMounted(() => {
 
       button {
         @include font-12-regular;
+        font-weight: 500;
         padding: 8px 16px;
-        border: 1px solid $dark-line-gray;
-        border-radius: $radius-sm;
+        min-width: 71px;
+        background: $dark-gray-dark;
+        // border: 1px solid $dark-line-gray;
+        // border-radius: $radius-sm;
         color: $white;
 
         &.active {
-          background: $main-color;
-          border-color: $main-color;
+          background: $main-gad;
+          // border-color: $main-color;
         }
       }
     }
