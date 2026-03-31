@@ -1344,6 +1344,10 @@ watch(
   }
   &.has-changes {
     border: 1px solid $sub-color-2;
+
+    .btn-save {
+      border: 1px solid $sub-color-2;
+    }
   }
 
   .btn-default {
@@ -1366,7 +1370,7 @@ watch(
     min-width: 71px;
     padding: 6px 16px;
     border-radius: $radius-sm;
-    border: 1px solid $sub-color-2;
+    border: 1px solid transparent;
     cursor: pointer;
     &:hover {
       opacity: 0.85;

@@ -308,14 +308,28 @@ onMounted(() => {
     flex: 1;
     display: flex;
     padding: 8px 16px;
+    position: relative;
     border-radius: $radius-sm;
     background: $bg-op;
-    border: 1px solid;
-    border-image-source: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.09) 0%,
-      rgba(255, 255, 255, 0.06) 100%
-    );
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: $radius-sm;
+      padding: 1px;
+      background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.09) 0%,
+        rgba(255, 255, 255, 0.06) 100%
+      );
+      -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
 
     input {
       width: 100%;
@@ -330,8 +344,9 @@ onMounted(() => {
     }
 
     &:has(input:focus) {
-      border-image-source: none;
-      border-color: $main-color;
+      &::before {
+        background: $sub-color-2;
+      }
     }
   }
 

@@ -275,8 +275,10 @@ onMounted(() => {
       th,
       td {
         text-align: center;
-        padding: 12px 8px;
+        padding: 5px 8px;
+        min-height: 36px;
         @include font-12-regular;
+        font-weight: 300;
       }
 
       thead tr {
@@ -309,7 +311,8 @@ onMounted(() => {
       tbody tr.clickable-row {
         cursor: pointer;
         &:hover {
-          background-color: rgba(255, 255, 255, 0.08);
+          background-color: $main-color;
+          //background-color: rgba(255, 255, 255, 0.08);
         }
       }
 
@@ -352,25 +355,44 @@ onMounted(() => {
       padding: 4px 12px;
       position: relative;
       border-radius: $radius-sm;
-      background: $bg-op;
-      border: 1px solid;
+      background: $bg-op; // 배경은 그대로 유지
 
-      border-image-source: linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.09) 0%,
-        rgba(255, 255, 255, 0.06) 100%
-      );
+      // 그라데이션 border를 ::before + mask로 구현
+      &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: $radius-sm;
+        padding: 1px; // ← 이게 border 두께
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.09) 0%,
+          rgba(255, 255, 255, 0.06) 100%
+        );
+        -webkit-mask:
+          linear-gradient(#fff 0 0) content-box,
+          linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+      }
 
       input {
         width: 100%;
         background: none;
         border: none;
         color: $white;
+        &::placeholder {
+          color: $dark-input-gray;
+        }
       }
+
       &:has(input:focus) {
-        border-image-source: none;
-        border-color: $main-color;
+        &::before {
+          background: $sub-color-2; // 포커스 시 단색 border
+        }
       }
+
       .search_icon {
         width: 24px;
         height: 24px;
@@ -401,6 +423,7 @@ onMounted(() => {
       border: none;
       border-radius: $radius-sm;
       @include font-12-regular;
+
       cursor: pointer;
 
       &.arrow {
