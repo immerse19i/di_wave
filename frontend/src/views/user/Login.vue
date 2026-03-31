@@ -69,8 +69,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useModalStore } from '@/store/modal';
 import UserModalBody from '@/components/user_modal/UserModalBody.vue';
 import { UseMessageStore } from '@/store/message';
@@ -80,6 +80,7 @@ import { useAuthStore } from '@/store/auth';
 import { creditAPI } from '@/api/credit';
 const modal = useModalStore();
 const router = useRouter();
+const route = useRoute();
 const message = UseMessageStore();
 const auth = useAuthStore();
 const form = ref({
@@ -210,6 +211,14 @@ const handleLogin = async () => {
     }
   }
 };
+
+// 세션 만료 팝업
+onMounted(() => {
+  if (route.query.expired === 'true') {
+    message.showAlert('보안을 위해 일정 시간 동안 움직임이 없어 자동 로그아웃되었습니다.\n다시 로그인해 주세요.');
+    router.replace({ query: {} });
+  }
+});
 </script>
 
 <style lang="scss" scoped>

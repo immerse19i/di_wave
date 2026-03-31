@@ -1,5 +1,25 @@
 const { pool } = require('../config/database')
 
+// ============ 유저용: 현재 게시 중인 팝업 조회 ============
+exports.getActivePopups = async (req, res) => {
+  try {
+    const today = new Date().toISOString().slice(0, 10)
+    const [rows] = await pool.query(
+      `SELECT id, title, content, popup_width, popup_height
+       FROM popups
+       WHERE status = 'published'
+         AND deleted_at IS NULL
+         AND (is_always = TRUE OR (display_start <= ? AND display_end >= ?))
+       ORDER BY published_at DESC`,
+      [today, today]
+    )
+    res.json({ success: true, data: rows })
+  } catch (error) {
+    console.error('GetActivePopups error:', error)
+    res.status(500).json({ success: false, message: '서버 오류' })
+  }
+}
+
 // ============ 목록 조회 ============
 exports.getPopups = async (req, res) => {
   try {

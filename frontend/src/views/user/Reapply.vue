@@ -42,11 +42,7 @@
         <!-- 연락처 -->
         <div class="form-group">
           <label>연락처</label>
-          <input
-            v-model="form.phone"
-            @input="validatePhone"
-            maxlength="11"
-          />
+          <input v-model="form.phone" @input="validatePhone" maxlength="11" />
           <p class="validation-msg" v-if="phoneMessage">{{ phoneMessage }}</p>
         </div>
 
@@ -57,6 +53,7 @@
             <input
               v-model="form.address"
               readonly
+              class="address-input"
               @click="searchAddress"
               style="cursor: pointer"
             />
@@ -92,7 +89,9 @@
               @click="$refs.fileInput.click()"
               style="cursor: pointer"
             />
-            <button type="button" @click="$refs.fileInput.click()">파일첨부</button>
+            <button type="button" @click="$refs.fileInput.click()">
+              파일첨부
+            </button>
             <input
               type="file"
               ref="fileInput"
@@ -187,13 +186,15 @@ const isDirty = computed(() => {
 function validatePhone() {
   const before = form.value.phone;
   form.value.phone = before.replace(/[^0-9]/g, '');
-  phoneMessage.value = before !== form.value.phone ? '숫자만 입력 가능합니다' : '';
+  phoneMessage.value =
+    before !== form.value.phone ? '숫자만 입력 가능합니다' : '';
 }
 
 function validateBusinessNumber() {
   const before = form.value.businessNumber;
   form.value.businessNumber = before.replace(/[^0-9]/g, '');
-  bizMessage.value = before !== form.value.businessNumber ? '숫자만 입력 가능합니다' : '';
+  bizMessage.value =
+    before !== form.value.businessNumber ? '숫자만 입력 가능합니다' : '';
 }
 
 function handleFileChange(e) {
@@ -248,8 +249,7 @@ async function fetchInfo() {
 
 // 로그아웃
 function handleLogout() {
-  auth.clearUser();
-  localStorage.removeItem('token');
+  auth.logout();
   router.push('/login');
 }
 
@@ -271,11 +271,13 @@ async function handleReapply() {
 
   try {
     await authAPI.reapply(formData);
-    message.showAlert('재신청이 완료되었습니다.\n관리자 승인 후 사용 가능합니다.', () => {
-      auth.clearUser();
-      localStorage.removeItem('token');
-      router.push('/login');
-    });
+    message.showAlert(
+      '재신청이 완료되었습니다.\n관리자 승인 후 사용 가능합니다.',
+      () => {
+        auth.logout();
+        router.push('/login');
+      },
+    );
   } catch (e) {
     message.showAlert(e.response?.data?.message || '재신청에 실패했습니다.');
   } finally {
@@ -314,8 +316,13 @@ onMounted(() => fetchInfo());
   cursor: pointer;
   padding: 0;
   margin-bottom: 24px;
-  img { width: 12px; height: 12px; }
-  &:hover { color: $white; }
+  img {
+    width: 12px;
+    height: 12px;
+  }
+  &:hover {
+    color: $white;
+  }
 }
 
 .page-title {
@@ -325,13 +332,13 @@ onMounted(() => fetchInfo());
 }
 
 .reject-info {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: $radius-md;
-  padding: 16px 20px;
+  // background: rgba(255, 255, 255, 0.05);
+  // border-radius: $radius-md;
+  // padding: 16px 20px;
   margin-bottom: 32px;
   @include font-14-regular;
   color: $dark-text;
-  line-height: 1.6;
+  line-height: 1;
 }
 
 .reapply-form {
@@ -355,18 +362,27 @@ onMounted(() => fetchInfo());
       color: $white;
       @include font-14-regular;
 
-      &::placeholder { color: $dark-input-gray; }
-      &:focus { border-color: $sub-color-2; }
+      &::placeholder {
+        color: $dark-input-gray;
+      }
+      &:focus {
+        border-color: $sub-color-2;
+      }
       &:read-only {
         background-color: darken($dark-input, 5%);
         cursor: default;
+        color: $dark-line-gray;
       }
+      // &.address-input {
+      //   // background-color: $dark-input;
+      //   color:
+      // }
     }
 
     &.readonly-group {
       .readonly-value {
         @include font-14-regular;
-        color: $dark-input-gray;
+        color: $dark-line-gray;
         display: block;
       }
     }
@@ -382,7 +398,9 @@ onMounted(() => fetchInfo());
     display: flex;
     gap: $spacing-md;
 
-    input { flex: 1; }
+    input {
+      flex: 1;
+    }
 
     button {
       min-width: 136px;
@@ -394,7 +412,9 @@ onMounted(() => fetchInfo());
       @include font-14-medium;
       white-space: nowrap;
       cursor: pointer;
-      &:hover { background-color: $main-color; }
+      &:hover {
+        background-color: $main-color;
+      }
     }
   }
 }
@@ -410,7 +430,9 @@ onMounted(() => fetchInfo());
   @include font-14-medium;
   cursor: pointer;
 
-  &:hover:not(:disabled) { background: $sub-color; }
+  &:hover:not(:disabled) {
+    background: $sub-color;
+  }
 
   &:disabled {
     background: $dark-line-gray;

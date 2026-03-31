@@ -5,12 +5,14 @@
     <UserFooter />
   </main>
   <PageModalBody v-if="modal.isOpen && modal.role === 'page'" />
+  <AnnouncementPopup />
 </template>
 
 <script setup>
 import Header from '../../components/common/Header.vue';
 import UserFooter from '../../components/common/UserFooter.vue';
 import PageModalBody from '@/components/page_modal/PageModalBody.vue';
+import AnnouncementPopup from '@/components/common/AnnouncementPopup.vue';
 import { useModalStore } from '@/store/modal';
 
 const modal = useModalStore();

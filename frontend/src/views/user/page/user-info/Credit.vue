@@ -5,9 +5,9 @@
       <div class="filter-row">
         <span class="filter-label">기간</span>
         <div class="date-picker-wrap">
-          <input type="date" v-model="startDate" />
+          <DatePicker v-model="startDate" :max-date="endDate" />
           <span>~</span>
-          <input type="date" v-model="endDate" />
+          <DatePicker v-model="endDate" :min-date="startDate" />
         </div>
         <div class="quick-btns">
           <button
@@ -39,21 +39,21 @@
       <div class="filter-row">
         <span class="filter-label">유형</span>
         <div class="radio-group">
-          <label
-            ><input type="radio" v-model="filterType" value="all" /><span
-              >전체</span
-            ></label
-          >
-          <label
-            ><input type="radio" v-model="filterType" value="charge" /><span
-              >충전</span
-            ></label
-          >
-          <label
-            ><input type="radio" v-model="filterType" value="use" /><span
-              >사용</span
-            ></label
-          >
+          <label class="radio-label">
+            <input type="radio" v-model="filterType" value="all" />
+            <span class="radio-custom"></span>
+            <span>전체</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" v-model="filterType" value="charge" />
+            <span class="radio-custom"></span>
+            <span>충전</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" v-model="filterType" value="use" />
+            <span class="radio-custom"></span>
+            <span>사용</span>
+          </label>
         </div>
       </div>
     </div>
@@ -155,6 +155,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { creditAPI } from '@/api/credit';
 import { useRouter } from 'vue-router';
+import DatePicker from '@/components/common/DatePicker.vue';
 
 const router = useRouter();
 
@@ -309,19 +310,6 @@ onMounted(() => {
       align-items: center;
       gap: 8px;
 
-      input[type='date'] {
-        padding: 8px 12px;
-        background: $dark-input;
-        border: 1px solid $dark-line-gray;
-        border-radius: $radius-sm;
-        color: $white;
-        @include font-14-regular;
-
-        &::-webkit-calendar-picker-indicator {
-          filter: invert(1);
-        }
-      }
-
       span {
         color: $white;
       }
@@ -349,18 +337,45 @@ onMounted(() => {
       display: flex;
       gap: 16px;
 
-      label {
+      .radio-label {
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
+        @include font-14-regular;
         cursor: pointer;
 
         input[type='radio'] {
-          accent-color: $main-color;
+          display: none;
         }
 
-        span {
-          @include font-14-regular;
+        .radio-custom {
+          width: 16px;
+          height: 16px;
+          background: $dark-line-gray;
+          border: none;
+          border-radius: 50%;
+          position: relative;
+          flex-shrink: 0;
+
+          &::after {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+          }
+        }
+
+        input[type='radio']:checked + .radio-custom {
+          background: $main-color;
+
+          &::after {
+            background: $white;
+          }
         }
       }
     }

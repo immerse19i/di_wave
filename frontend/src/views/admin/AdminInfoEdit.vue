@@ -196,7 +196,6 @@ onMounted(() => {
   margin-bottom: 24px;
   .status-msg {
     @include font-14-regular;
-    margin-right: auto;
     &.success {
       color: $dark-text;
     }
@@ -205,16 +204,16 @@ onMounted(() => {
     }
   }
   .btn-save {
-    min-width: 120px;
-    padding: 10px 24px;
+    min-width: 136px;
+    padding: 7.5px;
     border: none;
-    border-radius: $radius-sm;
+    border-radius: 4px;
     @include font-14-medium;
     cursor: pointer;
     color: $white;
-    background: $main-color;
+    background: $main-gad;
     &:hover {
-      background: $sub-color;
+      background: $main-color;
     }
   }
 }
@@ -225,6 +224,7 @@ onMounted(() => {
 .form-label {
   display: block;
   @include font-14-bold;
+  color: $white;
   margin-bottom: 8px;
 }
 .form-input {

@@ -174,13 +174,13 @@
           <div class="form-row">
             <label> <span class="required">*</span>현재 키 </label>
             <div class="dual-input">
-              <input type="text" v-model="form.currentHeight" placeholder="" />
+              <input type="text" v-model="form.currentHeight" @input="onNumericInput($event, 'currentHeight')" inputmode="decimal" />
               <span class="unit">cm</span>
 
               <label class="second-label">
                 <span class="required">*</span>몸무게
               </label>
-              <input type="text" v-model="form.weight" placeholder="" />
+              <input type="text" v-model="form.weight" @input="onNumericInput($event, 'weight')" inputmode="decimal" />
               <span class="unit">kg</span>
             </div>
           </div>
@@ -189,7 +189,7 @@
           <div class="form-row">
             <label>아버지 키</label>
             <div class="single-input-unit">
-              <input type="text" v-model="form.fatherHeight" placeholder="" />
+              <input type="text" v-model="form.fatherHeight" @input="onNumericInput($event, 'fatherHeight')" inputmode="decimal" />
               <span class="unit">cm</span>
             </div>
           </div>
@@ -198,7 +198,7 @@
           <div class="form-row">
             <label>어머니 키</label>
             <div class="single-input-unit">
-              <input type="text" v-model="form.motherHeight" placeholder="" />
+              <input type="text" v-model="form.motherHeight" @input="onNumericInput($event, 'motherHeight')" inputmode="decimal" />
               <span class="unit">cm</span>
             </div>
           </div>
@@ -214,22 +214,7 @@
           <!-- 분석일 -->
           <div class="form-row">
             <label> <span class="required">*</span>분석일 </label>
-            <div class="input-date">
-              <div class="single-input-unit">
-                <input
-                  type="date"
-                  ref="dateInput"
-                  v-model="form.analysisDate"
-                  placeholder="YYYY-MM-DD"
-                />
-              </div>
-              <img
-                src="/assets/icons/calendar.svg"
-                alt=""
-                class="icon-calendar"
-                @click="dateInput.showPicker()"
-              />
-            </div>
+            <DatePicker v-model="form.analysisDate" />
           </div>
         </form>
       </div>
@@ -253,6 +238,7 @@ import { useModalStore } from '@/store/modal';
 import { UseMessageStore } from '@/store/message';
 import { useAuthStore } from '@/store/auth';
 import { analysisAPI } from '@/api/analysis';
+import DatePicker from '@/components/common/DatePicker.vue';
 import { patientAPI } from '@/api/patient';
 import growthHeightData from '@/data/growth_height.json';
 import growthWeightData from '@/data/growth_weight.json';
@@ -350,6 +336,18 @@ const handleFileChange = (event) => {
     previewUrl.value = '';
   }
 };
+
+// 숫자만 입력 허용 (소수점 포함)
+const onNumericInput = (event, field) => {
+  const value = event.target.value;
+  const filtered = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+  if (value !== filtered) {
+    form.value[field] = filtered;
+    event.target.value = filtered;
+    message.showAlert('숫자만 입력 가능합니다.');
+  }
+};
+
 // 키/몸무게 유효성 검사 (성장도표 p3~p97 범위)
 const validateHeightWeight = () => {
   const genderKey = form.value.gender === 'M' ? 'male' : 'female';
@@ -714,7 +712,7 @@ const checkCreditAndSubmit = async () => {
 
     input {
       width: 40px;
-      padding: 8px 12px;
+      padding: 8px 2px;
       background-color: $dark-input;
       border: 1px solid $dark-line-gray;
       border-radius: $radius-sm;

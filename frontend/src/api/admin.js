@@ -96,6 +96,7 @@ getPublicNotices: (params) => api.get('/admin/notices/public', { params }),
 getPublicNoticeDetail: (id) => api.get(`/admin/notices/public/${id}`),
 
 // ===== 안내팝업 =====
+getActivePopups: () => api.get('/admin/popups/active'),
 getPopups: (params) => api.get('/admin/popups', { params }),
 getPopupDetail: (id) => api.get(`/admin/popups/${id}`),
 createPopup: (data) => api.post('/admin/popups', data),

@@ -9,7 +9,7 @@ from flask import Flask, request, jsonify
 SCRIPT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "OsteoAge_Model", "Script")
 sys.path.insert(0, SCRIPT_DIR)
 
-from CPU_BoneAge_PAH_Compact import predict_bone_age
+from CPU_BoneAge_PAH_Compact import predict_bone_age, recalculate_pah
 
 app = Flask(__name__)
 
@@ -70,6 +70,35 @@ def predict():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
     
+@app.route("/recalculate", methods=["POST"])
+def recalculate():
+    try:
+        data = request.json
+        bone_age_years = data.get("bone_age_years")
+        bone_age_months = data.get("bone_age_months")
+        sex = data.get("sex")
+        height = data.get("height")
+        age_months = data.get("age_months")
+
+        if None in [bone_age_years, bone_age_months, sex, height, age_months]:
+            return jsonify({"success": False, "message": "필수 파라미터 누락"}), 400
+
+        father_height = data.get("father_height")
+        mother_height = data.get("mother_height")
+
+        result = recalculate_pah(
+            bone_age_years=int(bone_age_years),
+            bone_age_months=int(bone_age_months),
+            sex=int(sex),
+            height=float(height),
+            age_months=int(age_months),
+            father_height=float(father_height) if father_height else None,
+            mother_height=float(mother_height) if mother_height else None
+        )
+        return jsonify({"success": True, "data": result})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
 if __name__ == "__main__":
     print("AI 서버 시작중... 모델 로딩 시간 걸림")
     app.run(host="0.0.0.0", port=9079, debug=False)

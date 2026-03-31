@@ -172,13 +172,28 @@ router.beforeEach(async (to, from, next) => {
   if (!auth.user) {
     try {
       const res = await authAPI.getMe()
-auth.setUser(res.data) // ← res.data.user는 undefined
+      auth.setUser(res.data)
     } catch (e) {
       // 토큰 만료/무효 → 로그아웃
       auth.logout()
       const loginPath = to.path.startsWith('/admin') ? '/admin/login' : '/login'
       return next(loginPath)
     }
+  }
+
+  // 반려 상태 유저는 서류보완 페이지로 강제 이동
+  if (auth.user?.hospital_status === 'rejected' && to.path !== '/reapply') {
+    return next('/reapply')
+  }
+
+  // 관리자 페이지는 admin role만 접근 가능
+  if (to.path.startsWith('/admin') && auth.user?.role !== 'admin') {
+    return next('/main')
+  }
+
+  // 유저 페이지는 hospital role만 접근 가능
+  if ((to.path.startsWith('/main') || to.path.startsWith('/user-info')) && auth.user?.role === 'admin') {
+    return next('/admin')
   }
 
   next()

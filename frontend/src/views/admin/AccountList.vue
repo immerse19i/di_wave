@@ -281,14 +281,8 @@ const handleSearch = () => {
   const keyword = searchKeyword.value.trim();
   if (keyword.length > 0) {
     const isNumber = /^\d+$/.test(keyword.replace(/-/g, ''));
-    if (isNumber && keyword.replace(/-/g, '').length < 4) {
-      message.showAlert(
-        '최소 입력 글자수를 확인해 주세요.\n사업자번호 4자리 이상',
-      );
-      return;
-    }
-    if (!isNumber && keyword.length < 2) {
-      message.showAlert('최소 입력 글자수를 확인해 주세요.\n병원명 2자 이상');
+    if ((isNumber && keyword.replace(/-/g, '').length < 4) || (!isNumber && keyword.length < 2)) {
+      message.showAlert('최소 입력 글자수를 확인해 주세요.\n(병원명 2자이상, 사업자번호 4자리이상)');
       return;
     }
   }

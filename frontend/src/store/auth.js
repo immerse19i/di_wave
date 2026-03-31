@@ -40,9 +40,10 @@ export const useAuthStore = defineStore('auth', () => {
 
     if(token.value){
       timeoutId = setTimeout(()=>{
+        const isAdmin = window.location.pathname.startsWith('/admin');
         logout();
-        alert('30분간 활동이 없어 자동 로그아웃');
-        window.location.href = '/login'
+        const loginPath = isAdmin ? '/admin/login' : '/login';
+        window.location.href = `${loginPath}?expired=true`;
       }, SESSION_TIMEOUT);
     }
 

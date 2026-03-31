@@ -273,25 +273,27 @@ onMounted(() => {
 
 // 탭 메뉴
 .tab-menu {
-  display: flex;
-  border-bottom: 1px solid $dark-line-gray;
-  margin-bottom: 24px;
+  display: inline-flex;
 
+  margin-bottom: 24px;
+  gap: 12px;
   .tab-item {
     padding: 12px 24px;
     background: none;
+    min-width: 125px;
     color: $dark-text;
     @include font-14-medium;
     border: none;
-    border-bottom: 2px solid transparent;
+    border-bottom: 1px solid $dark-line-gray;
     cursor: pointer;
-    transition: all $transition-fast;
+    // transition: all $transition-fast;
 
     &:hover {
       color: $white;
     }
 
     &.active {
+      border-width: 2px;
       color: $white;
       border-bottom-color: $white;
     }
