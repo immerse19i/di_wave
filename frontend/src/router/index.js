@@ -22,6 +22,7 @@ const AdminNoticeWrite = () => import('@/views/admin/AdminNoticeWrite.vue')
 // Admin Views
 const AdminLogin = () => import('@/views/admin/Login.vue');
 const Register = ()=> import('@/views/user/Register.vue');
+const Reapply = () => import('@/views/user/Reapply.vue');
 const AnalysisResult = () => import('@/views/user/page/AnalysisResult.vue');
 const AdminDashboard = () => import('@/views/admin/Approval.vue');
 const AdminMain = () => import('@/views/admin/AdminMain.vue')
@@ -39,6 +40,7 @@ const UsageLogDetail = () => import('@/views/admin/UsageLogDetail.vue')
 const Permission = () => import('@/views/admin/Permission.vue')
 const AdminInquiry = () => import('@/views/admin/AdminInquiry.vue')
 const AdminInquiryDetail = () => import('@/views/admin/AdminInquiryDetail.vue')
+const AccountAdd = () => import('@/views/admin/AccountAdd.vue')
 
 const routes = [
   // User Routes
@@ -89,6 +91,7 @@ const routes = [
     { path: 'terms/history/:type', component: AdminTermsHistory },
     { path: 'approval/:id', component: ApprovalDetail, props: true },  // ← 추가
     { path: 'accounts', component: AccountList },
+    { path: 'accounts/add', component: AccountAdd },
     { path: 'accounts/:id', component: AccountDetail, props: true },
     { path: 'notices', component: AdminNotice },
     { path: 'notices/write', component: AdminNoticeWrite },
@@ -128,6 +131,12 @@ const routes = [
   component: Register,
   meta: { requiresAuth: false },
 },
+{
+  path: '/reapply',
+  name: 'Reapply',
+  component: Reapply,
+  meta: { requiresAuth: false },
+},
 //약관 페이지
 {
   path: '/terms',
@@ -163,13 +172,28 @@ router.beforeEach(async (to, from, next) => {
   if (!auth.user) {
     try {
       const res = await authAPI.getMe()
-auth.setUser(res.data) // ← res.data.user는 undefined
+      auth.setUser(res.data)
     } catch (e) {
       // 토큰 만료/무효 → 로그아웃
       auth.logout()
       const loginPath = to.path.startsWith('/admin') ? '/admin/login' : '/login'
       return next(loginPath)
     }
+  }
+
+  // 반려 상태 유저는 서류보완 페이지로 강제 이동
+  if (auth.user?.hospital_status === 'rejected' && to.path !== '/reapply') {
+    return next('/reapply')
+  }
+
+  // 관리자 페이지는 admin role만 접근 가능
+  if (to.path.startsWith('/admin') && auth.user?.role !== 'admin') {
+    return next('/main')
+  }
+
+  // 유저 페이지는 hospital role만 접근 가능
+  if ((to.path.startsWith('/main') || to.path.startsWith('/user-info')) && auth.user?.role === 'admin') {
+    return next('/admin')
   }
 
   next()

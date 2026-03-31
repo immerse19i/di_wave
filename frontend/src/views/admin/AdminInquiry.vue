@@ -33,19 +33,9 @@
             <span class="radio-custom"></span>
             문의일시
           </label>
-          <input
-            type="date"
-            v-model="startDate"
-            :disabled="dateMode !== 'date'"
-            class="date-input"
-          />
+          <DatePicker v-model="startDate" :max-date="endDate" />
           <span class="date-separator">~</span>
-          <input
-            type="date"
-            v-model="endDate"
-            :disabled="dateMode !== 'date'"
-            class="date-input"
-          />
+          <DatePicker v-model="endDate" :min-date="startDate" />
         </div>
       </div>
 
@@ -163,6 +153,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { inquiryAPI } from '@/api/inquiry';
+import DatePicker from '@/components/common/DatePicker.vue';
 
 const router = useRouter();
 
@@ -413,6 +404,7 @@ const onResize = () => {
   gap: 6px;
   cursor: pointer;
   @include font-14-regular;
+  white-space: nowrap;
 
   input[type='radio'] {
     display: none;
@@ -425,6 +417,7 @@ const onResize = () => {
     border: none;
     border-radius: 50%;
     position: relative;
+    flex-shrink: 0;
 
     &::after {
       content: '';

@@ -940,6 +940,50 @@ def predict_bone_age(
 
 
 # =============================================================================
+# 의사 뼈나이 기준 PAH 재계산 (이미지 추론 없이)
+# =============================================================================
+def recalculate_pah(bone_age_years, bone_age_months, sex, height, age_months,
+                    father_height=None, mother_height=None):
+    """의사가 수정한 뼈나이로 PAH 재계산 (이미지 추론 없음)"""
+    pred_boneage = bone_age_years * 12 + bone_age_months
+
+    # LMS 데이터 로드
+    lms_df = load_lms_data(LMS_CSV_PATH)
+
+    # PAH 계산 (predict_bone_age의 886~936 라인과 동일)
+    pah_result = calculate_pah_lms(height, pred_boneage, sex, lms_df, ADULT_MONTHS)
+    percentile_result = calculate_height_percentile(height, age_months, sex, lms_df)
+    calib_result = calibrate_pah(height, pah_result['PAH_LMS'], father_height, mother_height, sex, age_months, pred_boneage)
+    pah_final_percentile_result = calculate_pah_final_percentile(calib_result['PAH_Final'], sex, lms_df, ADULT_MONTHS)
+
+    mph_percentile_result = None
+    if calib_result['MPH'] is not None:
+        mph_percentile_result = calculate_mph_percentile(calib_result['MPH'], sex, lms_df, ADULT_MONTHS)
+
+    pah_lms_percentile_result = calculate_pah_lms_percentile(pah_result['PAH_LMS'], sex, lms_df, ADULT_MONTHS)
+    potential_result = calculate_potential_score(age_months, pred_boneage)
+
+    return {
+        "PAH_Final": round(calib_result['PAH_Final'], 2),
+        "Current_Age": months_to_year_month_str(age_months),
+        "BoneAge": months_to_year_month_str(pred_boneage),
+        "MPH": round(calib_result['MPH'], 2) if calib_result['MPH'] is not None else None,
+        "Height_Score": round(percentile_result['percentile_current'], 1),
+        "Potential_Score": round(potential_result['potential_score'], 1),
+        "Current_Height": height,
+        "Current_Height_Percentile": round(percentile_result['percentile_current'], 1),
+        "Genetic_Predicted_Height": round(calib_result['MPH'], 2) if calib_result['MPH'] is not None else None,
+        "MPH_Percentile": round(mph_percentile_result['percentile_mph'], 1) if mph_percentile_result is not None else None,
+        "Growth_Curve_Predicted_Height": round(pah_result['PAH_LMS'], 2),
+        "LMS_Percentile": round(pah_lms_percentile_result['percentile_pah_lms'], 1),
+        "Delta_Genetic": round(calib_result['ΔGenetic'], 2),
+        "Delta_Maturity": round(calib_result['ΔMaturity'], 2),
+        "Final_Predicted_Height": round(calib_result['PAH_Final'], 2),
+        "PAH_Final_Percentile": round(pah_final_percentile_result['percentile_pah_final'], 1),
+    }
+
+
+# =============================================================================
 # 단독 실행 시 테스트
 # =============================================================================
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 const {pool} = require('../config/database');
-const { predictBoneAge} = require('../services/aiService');
+const { predictBoneAge, recalculatePAH} = require('../services/aiService');
 const config = require('../config/config');
 const pdfService = require('../services/pdfService');
 
@@ -270,14 +270,46 @@ exports.updateDoctorBoneAge = async (req, res) => {
   try {
     const { id } = req.params;
     const { bone_age_years, bone_age_months } = req.body;
-    
-    await pool.query(
-      'UPDATE analyses SET bone_age_years = ?, bone_age_months = ? WHERE id = ? AND hospital_id = ?',
-      [bone_age_years, bone_age_months, id, req.user.hospital_id]
+    const hospitalId = req.user.hospital_id;
+
+    // 기존 분석 데이터 조회
+    const [rows] = await pool.query(
+      `SELECT a.*, p.gender FROM analyses a
+       JOIN patients p ON a.patient_id = p.id
+       WHERE a.id = ? AND a.hospital_id = ?`,
+      [id, hospitalId]
     );
-    
-    res.json({ success: true });
+    if (!rows.length) {
+      return res.status(404).json({ success: false, message: '분석을 찾을 수 없습니다.' });
+    }
+    const analysis = rows[0];
+
+    // 의사 뼈나이 기준 PAH 재계산 (크레딧 차감 없음, 이미지 추론 없음)
+    const ageMonths = (analysis.chronological_age_years || 0) * 12
+                    + (analysis.chronological_age_months || 0);
+    const aiResult = await recalculatePAH({
+      boneAgeYears: bone_age_years,
+      boneAgeMonths: bone_age_months,
+      sex: analysis.gender === 'M' ? 1 : 0,
+      height: parseFloat(analysis.height),
+      ageMonths: ageMonths,
+      fatherHeight: analysis.father_height ? parseFloat(analysis.father_height) : null,
+      motherHeight: analysis.mother_height ? parseFloat(analysis.mother_height) : null
+    });
+
+    if (!aiResult.success) {
+      return res.status(500).json({ success: false, message: 'PAH 재계산 실패' });
+    }
+
+    // 의사 뼈나이 + 새 result_json 저장
+    await pool.query(
+      'UPDATE analyses SET bone_age_years = ?, bone_age_months = ?, result_json = ? WHERE id = ? AND hospital_id = ?',
+      [bone_age_years, bone_age_months, JSON.stringify(aiResult.data), id, hospitalId]
+    );
+
+    res.json({ success: true, data: aiResult.data });
   } catch (error) {
+    console.error('의사 뼈나이 저장 오류:', error);
     res.status(500).json({ success: false, message: '저장 실패' });
   }
 };

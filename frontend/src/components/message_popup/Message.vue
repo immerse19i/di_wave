@@ -6,6 +6,7 @@
     @click.self="message.type === 'timer' ? message.close() : null"
   >
     <div class="message-content">
+      <h3 v-if="message.title" class="message-title">{{ message.title }}</h3>
       <p class="message-text">{{ message.text }}</p>
 
       <!-- 타이머 -->
@@ -18,10 +19,10 @@
         <button class="btn-confirm" @click="message.confirm()">확인</button>
       </div>
 
-      <!-- 예/아니오 -->
+      <!-- 아니오/예 (기본) or 커스텀 텍스트 -->
       <div v-if="message.type === 'confirm'" class="message-actions">
-        <button class="btn-cancel" @click="message.cancel()">아니오</button>
-        <button class="btn-confirm" @click="message.confirm()">예</button>
+        <button class="btn-cancel" @click="message.cancel()">{{ message.cancelText || '아니오' }}</button>
+        <button class="btn-confirm" @click="message.confirm()">{{ message.confirmText || '예' }}</button>
       </div>
     </div>
   </div>
@@ -39,7 +40,7 @@ const message = UseMessageStore();
   top: 0;
   left: 0;
   position: fixed;
-  background-color: #00000066;
+  background-color: rgba(0, 0, 0, 0.7);
   z-index: 1000;
 }
 
@@ -56,6 +57,12 @@ const message = UseMessageStore();
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
+}
+
+.message-title {
+  @include font-20-bold;
+  color: $white;
+  margin-bottom: 16px;
 }
 
 .message-text {

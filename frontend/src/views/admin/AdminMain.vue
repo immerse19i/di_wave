@@ -2,7 +2,11 @@
   <div class="admin-layout">
     <!-- 헤더 -->
     <header class="admin-header">
-      <div class="header-left">
+      <div
+        class="header-left"
+        @click="$router.push('/admin')"
+        style="cursor: pointer"
+      >
         <img src="/assets/logo/logo.svg" alt="OsteoAge" class="header-logo" />
         <span class="header-title">관리자웹</span>
       </div>
@@ -75,9 +79,17 @@ const menuList = [
     path: '/admin/popups',
     icon: '/assets/icons/notice.svg',
   },
-  { label: '이용약관', path: '/admin/terms', icon: '/assets/icons/terms_icon.svg' },
+  {
+    label: '이용약관',
+    path: '/admin/terms',
+    icon: '/assets/icons/terms_icon.svg',
+  },
   { label: '정보 수정', path: '/admin/info', icon: '/assets/icons/info.svg' },
-  { label: '사용기록', path: '/admin/logs', icon: '/assets/icons/usage_log_icon.svg' },
+  {
+    label: '사용기록',
+    path: '/admin/logs',
+    icon: '/assets/icons/usage_log_icon.svg',
+  },
   {
     label: '권한',
     path: '/admin/permissions',
@@ -183,7 +195,7 @@ const handleLogout = async () => {
 
     &.active {
       color: $white;
-      background: rgba(255, 255, 255, 0.08);
+      background: #27313f;
 
       img {
         opacity: 1;

@@ -25,8 +25,9 @@ api.interceptors.response.use(
     if(error.response?.status === 401 && !error.config.url.includes('/auth/login')){
       //토큰 지우고
       localStorage.removeItem('token');
-      // 로그인 페이지로
-      window.location.href = '/login';
+      // 관리자 페이지면 관리자 로그인으로, 아니면 유저 로그인으로
+      const isAdmin = window.location.pathname.startsWith('/admin');
+      window.location.href = isAdmin ? '/admin/login' : '/login';
     }
     return Promise.reject(error);
   }

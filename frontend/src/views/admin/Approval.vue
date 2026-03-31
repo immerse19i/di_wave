@@ -273,25 +273,27 @@ onMounted(() => {
 
 // 탭 메뉴
 .tab-menu {
-  display: flex;
-  border-bottom: 1px solid $dark-line-gray;
-  margin-bottom: 24px;
+  display: inline-flex;
 
+  margin-bottom: 24px;
+  gap: 12px;
   .tab-item {
     padding: 12px 24px;
     background: none;
+    min-width: 125px;
     color: $dark-text;
     @include font-14-medium;
     border: none;
-    border-bottom: 2px solid transparent;
+    border-bottom: 1px solid $dark-line-gray;
     cursor: pointer;
-    transition: all $transition-fast;
+    // transition: all $transition-fast;
 
     &:hover {
       color: $white;
     }
 
     &.active {
+      border-width: 2px;
       color: $white;
       border-bottom-color: $white;
     }
@@ -308,14 +310,28 @@ onMounted(() => {
     flex: 1;
     display: flex;
     padding: 8px 16px;
+    position: relative;
     border-radius: $radius-sm;
     background: $bg-op;
-    border: 1px solid;
-    border-image-source: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.09) 0%,
-      rgba(255, 255, 255, 0.06) 100%
-    );
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: $radius-sm;
+      padding: 1px;
+      background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.09) 0%,
+        rgba(255, 255, 255, 0.06) 100%
+      );
+      -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
 
     input {
       width: 100%;
@@ -330,8 +346,9 @@ onMounted(() => {
     }
 
     &:has(input:focus) {
-      border-image-source: none;
-      border-color: $main-color;
+      &::before {
+        background: $sub-color-2;
+      }
     }
   }
 

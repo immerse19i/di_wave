@@ -32,4 +32,21 @@ async function predictBoneAge(imagePath, patientData){
 
 }
 
-module.exports = {predictBoneAge};
+async function recalculatePAH(data) {
+    const response = await axios.post(
+        `${config.ai.serverUrl}/recalculate`,
+        {
+            bone_age_years: data.boneAgeYears,
+            bone_age_months: data.boneAgeMonths,
+            sex: data.sex,
+            height: data.height,
+            age_months: data.ageMonths,
+            father_height: data.fatherHeight || null,
+            mother_height: data.motherHeight || null
+        },
+        { timeout: 30000 }
+    );
+    return response.data;
+}
+
+module.exports = {predictBoneAge, recalculatePAH};
