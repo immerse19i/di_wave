@@ -5,6 +5,9 @@ import { ref } from 'vue';
 export const UseMessageStore = defineStore('message', () => {
   const isOpen = ref(false);
   const text = ref('');
+  const title = ref('');
+  const confirmText = ref('');
+  const cancelText = ref('');
   const type = ref('alert'); // 'timer' | 'alert' | 'confirm'
   const timer = ref(0);
   const onConfirm = ref(null);
@@ -37,11 +40,15 @@ export const UseMessageStore = defineStore('message', () => {
     isOpen.value = true;
   };
 
-  // 타입3: 확인/취소 (예 / 아니오)
-  const showConfirm = (msg, confirmCallback, cancelCallback = null) => {
+  // 타입3: 확인/취소
+  // options: { title, confirmText, cancelText } (선택)
+  const showConfirm = (msg, confirmCallback, cancelCallback = null, options = {}) => {
     _reset();
     type.value = 'confirm';
     text.value = msg;
+    title.value = options.title || '';
+    confirmText.value = options.confirmText || '';
+    cancelText.value = options.cancelText || '';
     onConfirm.value = confirmCallback;
     onCancel.value = cancelCallback;
     isOpen.value = true;
@@ -67,11 +74,14 @@ export const UseMessageStore = defineStore('message', () => {
 
   const _reset = () => {
     text.value = '';
+    title.value = '';
+    confirmText.value = '';
+    cancelText.value = '';
     type.value = 'alert';
     timer.value = 0;
     onConfirm.value = null;
     onCancel.value = null;
   };
 
-  return { isOpen, text, type, timer, showTimer, showAlert, showConfirm, confirm, cancel, close };
+  return { isOpen, text, title, confirmText, cancelText, type, timer, showTimer, showAlert, showConfirm, confirm, cancel, close };
 });

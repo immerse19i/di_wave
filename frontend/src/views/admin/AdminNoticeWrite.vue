@@ -62,9 +62,14 @@
         <span v-if="statusMsg" :class="['status-msg', statusMsgType]">{{
           statusMsg
         }}</span>
-        <div class="action-buttons">
-          <button class="btn-draft" @click="saveDraft">임시저장</button>
-          <button class="btn-publish" @click="publish">게시하기</button>
+        <div class="action-right">
+          <span v-if="isPublished && notice.published_at" class="published-date">
+            {{ formatDateTime(notice.published_at) }} 작성
+          </span>
+          <div class="action-buttons">
+            <button v-if="!isPublished" class="btn-draft" @click="saveDraft">임시저장</button>
+            <button class="btn-publish" @click="publish">게시하기</button>
+          </div>
         </div>
       </div>
 
@@ -166,7 +171,9 @@
             class="attach-item add-btn"
             @click="triggerFileInput"
           >
-            <span class="plus-icon">+</span>
+            <span class="plus-icon">
+              <img src="/assets/icons/add_icon.svg" alt="add" />
+            </span>
             <span>추가하기</span>
           </div>
         </div>
@@ -264,6 +271,9 @@ const message = UseMessageStore();
 const props = defineProps({ id: [String, Number] });
 const isEditMode = computed(() => !!props.id);
 const isDeleted = ref(false);
+const isPublished = computed(() => {
+  return isEditMode.value && notice.value && (notice.value.status === 'published' || notice.value.status === 'private');
+});
 
 // 폼 데이터
 const form = ref({
@@ -456,8 +466,8 @@ const truncateFilename = (name) => {
 };
 
 const getFileUrl = (path) => {
-  const apiUrl = import.meta.env.VITE_API_URL || '';
-  return `${apiUrl}/${path}`;
+  if (!path) return '';
+  return path.startsWith('/') ? path : `/${path}`;
 };
 
 const previewOrDownload = (file) => {
@@ -639,6 +649,18 @@ const goBack = () => {
   gap: 12px;
   margin-bottom: 20px;
 }
+
+.action-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.published-date {
+  @include font-12-regular;
+  color: $dark-text;
+}
 .status-msg {
   @include font-12-regular;
   &.error {
@@ -648,19 +670,25 @@ const goBack = () => {
     color: $dark-text;
   }
 }
+.action-buttons {
+  display: flex;
+  gap: 12px;
+}
+
 .btn-draft,
 .btn-publish {
-  padding: 8px 28px;
+  min-width: 136px;
+  padding: 7.5px;
   border: none;
-  border-radius: $radius-sm;
+  border-radius: 4px;
   cursor: pointer;
   @include font-14-medium;
 }
 .btn-draft {
-  background: $dark-line-gray;
+  background: $main-color;
   color: $white;
   &:hover {
-    opacity: 0.85;
+    background: $sub-color;
   }
 }
 .btn-publish {
@@ -732,6 +760,7 @@ const goBack = () => {
   gap: 6px;
   cursor: pointer;
   @include font-14-regular;
+  white-space: nowrap;
 
   input[type='radio'] {
     display: none;
@@ -744,6 +773,7 @@ const goBack = () => {
     border: none;
     border-radius: 50%;
     position: relative;
+    flex-shrink: 0;
 
     &::after {
       content: '';
@@ -836,8 +866,8 @@ const goBack = () => {
 }
 .attach-item {
   position: relative;
-  width: 130px;
-  height: 120px;
+  width: 126px;
+  height: 126px;
   border: 1px dashed $dark-line-gray;
   border-radius: $radius-sm;
   display: flex;
@@ -851,8 +881,16 @@ const goBack = () => {
     cursor: pointer;
   }
   &.add-btn {
-    color: $dark-text;
+    border: 2px dashed $white;
+    color: $white;
+    gap: 8px;
     @include font-12-regular;
+
+    .plus-icon {
+      font-size: 28px;
+      color: $white;
+    }
+
     &:hover {
       border-color: $main-color;
       color: $main-color;

@@ -39,5 +39,8 @@ router.post('/send-code', authController.sendCode);
 router.post('/verify-code', authController.verifyCode);
 router.post('/register', uploadBusiness.single('businessLicense'), authController.register);
 
+// 반려 후 서류보완 재신청
+router.get('/rejected-info', verifyToken, authController.getRejectedInfo);
+router.put('/reapply', verifyToken, uploadBusiness.single('businessLicense'), authController.reapply);
 
 module.exports = router;

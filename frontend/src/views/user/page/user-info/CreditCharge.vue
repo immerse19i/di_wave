@@ -18,6 +18,7 @@
             :value="plan.credit"
             v-model="selectedCredit"
           />
+          <span class="radio-custom"></span>
           <span class="plan-label">
             <strong>{{ plan.credit }} Credit</strong>
             <span class="plan-desc">
@@ -338,9 +339,37 @@ const goToCreditMain = () => {
     cursor: pointer;
 
     input[type='radio'] {
-      accent-color: $main-color;
-      width: 18px;
-      height: 18px;
+      display: none;
+    }
+
+    .radio-custom {
+      width: 16px;
+      height: 16px;
+      background: $dark-line-gray;
+      border: none;
+      border-radius: 50%;
+      position: relative;
+      flex-shrink: 0;
+
+      &::after {
+        content: '';
+        width: 6px;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    input[type='radio']:checked + .radio-custom {
+      background: $main-color;
+
+      &::after {
+        background: $white;
+      }
     }
 
     .plan-label {

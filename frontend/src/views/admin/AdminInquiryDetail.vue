@@ -167,7 +167,9 @@
                 class="file-card add-card"
                 @click="triggerFileInput"
               >
-                <div class="add-icon">+</div>
+                <div class="add-icon">
+                  <img src="/assets/icons/add_icon.svg" alt="add" />
+                </div>
                 <span>추가하기</span>
               </div>
             </div>
@@ -438,8 +440,8 @@ const truncateFilename = (name) => {
 };
 
 const getFileUrl = (path) => {
-  const apiUrl = import.meta.env.VITE_API_URL || '';
-  return `${apiUrl}/${path}`;
+  if (!path) return '';
+  return path.startsWith('/') ? path : `/${path}`;
 };
 
 const formatDateTime = (dt) => {
@@ -736,8 +738,8 @@ const downloadViewerFile = () => {
 }
 .file-card {
   position: relative;
-  width: 100px;
-  height: 120px;
+  width: 126px;
+  height: 126px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -784,16 +786,16 @@ const downloadViewerFile = () => {
   word-break: break-all;
 }
 .add-card {
-  border-style: dashed;
-  color: $dark-text;
+  border: 2px dashed $white;
+  color: $white;
+  gap: 8px;
   @include font-12-regular;
   &:hover {
     border-color: $main-color;
-    color: $white;
+    color: $main-color;
   }
   .add-icon {
     font-size: 28px;
-    margin-bottom: 4px;
   }
 }
 

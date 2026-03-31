@@ -20,6 +20,13 @@ export const adminAPI = {
   rejectHospital(id, data) {
     return api.patch(`/admin/hospitals/${id}/reject`, data)
   },
+// 계정 생성 (관리자)
+createAccount(formData) {
+  return api.post('/admin/hospitals/accounts', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+},
+
 // 가입계정 목록
 getAccounts(params) {
   return api.get('/admin/hospitals/accounts', { params })
@@ -89,6 +96,7 @@ getPublicNotices: (params) => api.get('/admin/notices/public', { params }),
 getPublicNoticeDetail: (id) => api.get(`/admin/notices/public/${id}`),
 
 // ===== 안내팝업 =====
+getActivePopups: () => api.get('/admin/popups/active'),
 getPopups: (params) => api.get('/admin/popups', { params }),
 getPopupDetail: (id) => api.get(`/admin/popups/${id}`),
 createPopup: (data) => api.post('/admin/popups', data),

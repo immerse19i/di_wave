@@ -69,8 +69,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useModalStore } from '@/store/modal';
 import UserModalBody from '@/components/user_modal/UserModalBody.vue';
 import { UseMessageStore } from '@/store/message';
@@ -80,6 +80,7 @@ import { useAuthStore } from '@/store/auth';
 import { creditAPI } from '@/api/credit';
 const modal = useModalStore();
 const router = useRouter();
+const route = useRoute();
 const message = UseMessageStore();
 const auth = useAuthStore();
 const form = ref({
@@ -189,9 +190,18 @@ const handleLogin = async () => {
     if (status === 423) {
       message.showAlert(error.response?.data?.message);
       return;
-    } else if (code === 'PENDING_APPROVAL' || code === 'REJECTED') {
+    } else if (code === 'PENDING_APPROVAL') {
       message.showAlert(
         '아직 가입 승인 대기 중입니다.\n승인 완료 후 이메일로 안내해 드립니다.',
+      );
+    } else if (code === 'REJECTED') {
+      const rejectedToken = error.response?.data?.token;
+      if (rejectedToken) {
+        localStorage.setItem('token', rejectedToken);
+      }
+      message.showAlert(
+        '가입이 반려되었습니다.\n사유 확인 후 재신청이 가능합니다.',
+        () => router.push('/reapply'),
       );
     } else if (code === 'SUSPENDED') {
       message.showAlert('정지된 계정입니다.\n관리자에게 문의해 주세요.');
@@ -201,6 +211,14 @@ const handleLogin = async () => {
     }
   }
 };
+
+// 세션 만료 팝업
+onMounted(() => {
+  if (route.query.expired === 'true') {
+    message.showAlert('보안을 위해 일정 시간 동안 움직임이 없어 자동 로그아웃되었습니다.\n다시 로그인해 주세요.');
+    router.replace({ query: {} });
+  }
+});
 </script>
 
 <style lang="scss" scoped>

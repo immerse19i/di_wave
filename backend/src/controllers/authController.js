@@ -53,9 +53,28 @@ if(!user.is_active){
         });
       }
       if(hStatus === 'rejected') {
-        return res.status(403).json({ 
+        // 반려 시 비밀번호 검증 후 토큰 발급 (서류보완 페이지 접근용)
+        const isMatchRejected = await bcrypt.compare(password, user.password);
+        if (!isMatchRejected) {
+          return res.status(401).json({ message: '아이디 또는 비밀번호가 올바르지 않습니다.' });
+        }
+        const rejectedToken = jwt.sign(
+          { id: user.id, hospital_id: user.hospital_id, role: user.role },
+          config.jwt.secret,
+          { expiresIn: config.jwt.expiresIn }
+        );
+        // 반려 사유 조회
+        const [logRows] = await pool.query(
+          `SELECT details FROM admin_logs
+           WHERE hospital_id = ? AND category = '승인상태 변경' AND details LIKE '%반려%'
+           ORDER BY created_at DESC LIMIT 1`,
+          [user.hospital_id]
+        );
+        return res.status(403).json({
           code: 'REJECTED',
-          message: '가입이 반려되었습니다. 사유 확인 후 재신청이 가능합니다.'
+          message: '가입이 반려되었습니다. 사유 확인 후 재신청이 가능합니다.',
+          token: rejectedToken,
+          rejectInfo: logRows.length > 0 ? logRows[0].details : '',
         });
       }
       if(hStatus === 'suspended') {
@@ -656,4 +675,91 @@ exports.verifyPassword = async (req, res) => {
   }
 };
 
+// GET /api/auth/rejected-info - 반려 사유 + 기존 정보 조회
+exports.getRejectedInfo = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const hospitalId = req.user.hospital_id;
+
+    const [rows] = await pool.query(
+      `SELECT h.name, h.ceo_name, h.phone, h.address, h.address_detail,
+              h.business_number, h.business_license_path, h.status,
+              u.login_id, u.email
+       FROM hospitals h
+       LEFT JOIN users u ON u.hospital_id = h.id AND u.role = 'hospital'
+       WHERE h.id = ? AND u.id = ?`,
+      [hospitalId, userId]
+    );
+
+    if (rows.length === 0 || rows[0].status !== 'rejected') {
+      return res.status(400).json({ success: false, message: '반려 상태가 아닙니다.' });
+    }
+
+    // 반려 사유 조회 (admin_logs)
+    const [logRows] = await pool.query(
+      `SELECT details FROM admin_logs
+       WHERE hospital_id = ? AND category = '승인상태 변경' AND details LIKE '%반려%'
+       ORDER BY created_at DESC LIMIT 1`,
+      [hospitalId]
+    );
+
+    res.json({
+      success: true,
+      data: rows[0],
+      rejectInfo: logRows.length > 0 ? logRows[0].details : '',
+    });
+  } catch (error) {
+    console.error('GetRejectedInfo error:', error);
+    res.status(500).json({ success: false, message: '서버 오류' });
+  }
+};
+
+// PUT /api/auth/reapply - 서류보완 재신청
+exports.reapply = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const hospitalId = req.user.hospital_id;
+    const { hospitalName, ceoName, phone, address, addressDetail, businessNumber } = req.body;
+
+    // 반려 상태 확인
+    const [check] = await pool.query('SELECT status FROM hospitals WHERE id = ?', [hospitalId]);
+    if (check.length === 0 || check[0].status !== 'rejected') {
+      return res.status(400).json({ success: false, message: '반려 상태가 아닙니다.' });
+    }
+
+    // 사업자등록증 경로
+    let licensePath = undefined;
+    if (req.file) {
+      licensePath = `uploads/business/${req.file.filename}`;
+    }
+
+    // hospitals UPDATE
+    const updateFields = [];
+    const updateParams = [];
+    if (hospitalName) { updateFields.push('name = ?'); updateParams.push(hospitalName); }
+    if (ceoName) { updateFields.push('ceo_name = ?'); updateParams.push(ceoName); }
+    if (phone) { updateFields.push('phone = ?'); updateParams.push(phone); }
+    if (address) { updateFields.push('address = ?'); updateParams.push(address); }
+    if (addressDetail !== undefined) { updateFields.push('address_detail = ?'); updateParams.push(addressDetail); }
+    if (businessNumber) { updateFields.push('business_number = ?'); updateParams.push(businessNumber); }
+    if (licensePath) { updateFields.push('business_license_path = ?'); updateParams.push(licensePath); }
+    updateFields.push("status = 'pending'");
+    updateParams.push(hospitalId);
+
+    await pool.query(
+      `UPDATE hospitals SET ${updateFields.join(', ')} WHERE id = ?`,
+      updateParams
+    );
+
+    // users name 동기화
+    if (hospitalName) {
+      await pool.query('UPDATE users SET name = ? WHERE id = ?', [hospitalName, userId]);
+    }
+
+    res.json({ success: true, message: '재신청이 완료되었습니다.' });
+  } catch (error) {
+    console.error('Reapply error:', error);
+    res.status(500).json({ success: false, message: '서버 오류' });
+  }
+};
 

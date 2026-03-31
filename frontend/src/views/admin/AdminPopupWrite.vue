@@ -97,19 +97,9 @@
     <div class="form-row">
       <label class="form-label row-label">게시기간</label>
       <div class="period-inputs">
-        <input
-          v-model="form.display_start"
-          type="date"
-          class="date-input"
-          :disabled="form.is_always"
-        />
+        <DatePicker v-model="form.display_start" :max-date="form.display_end" />
         <span class="date-sep">-</span>
-        <input
-          v-model="form.display_end"
-          type="date"
-          class="date-input"
-          :disabled="form.is_always"
-        />
+        <DatePicker v-model="form.display_end" :min-date="form.display_start" />
         <label class="checkbox-label">
           <input type="checkbox" v-model="form.is_always" /> 상시
         </label>
@@ -121,6 +111,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter, useRoute, onBeforeRouteLeave } from 'vue-router';
+import DatePicker from '@/components/common/DatePicker.vue';
 import { Ckeditor as CkeditorComponent } from '@ckeditor/ckeditor5-vue';
 import {
   ClassicEditor,

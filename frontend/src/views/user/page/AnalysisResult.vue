@@ -753,15 +753,21 @@ const resetToDefault = () => {
 const saveDoctorBoneAge = async () => {
   if (!analysis.value?.id) return;
   try {
-    await analysisAPI.updateDoctorBoneAge(analysis.value.id, {
+    const res = await analysisAPI.updateDoctorBoneAge(analysis.value.id, {
       bone_age_years: doctorBoneAgeYears.value,
       bone_age_months: doctorBoneAgeMonths.value,
     });
     savedDoctorYears.value = doctorBoneAgeYears.value;
     savedDoctorMonths.value = doctorBoneAgeMonths.value;
-    // briefingText 등 화면 갱신을 위해 analysis 값도 업데이트
     analysis.value.bone_age_years = doctorBoneAgeYears.value;
     analysis.value.bone_age_months = doctorBoneAgeMonths.value;
+
+    // 재계산된 result_json 반영
+    if (res.data.data) {
+      analysis.value.result_json = res.data.data;
+    }
+    nextTick(() => drawGrowthChart());
+
     message.showAlert('저장되었습니다.');
   } catch (e) {
     console.error('의사 뼈나이 저장 오류:', e);
@@ -1299,6 +1305,30 @@ watch(
   }
 }
 
+// 비교 카드 (이전 기록) — 흐릿한 스타일
+.comparison-summary {
+  .predicted-height {
+    .label {
+      color: $dark-input-gray;
+    }
+    .value {
+      color: $dark-input-gray;
+      small {
+        color: $dark-input-gray;
+      }
+    }
+  }
+  .age-info {
+    color: $dark-input-gray;
+    .type {
+      color: $dark-input-gray;
+    }
+    b {
+      color: $dark-input-gray;
+    }
+  }
+}
+
 // 의사 판독
 .doctor-boneage {
   background: $bg-op;
@@ -1344,6 +1374,10 @@ watch(
   }
   &.has-changes {
     border: 1px solid $sub-color-2;
+
+    .btn-save {
+      border: 1px solid $sub-color-2;
+    }
   }
 
   .btn-default {
@@ -1366,7 +1400,7 @@ watch(
     min-width: 71px;
     padding: 6px 16px;
     border-radius: $radius-sm;
-    border: 1px solid $sub-color-2;
+    border: 1px solid transparent;
     cursor: pointer;
     &:hover {
       opacity: 0.85;

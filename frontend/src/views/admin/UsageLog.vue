@@ -17,19 +17,9 @@
           <input type="radio" v-model="periodType" value="period" />
           <span>기간선택</span>
         </label>
-        <input
-          type="date"
-          v-model="startDate"
-          class="date-input"
-          :disabled="periodType === 'none'"
-        />
+        <DatePicker v-model="startDate" :max-date="endDate" />
         <span class="date-sep">-</span>
-        <input
-          type="date"
-          v-model="endDate"
-          class="date-input"
-          :disabled="periodType === 'none'"
-        />
+        <DatePicker v-model="endDate" :min-date="startDate" />
       </div>
 
       <!-- 검색 -->
@@ -120,6 +110,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { adminAPI } from '@/api/admin';
+import DatePicker from '@/components/common/DatePicker.vue';
 
 const router = useRouter();
 
@@ -269,6 +260,7 @@ onUnmounted(() => {
   gap: 6px;
   cursor: pointer;
   @include font-14-regular;
+  white-space: nowrap;
 
   input[type='radio'] {
     display: none;

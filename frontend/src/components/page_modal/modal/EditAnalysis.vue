@@ -4,69 +4,7 @@
     <h2 class="modal-title">정보 수정</h2>
 
     <div class="modal-body">
-      <!-- 왼쪽: 이미지 영역 (드래그앤드롭) -->
-      <div class="image-section">
-        <div
-          class="image-preview"
-          :class="{ 'drag-over': isDragOver }"
-          @click="triggerFileInput"
-          @dragover.prevent="isDragOver = true"
-          @dragleave.prevent="handleDragLeave"
-          @drop.prevent="handleDrop"
-        >
-          <!-- 드래그 오버레이 -->
-          <div v-if="isDragOver" class="drag-overlay">
-            <img
-              src="/assets/icons/upload_icon.svg"
-              alt=""
-              class="upload-icon"
-            />
-            <p v-if="previewUrl" class="replace-text">이미지 교체</p>
-          </div>
-          <!-- 이미지 미리보기 -->
-          <img
-            v-if="previewUrl"
-            :src="previewUrl"
-            alt="X-ray preview"
-            class="preview-image"
-          />
-          <div v-else class="placeholder">
-            <p class="placeholder-title">X-ray 사진을 첨부해 주세요.</p>
-            <p class="placeholder-ext">
-              첨부가능 확장자 : jpg,png,jpeg,svg,dcm
-            </p>
-            <p class="placeholder-sub">*좌측 X-ray 사진을 첨부해 주세요.</p>
-            <button
-              type="button"
-              class="btn-select-image"
-              @click.stop="triggerFileInput"
-            >
-              사진 선택
-            </button>
-            <p class="placeholder-drag">
-              사진 선택 또는 이미지를 드래그하여 업로드 하세요
-            </p>
-          </div>
-        </div>
-
-        <input
-          type="file"
-          ref="fileInput"
-          @change="handleFileChange"
-          accept=".jpg,.jpeg,.png,.dcm"
-          style="display: none"
-        />
-        <button
-          v-if="previewUrl"
-          type="button"
-          class="btn-select-image"
-          @click="triggerFileInput"
-        >
-          사진 선택
-        </button>
-      </div>
-
-      <!-- 오른쪽: 폼 영역 -->
+      <!-- 폼 영역 -->
       <div class="form-section">
         <form @submit.prevent>
           <!-- 환자등록번호 -->
@@ -158,12 +96,22 @@
           <div class="form-row">
             <label><span class="required">*</span>현재 키</label>
             <div class="dual-input">
-              <input type="text" v-model="form.currentHeight" />
+              <input
+                type="text"
+                v-model="form.currentHeight"
+                @input="onNumericInput($event, 'currentHeight')"
+                inputmode="decimal"
+              />
               <span class="unit">cm</span>
               <label class="second-label"
                 ><span class="required">*</span>몸무게</label
               >
-              <input type="text" v-model="form.weight" />
+              <input
+                type="text"
+                v-model="form.weight"
+                @input="onNumericInput($event, 'weight')"
+                inputmode="decimal"
+              />
               <span class="unit">kg</span>
             </div>
           </div>
@@ -172,7 +120,12 @@
           <div class="form-row">
             <label>아버지 키</label>
             <div class="single-input-unit">
-              <input type="text" v-model="form.fatherHeight" />
+              <input
+                type="text"
+                v-model="form.fatherHeight"
+                @input="onNumericInput($event, 'fatherHeight')"
+                inputmode="decimal"
+              />
               <span class="unit">cm</span>
             </div>
           </div>
@@ -181,7 +134,12 @@
           <div class="form-row">
             <label>어머니 키</label>
             <div class="single-input-unit">
-              <input type="text" v-model="form.motherHeight" />
+              <input
+                type="text"
+                v-model="form.motherHeight"
+                @input="onNumericInput($event, 'motherHeight')"
+                inputmode="decimal"
+              />
               <span class="unit">cm</span>
             </div>
           </div>
@@ -197,21 +155,7 @@
           <!-- 분석일 -->
           <div class="form-row">
             <label><span class="required">*</span>분석일</label>
-            <div class="input-date">
-              <div class="single-input-unit">
-                <input
-                  type="date"
-                  ref="dateInput"
-                  v-model="form.analysisDate"
-                />
-              </div>
-              <img
-                src="/assets/icons/calendar.svg"
-                alt=""
-                class="icon-calendar"
-                @click="dateInput.showPicker()"
-              />
-            </div>
+            <DatePicker v-model="form.analysisDate" />
           </div>
         </form>
       </div>
@@ -235,6 +179,7 @@ import { useModalStore } from '@/store/modal';
 import { UseMessageStore } from '@/store/message';
 import { analysisAPI } from '@/api/analysis';
 import { patientAPI } from '@/api/patient';
+import DatePicker from '@/components/common/DatePicker.vue';
 import FadeLoader from '@/components/common/FadeLoader.vue';
 import { useRouter } from 'vue-router';
 
@@ -243,6 +188,17 @@ const message = UseMessageStore();
 const router = useRouter();
 const dateInput = ref(null);
 const fileInput = ref(null);
+
+// 숫자만 입력 허용 (소수점 포함)
+const onNumericInput = (event, field) => {
+  const value = event.target.value;
+  const filtered = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+  if (value !== filtered) {
+    form.value[field] = filtered;
+    event.target.value = filtered;
+    message.showAlert('숫자만 입력 가능합니다.');
+  }
+};
 
 // props 대신 modal.role로 analysis 데이터 전달받기
 const analysisData = ref(null);
@@ -533,7 +489,7 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .edit-analysis {
-  width: 952px;
+  width: 540px;
   padding: 20px 0;
 }
 
@@ -548,7 +504,7 @@ onMounted(() => {
 .modal-body {
   display: flex;
   gap: 20px;
-  min-width: 952px;
+  min-width: 540px;
 }
 
 // 왼쪽: 이미지 영역
@@ -706,7 +662,7 @@ onMounted(() => {
 
     input {
       width: 40px;
-      padding: 8px 12px;
+      padding: 8px 2px;
       background-color: $dark-input;
       border: 1px solid $dark-line-gray;
       border-radius: $radius-sm;

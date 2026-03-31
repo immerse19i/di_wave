@@ -1,11 +1,12 @@
 <template>
   <div class="page-wrap">
-    <div class="page-header">
-      <h2 class="page-title">사용기록</h2>
-      <div class="breadcrumb">사용기록 &gt; 목록 &gt; 상세보기</div>
-    </div>
+    <h2 class="page-title">사용기록</h2>
+    <div class="breadcrumb">사용기록 &gt; 목록 &gt; 상세보기</div>
 
-    <button class="btn-back" @click="goBack"><span>&lt;</span> 뒤로가기</button>
+    <button class="btn-back" @click="goBack">
+      <img src="/assets/icons/arrow_back.svg" alt="back" />
+      뒤로가기
+    </button>
 
     <h3 class="section-title">기록 상세보기</h3>
 
@@ -92,28 +93,34 @@ onMounted(async () => {
   color: $white;
 }
 
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.page-title {
+  @include font-20-bold;
+  margin-bottom: 8px;
+}
+
+.breadcrumb {
+  @include font-16-regular;
+  color: $dark-text;
+  text-align: right;
   margin-bottom: 24px;
-  .page-title {
-    @include font-20-bold;
-  }
-  .breadcrumb {
-    @include font-12-regular;
-    color: $dark-text;
-  }
 }
 
 .btn-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   background: none;
   border: none;
-  color: $dark-text;
+  color: rgba(255, 255, 255, 0.7);
   @include font-14-regular;
   cursor: pointer;
   padding: 0;
   margin-bottom: 16px;
+  flex-direction: row-reverse;
+  img {
+    width: 12px;
+    height: 12px;
+  }
 
   &:hover {
     color: $white;
@@ -133,18 +140,19 @@ onMounted(async () => {
 .info-row {
   display: flex;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .info-label {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  min-width: 120px;
-  padding: 10px 16px;
-  background: rgba(48, 91, 134, 0.35);
-  border-radius: $radius-sm;
-  @include font-14-medium;
+  justify-content: left;
+  min-width: 152px;
+  min-height: 43px;
+  padding: 12px 24px;
+  background: $bg-op;
+  border-radius: $radius-md;
+  @include font-14-bold;
   white-space: nowrap;
 }
 

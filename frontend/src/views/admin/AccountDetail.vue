@@ -87,7 +87,7 @@
               v-if="account.business_license_path"
               class="file-link"
               :href="fileUrl"
-              target="_blank"
+              :download="licenseName"
             >
               {{ licenseName }}
             </a>
@@ -165,6 +165,7 @@
           <div class="status-radios">
             <label :class="{ selected: statusForm.status === 'active' }">
               <input type="radio" v-model="statusForm.status" value="active" />
+              <span class="radio-custom"></span>
               정상
             </label>
             <label :class="{ selected: statusForm.status === 'suspended' }">
@@ -173,6 +174,7 @@
                 v-model="statusForm.status"
                 value="suspended"
               />
+              <span class="radio-custom"></span>
               정지
             </label>
             <label :class="{ selected: statusForm.status === 'withdrawn' }">
@@ -181,6 +183,7 @@
                 v-model="statusForm.status"
                 value="withdrawn"
               />
+              <span class="radio-custom"></span>
               탈퇴
             </label>
           </div>
@@ -316,6 +319,7 @@
                     v-model="creditForm.type"
                     value="charge"
                   />
+                  <span class="radio-custom"></span>
                   지급
                 </label>
                 <label :class="{ selected: creditForm.type === 'deduct' }">
@@ -324,6 +328,7 @@
                     v-model="creditForm.type"
                     value="deduct"
                   />
+                  <span class="radio-custom"></span>
                   차감
                 </label>
               </div>
@@ -382,13 +387,15 @@
           <!-- 기간 필터 -->
           <div class="filter-row">
             <span class="filter-label">기간</span>
-            <input
-              type="date"
+            <DatePicker
               v-model="chFilter.startDate"
-              class="date-input"
+              :max-date="chFilter.endDate"
             />
             <span class="date-sep">~</span>
-            <input type="date" v-model="chFilter.endDate" class="date-input" />
+            <DatePicker
+              v-model="chFilter.endDate"
+              :min-date="chFilter.startDate"
+            />
             <div class="quick-btns">
               <button
                 v-for="q in quickPeriods"
@@ -416,6 +423,7 @@
                   :value="t.value"
                   @change="fetchCreditHistory(1)"
                 />
+                <span class="radio-custom"></span>
                 {{ t.label }}
               </label>
             </div>
@@ -424,7 +432,10 @@
           <!-- 엑셀 다운로드 + 잔여 -->
           <div class="ch-toolbar">
             <button class="btn-excel" @click="downloadExcel">
-              <span class="excel-icon">↓</span> 엑셀 다운로드
+              <span class="excel-icon"
+                ><img src="/assets/icons/download_icon.svg" alt=""
+              /></span>
+              엑셀 다운로드
             </button>
             <div class="ch-balance">
               <span class="balance-label">잔여</span>
@@ -483,20 +494,20 @@
           </table>
 
           <!-- 페이지네이션 -->
-          <div class="pagination" v-if="chTotalPages > 1">
+          <div class="ch-pagination">
             <button
-              class="page-btn"
+              class="page-btn arrow"
               :disabled="chPage <= 1"
               @click="fetchCreditHistory(1)"
             >
-              &laquo;
+              <img src="/assets/icons/arrow_first.svg" alt="first" />
             </button>
             <button
-              class="page-btn"
+              class="page-btn arrow"
               :disabled="chPage <= 1"
               @click="fetchCreditHistory(chPage - 1)"
             >
-              &lt;
+              <img src="/assets/icons/arrow_prev.svg" alt="prev" />
             </button>
             <button
               v-for="p in chVisiblePages"
@@ -507,18 +518,18 @@
               {{ p }}
             </button>
             <button
-              class="page-btn"
+              class="page-btn arrow"
               :disabled="chPage >= chTotalPages"
               @click="fetchCreditHistory(chPage + 1)"
             >
-              &gt;
+              <img src="/assets/icons/arrow_next.svg" alt="next" />
             </button>
             <button
-              class="page-btn"
+              class="page-btn arrow"
               :disabled="chPage >= chTotalPages"
               @click="fetchCreditHistory(chTotalPages)"
             >
-              &raquo;
+              <img src="/assets/icons/arrow_last.svg" alt="last" />
             </button>
           </div>
 
@@ -528,6 +539,14 @@
         </div>
       </div>
     </div>
+
+    <!-- 사업자등록증 미리보기 모달 -->
+    <FilePreviewModal
+      :visible="showPreview"
+      :fileUrl="fileUrl"
+      :fileName="licenseName"
+      @close="showPreview = false"
+    />
   </div>
 </template>
 
@@ -544,6 +563,8 @@ import {
 import { useRouter, onBeforeRouteLeave } from 'vue-router';
 import { adminAPI } from '@/api/admin';
 import { UseMessageStore } from '@/store/message';
+import DatePicker from '@/components/common/DatePicker.vue';
+import FilePreviewModal from '@/components/common/FilePreviewModal.vue';
 
 const props = defineProps({ id: [String, Number] });
 const router = useRouter();
@@ -704,8 +725,9 @@ const handleLicenseUpload = async (e) => {
 };
 
 // 미리보기
+const showPreview = ref(false);
 const previewLicense = () => {
-  window.open(fileUrl.value, '_blank');
+  showPreview.value = true;
 };
 
 // 로그인 제한 해제
@@ -1237,7 +1259,7 @@ const formatShortDate = (dateStr) => {
   cursor: pointer;
 
   min-width: 96px;
-  &:hover:not(:disabled) {
+  &:hover:not(:disabled):not(.preview) {
     border-color: $main-color;
   }
 
@@ -1254,6 +1276,10 @@ const formatShortDate = (dateStr) => {
   }
 
   &.preview {
+    background: transparent;
+    border: 1px solid;
+    padding: 8px 12px;
+    min-width: unset;
     border-color: $sub-color-2;
   }
 }
@@ -1283,11 +1309,11 @@ const formatShortDate = (dateStr) => {
 
 .popup-box {
   background: $dark-bg;
-  border: 1px solid $dark-line-gray;
+  // border: 1px solid $dark-line-gray;
   border-radius: $radius-md;
-  padding: 32px 40px;
-  min-width: 480px;
-  max-width: 560px;
+  padding: 16px 12px;
+  min-width: 564px;
+  // max-width: 560px;
 }
 
 .popup-title {
@@ -1300,19 +1326,19 @@ const formatShortDate = (dateStr) => {
   @include font-14-regular;
   text-align: center;
   color: $dark-text;
-  margin-bottom: 24px;
+  margin-bottom: 8px;
 }
 
 .status-radios {
   display: flex;
   justify-content: center;
   gap: 24px;
-  margin-bottom: 24px;
+  margin-bottom: 8px;
 
   label {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 10px;
     @include font-14-regular;
     cursor: pointer;
     color: $dark-text;
@@ -1322,24 +1348,54 @@ const formatShortDate = (dateStr) => {
     }
 
     input[type='radio'] {
-      accent-color: $main-color;
+      display: none;
+    }
+
+    .radio-custom {
+      width: 16px;
+      height: 16px;
+      background: $dark-line-gray;
+      border: none;
+      border-radius: 50%;
+      position: relative;
+      flex-shrink: 0;
+
+      &::after {
+        content: '';
+        width: 6px;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    input[type='radio']:checked + .radio-custom {
+      background: $main-color;
+
+      &::after {
+        background: $white;
+      }
     }
   }
 }
 
 .reason-label {
   @include font-14-medium;
-  color: $main-color;
+  color: $white;
   margin-bottom: 8px;
 }
 
 .reason-textarea {
   width: 100%;
-  min-height: 120px;
-  padding: 12px 16px;
+  min-height: 80px;
+  padding: 8px;
   background: $dark-input;
   border: 1px solid $dark-line-gray;
-  border-radius: $radius-sm;
+  // border-radius: $radius-sm;
   color: $white;
   @include font-14-regular;
   resize: vertical;
@@ -1353,21 +1409,22 @@ const formatShortDate = (dateStr) => {
 .popup-buttons {
   display: flex;
   gap: 12px;
-  margin-top: 24px;
-
+  margin-top: 8px;
+  justify-content: center;
   .btn-cancel,
   .btn-confirm {
-    flex: 1;
-    padding: 12px;
+    // flex: 1;
+    padding: 7.5px;
     border-radius: $radius-sm;
     @include font-14-medium;
     cursor: pointer;
+    min-width: 138px;
   }
 
   .btn-cancel {
-    background: $dark-input;
+    background: $dark-gray-dark;
     color: $white;
-    border: 1px solid $dark-line-gray;
+    // border: 1px solid $dark-line-gray;
   }
 
   .btn-confirm {
@@ -1448,8 +1505,14 @@ const formatShortDate = (dateStr) => {
 
 // 크레딧 수동 관리 팝업
 .credit-popup {
-  min-width: 520px;
-  max-width: 620px;
+  min-width: 787px;
+  max-width: 787px;
+  padding: 36px 40px;
+
+  .reason-textarea {
+    background: unset;
+    border-radius: 8px;
+  }
 }
 
 .credit-form {
@@ -1473,7 +1536,7 @@ const formatShortDate = (dateStr) => {
     label {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 10px;
       @include font-14-regular;
       cursor: pointer;
       color: $dark-text;
@@ -1483,7 +1546,37 @@ const formatShortDate = (dateStr) => {
       }
 
       input[type='radio'] {
-        accent-color: $main-color;
+        display: none;
+      }
+
+      .radio-custom {
+        width: 16px;
+        height: 16px;
+        background: $dark-line-gray;
+        border: none;
+        border-radius: 50%;
+        position: relative;
+        flex-shrink: 0;
+
+        &::after {
+          content: '';
+          width: 6px;
+          height: 6px;
+          background: rgba(255, 255, 255, 0.5);
+          border-radius: 50%;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+        }
+      }
+
+      input[type='radio']:checked + .radio-custom {
+        background: $main-color;
+
+        &::after {
+          background: $white;
+        }
       }
     }
   }
@@ -1519,10 +1612,10 @@ const formatShortDate = (dateStr) => {
 // 크레딧 조회 팝업
 .credit-history-popup {
   background: $dark-bg;
-  border: 1px solid $dark-line-gray;
-  border-radius: $radius-md;
+  // border: 1px solid $dark-line-gray;
+  border-radius: $radius-xl;
   padding: 32px 40px;
-  width: 1000px;
+  width: 1200px;
   max-width: 95vw;
 }
 
@@ -1531,6 +1624,15 @@ const formatShortDate = (dateStr) => {
   align-items: center;
   margin-bottom: 12px;
   gap: 8px;
+
+  :deep(.dp__main) {
+    width: auto;
+    flex-shrink: 0;
+  }
+
+  :deep(.dp-input-wrap) {
+    width: 126px;
+  }
 
   .filter-label {
     min-width: 50px;
@@ -1554,24 +1656,75 @@ const formatShortDate = (dateStr) => {
     color: $dark-text;
   }
 
+  .credit-radios {
+    display: flex;
+    gap: 20px;
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      @include font-14-regular;
+      cursor: pointer;
+      color: $dark-text;
+
+      &.selected {
+        color: $white;
+      }
+
+      input[type='radio'] {
+        display: none;
+      }
+
+      .radio-custom {
+        width: 16px;
+        height: 16px;
+        background: $dark-line-gray;
+        border: none;
+        border-radius: 50%;
+        position: relative;
+        flex-shrink: 0;
+
+        &::after {
+          content: '';
+          width: 6px;
+          height: 6px;
+          background: rgba(255, 255, 255, 0.5);
+          border-radius: 50%;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+        }
+      }
+
+      input[type='radio']:checked + .radio-custom {
+        background: $main-color;
+        &::after {
+          background: $white;
+        }
+      }
+    }
+  }
+
   .quick-btns {
     display: flex;
-    gap: 0;
+    gap: 4px;
     margin-left: 12px;
 
     .quick-btn {
       padding: 8px 16px;
-      background: $dark-input;
-      border: 1px solid $dark-line-gray;
-      color: $dark-text;
+      background: $dark-gray-dark;
+      // border: 1px solid $dark-line-gray;
+      color: $white;
       @include font-12-regular;
       cursor: pointer;
-
+      min-width: 71px;
       &:first-child {
-        border-radius: $radius-sm 0 0 $radius-sm;
+        // border-radius: $radius-sm 0 0 $radius-sm;
       }
       &:last-child {
-        border-radius: 0 $radius-sm $radius-sm 0;
+        // border-radius: 0 $radius-sm $radius-sm 0;
       }
       &:not(:first-child) {
         border-left: none;
@@ -1613,18 +1766,20 @@ const formatShortDate = (dateStr) => {
     display: flex;
     align-items: center;
     .balance-label {
+      min-width: 116px;
       padding: 8px 16px;
-      background: $main-gad;
+      background: $bg-op;
+      text-align: center;
       @include font-14-medium;
-      border-radius: $radius-sm 0 0 $radius-sm;
+      // border-radius: $radius-sm 0 0 $radius-sm;
     }
     .balance-value {
       padding: 8px 20px;
-      background: $dark-input;
-      border: 1px solid $dark-line-gray;
-      border-radius: 0 $radius-sm $radius-sm 0;
+      // background: $dark-input;
+      border: 1px solid $dark-gray-dark;
+      // border-radius: 0 $radius-sm $radius-sm 0;
       @include font-14-medium;
-      min-width: 60px;
+      min-width: 116px;
       text-align: center;
     }
   }
@@ -1639,6 +1794,7 @@ const formatShortDate = (dateStr) => {
   td {
     padding: 10px 8px;
     @include font-12-regular;
+    font-weight: 300;
     text-align: center;
     vertical-align: middle;
   }
@@ -1669,6 +1825,51 @@ const formatShortDate = (dateStr) => {
   .empty-message {
     padding: 60px 0;
     color: $dark-text;
+  }
+}
+
+.ch-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  margin-top: 16px;
+
+  .page-btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    background: none;
+    color: $dark-text;
+    border: none;
+    border-radius: $radius-sm;
+    @include font-12-regular;
+    cursor: pointer;
+
+    &.arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      img {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    &:hover:not(:disabled) {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    &.active {
+      background: $main-gad;
+      color: $white;
+      @include font-12-bold;
+    }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
   }
 }
 </style>

@@ -79,32 +79,17 @@
       <!-- ⑤⑥ 반려/승인 버튼 (pending일 때만) -->
       <div class="action-area" v-if="hospital.status === 'pending'">
         <button class="btn-reject" @click="showRejectModal = true">반려</button>
-        <button class="btn-approve" @click="showApproveModal = true">
-          승인
-        </button>
+        <button class="btn-approve" @click="confirmApprove">승인</button>
       </div>
     </div>
 
-    <!-- ======== 승인 확인 모달 ======== -->
-    <div
-      class="modal-overlay"
-      v-if="showApproveModal"
-      @click.self="showApproveModal = false"
-    >
-      <div class="modal-box approve-modal">
-        <h3 class="modal-title approve">승인</h3>
-        <p class="modal-desc">
-          '{{ hospital.name }}'<br />
-          해당 병원을 승인하시겠습니까?
-        </p>
-        <div class="modal-actions">
-          <button class="btn-modal-cancel" @click="showApproveModal = false">
-            취소
-          </button>
-          <button class="btn-modal-confirm" @click="handleApprove">확인</button>
-        </div>
-      </div>
-    </div>
+    <!-- 사업자등록증 미리보기 모달 -->
+    <FilePreviewModal
+      :visible="showPreview"
+      :fileUrl="fileUrl"
+      :fileName="fileName"
+      @close="showPreview = false"
+    />
 
     <!-- ======== 반려 처리 모달 ======== -->
     <div
@@ -153,10 +138,10 @@
           </button>
           <button
             class="btn-modal-confirm"
-            :disabled="!selectedReason"
+            :disabled="!selectedReason || isProcessing"
             @click="handleReject"
           >
-            확인
+            {{ isProcessing ? '처리중...' : '확인' }}
           </button>
         </div>
       </div>
@@ -167,13 +152,14 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { adminAPI } from '@/api/admin';
+import { UseMessageStore } from '@/store/message';
+import FilePreviewModal from '@/components/common/FilePreviewModal.vue';
 
 const router = useRouter();
 const route = useRoute();
+const message = UseMessageStore();
 const hospital = ref(null);
-
-// 승인 모달
-const showApproveModal = ref(false);
+const isProcessing = ref(false);
 
 // 반려 모달
 const showRejectModal = ref(false);
@@ -241,28 +227,41 @@ const closeRejectModal = () => {
   rejectComment.value = '';
 };
 
+// 승인 확인 (메시지 모달 사용)
+const confirmApprove = () => {
+  message.showConfirm(
+    `'${hospital.value.name}'\n해당 병원을 승인하시겠습니까?`,
+    handleApprove,
+    null,
+    { title: '승인', confirmText: '확인', cancelText: '취소' },
+  );
+};
+
 // 승인 처리
 const handleApprove = async () => {
   try {
     await adminAPI.approveHospital(route.params.id);
-    showApproveModal.value = false;
     router.push('/admin/approval');
   } catch (e) {
-    alert('승인 처리 실패');
+    message.showAlert('승인 처리 실패');
   }
 };
 
 // 반려 처리
 const handleReject = async () => {
+  if (isProcessing.value) return;
+  isProcessing.value = true;
   try {
     await adminAPI.rejectHospital(route.params.id, {
       reason: selectedReason.value,
       comment: rejectComment.value,
     });
     closeRejectModal();
-    fetchDetail();
+    router.push('/admin/approval');
   } catch (e) {
-    alert('반려 처리 실패');
+    message.showAlert('반려 처리 실패');
+  } finally {
+    isProcessing.value = false;
   }
 };
 
@@ -281,9 +280,10 @@ const formatShortDate = (dateStr) => {
   return `${yy}.${mm}.${dd}`;
 };
 
-// 미리보기 (새 탭)
+// 미리보기
+const showPreview = ref(false);
 const openPreview = () => {
-  window.open(fileUrl.value, '_blank');
+  showPreview.value = true;
 };
 
 onMounted(() => {
@@ -329,32 +329,32 @@ onMounted(() => {
 
 // 병원명
 .hospital-name {
-  font-size: 28px;
+  font-size: 44px;
   font-weight: 700;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 // 가입일
 .join-date {
-  @include font-12-regular;
-  color: $dark-text;
-  margin-bottom: 32px;
+  @include font-14-regular;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 36px;
 }
 
 // ── 상세 정보 카드 ──
 .info-card {
-  background: $bg-op;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  // background: $bg-op;
+  // border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 8px;
-  padding: 32px;
+  // padding: 32px;
   margin-bottom: 32px;
 }
 
 .info-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 36px;
+  margin-bottom: 12px;
 
   &.full {
     grid-template-columns: 1fr;
@@ -373,12 +373,13 @@ onMounted(() => {
 .field-label {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  min-width: 120px;
-  padding: 8px 16px;
-  background: rgba(48, 91, 134, 0.35);
-  border-radius: $radius-sm;
-  @include font-14-medium;
+  justify-content: left;
+  min-width: 152px;
+  min-height: 43px;
+  padding: 12px 24px;
+  background: $bg-op;
+  border-radius: $radius-md;
+  @include font-16-bold;
   white-space: nowrap;
 }
 
@@ -471,9 +472,9 @@ onMounted(() => {
 }
 
 .modal-box {
-  background: #1e2a3a;
-  border-radius: 12px;
-  padding: 40px;
+  background: $dark-bg;
+  border-radius: $radius-md;
+  padding: 12px 16px 16px;
   color: $white;
   text-align: center;
 }
@@ -495,8 +496,8 @@ onMounted(() => {
 .modal-desc {
   @include font-14-regular;
   color: $dark-text;
-  line-height: 1.6;
-  margin-bottom: 24px;
+  line-height: 1;
+  margin-bottom: 12px;
 }
 
 .modal-actions {
@@ -509,15 +510,17 @@ onMounted(() => {
 .btn-modal-cancel {
   flex: 1;
   padding: 12px 0;
-  background: rgba(255, 255, 255, 0.08);
-  color: $white;
+  background: $dark-gray-dark;
+  color: $dark-text;
   border: none;
   border-radius: $radius-sm;
   @include font-14-medium;
   cursor: pointer;
+  min-width: 136px;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.12);
+    border-color: $sub-color-2;
+    color: $white;
   }
 }
 
@@ -528,15 +531,16 @@ onMounted(() => {
   color: $white;
   border: none;
   border-radius: $radius-sm;
-  @include font-14-bold;
+  @include font-14-medium;
   cursor: pointer;
+  min-width: 136px;
 
   &:hover {
     background: $sub-color;
   }
 
   &:disabled {
-    background: rgba(255, 255, 255, 0.08);
+    background: $dark-gray-dark;
     color: $dark-text;
     cursor: default;
   }
@@ -549,14 +553,15 @@ onMounted(() => {
 
 // ── 반려 모달 ──
 .reject-modal {
-  width: 520px;
+  width: 564px;
 }
 
 .reject-reasons {
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
-  gap: 14px;
-  margin-bottom: 24px;
+  gap: 8px;
+
+  margin-bottom: 12px;
   text-align: left;
   padding: 0 40px;
 }
@@ -567,7 +572,7 @@ onMounted(() => {
   gap: 10px;
   @include font-14-regular;
   cursor: pointer;
-
+  // margin-bottom: 16px;
   input[type='radio'] {
     display: none;
   }
@@ -604,24 +609,25 @@ onMounted(() => {
 }
 
 .textarea-label {
-  @include font-14-bold;
+  @include font-14-medium;
   text-align: left;
   margin-bottom: 8px;
+  line-height: 1;
 }
 
 .reject-textarea {
   width: 100%;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.3);
+  padding: 8px;
+  background: $dark-input;
   border: 1px solid $dark-line-gray;
-  border-radius: $radius-sm;
+  border-radius: $radius-md;
   color: $white;
   @include font-14-regular;
   resize: none;
-  line-height: 1.6;
+  line-height: 1;
 
   &:focus {
-    border-color: $main-color;
+    border-color: $sub-color-2;
     outline: none;
   }
 }
