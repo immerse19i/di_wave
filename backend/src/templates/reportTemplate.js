@@ -283,7 +283,7 @@ function generateReportHTML(data) {
     .cover-page .cover-info-box {
       border: 2px solid #4a90d9; border-radius: 10px;
       padding: 16px; display: inline-flex; flex-direction: column; row-gap: 10px;
-      position: absolute; top: 50%; z-index: 1;
+      position: absolute; top: 38%; z-index: 1;
       background: rgba(255, 255, 255, 0.5);
     }
     .cover-page .cover-info-box .info-row {
@@ -366,7 +366,7 @@ function generateReportHTML(data) {
 }
 .gauge-fill { height: 100%; border-radius: 8px; background: linear-gradient(270deg, #2DB7AE 0%, #285989 100%); }
     .gauge-marker {
-      position: absolute; top: 50%; transform: translate(-50%, -70%);
+      position: absolute; top: 50%; transform: translate(-50%, -57%);
       display: flex; flex-direction: column; align-items: center;
     }
     .gauge-marker .marker-value { font-size: 12px; font-weight: 400; }
@@ -408,7 +408,7 @@ function generateReportHTML(data) {
 .health-gauge .health-title { font-size: 14px; font-weight: 700; min-width: 109px; color: #737373; }
 .health-gauge .health-title strong { margin-top: 4px; display: block; color: #383838; font-size: 20px; font-weight: 700; }
 .health-gauge .health-title strong .unit { font-size: 14px; font-weight: 400; }
-.health-gauge .health-desc { font-size: 9px; color: #737373; margin: 8px 0 0; line-height: 1; }
+.health-gauge .health-desc { font-size: 9px; color: #737373; margin: 8px 0 0; line-height: 1.2; }
 
     .level-bar {
       display: flex; border-radius: 4px; overflow: hidden;
@@ -706,6 +706,7 @@ function generateReportHTML(data) {
       ctx.fillRect(0, 0, W, H);
 
       ctx.strokeStyle = '#f0f0f0'; ctx.lineWidth = 0.5;
+
       for (var y = yMin; y <= yMax; y += 10) {
         ctx.beginPath(); ctx.moveTo(margin.left, toY(y));
         ctx.lineTo(W - margin.right, toY(y)); ctx.stroke();
@@ -721,7 +722,7 @@ function generateReportHTML(data) {
         var isDashed = key === 'p3' || key === 'p25' || key === 'p75' || key === 'p97';
         ctx.beginPath();
         ctx.strokeStyle = is50 ? '#4A90D9' : '#c0c0c0';
-        ctx.lineWidth = (is50 || isBold) ? 2 : 1;
+        ctx.lineWidth = (is50 || isBold) ? 1 : 0.5;
         if (isDashed) ctx.setLineDash([4, 3]); else ctx.setLineDash([]);
         filtered.forEach(function(d, i) {
           var x = toX(d.month), y = toY(d[key]);
