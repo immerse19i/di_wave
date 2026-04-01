@@ -26,7 +26,9 @@ onMounted(async () => {
   padding: 24px 0;
 }
 .info-title {
-  @include font-20-bold;
+  font-size: 44px;
+  font-weight: 700;
+  color: $white;
   margin-bottom: 24px;
 }
 .info-content {
