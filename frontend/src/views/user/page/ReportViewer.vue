@@ -1091,7 +1091,7 @@ const drawGrowthChart = (canvas, options) => {
 
     ctx.beginPath();
     ctx.strokeStyle = is50 ? '#4A90D9' : '#c0c0c0';
-    ctx.lineWidth = is50 || isBold ? 2 : 1;
+    ctx.lineWidth = is50 || isBold ? 1 : 0.5;
     if (isDashed) ctx.setLineDash([4, 3]);
     else ctx.setLineDash([]);
     filtered.forEach((d, i) => {
@@ -1558,7 +1558,7 @@ onUnmounted(() => {
     flex-direction: column;
     row-gap: 10px;
     position: absolute;
-    top: 50%;
+    top: 38%;
     z-index: 1;
     background: rgba(255, 255, 255, 0.5);
     .info-row {
@@ -1823,7 +1823,7 @@ onUnmounted(() => {
   .gauge-marker {
     position: absolute;
     top: 50%;
-    transform: translate(-50%, -70%);
+    transform: translate(-50%, -57%);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1941,7 +1941,7 @@ onUnmounted(() => {
     color: $text-gray-2;
 
     margin: 8px 0 0;
-    line-height: 1;
+    line-height: 1.2;
   }
 }
 

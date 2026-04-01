@@ -87,32 +87,30 @@ exports.createAccount = async (req, res) => {
         subject: '[OsteoAge] 가입 승인이 완료되었습니다. 지금 바로 이용해 보세요!',
         html: `
           <div style="max-width:600px; font-family:'Inter',Arial,sans-serif; color:#353535;">
-            <p style="font-size:14px; line-height:1.6;">
+            <p style="font-size:14px; line-height:1.6; margin-bottom:20px;">
               <strong>${hospitalName}</strong>님.<br/>
-              OsteoAge 서비스 가입이 승인되었습니다.
+              OsteoAge 서비스 가입 승인이 완료되었습니다.
             </p>
-            <table style="border-collapse:collapse; width:100%; margin:20px 0;">
-              <tr>
-                <td style="padding:8px 12px; background:#f5f5f5; border:1px solid #ddd; font-weight:bold;">병원명</td>
-                <td style="padding:8px 12px; border:1px solid #ddd;">${hospitalName}</td>
-              </tr>
-              <tr>
-                <td style="padding:8px 12px; background:#f5f5f5; border:1px solid #ddd; font-weight:bold;">ID</td>
-                <td style="padding:8px 12px; border:1px solid #ddd;">${loginId}</td>
-              </tr>
-              <tr>
-                <td style="padding:8px 12px; background:#f5f5f5; border:1px solid #ddd; font-weight:bold;">승인결과</td>
-                <td style="padding:8px 12px; border:1px solid #ddd; color:#305b86; font-weight:bold;">승인완료</td>
-              </tr>
-            </table>
-            <p style="font-size:13px; line-height:1.8;">
-              지금 바로 로그인하여 서비스를 이용하실 수 있습니다.
+            <p style="font-size:14px; line-height:1.6; margin-bottom:20px;">
+            지금 접속하여 OsteoAge를 이용해보세요.<br/>
+            아이디 : ${loginId}
+            </p>
+
+
+    <a href="http://osteoage.ai/login" target="_blank" style="width:415px; background: linear-gradient(180deg, #F8F8F8 0%, #E0E0E0 100%); display:block; margin-bottom:20px;">
+        <img src="http://osteoage.ai/assets/logo/osteo_age_logo.png" alt="osteo_logo"/>
+    </a>
+            <p style="font-size:12px; line-height:1.4;">
+본 메일은 발송 전용으로 회신이 불가능합니다.<br/>
+추가 문의 사항은 서비스 내 [문의하기] 게시판을 이용해 주세요.<br/>
+Copyright © OsteoAge. All rights reserved.
             </p>
             <p style="font-size:12px; color:#353535; margin-top:24px;">
-              디웨이브주식회사<br/>
-              csadmin@diwave.io<br/>
-              02-2088-8728 [문의가능시간 : 10:00~17:00 (토·일·공휴일 휴무)]
+디웨이브주식회사<br/>
+02-2088-8728 [문의가능시간 : 10:00~17:00 (토 · 일 · 공휴일 휴무)]
             </p>
+
+            <img src="http://osteoage.ai/assets/logo/di_wave_logo_color.png" alt="DiwaveLogo" style="width:185px; margin-top:8px;" />
           </div>
         `,
       });
