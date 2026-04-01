@@ -351,25 +351,20 @@ exports.answerInquiry = async (req, res) => {
           attachments: emailAttachments,
           html: `
             <div style="max-width:600px; margin:0 auto; font-family:'Inter','Noto Sans KR',Arial,sans-serif; color:#353535;">
-              <!-- 헤더: 로고 -->
-              <div style="padding:24px 0;">
-                <img src="https://diwave.io/logo_diwave.png" alt="DiWAVE" style="height:32px;" />
-              </div>
-
-              <!-- 타이틀 배너 -->
-              <div style="background:linear-gradient(90deg, #305b86, #3a9d8f); padding:16px 24px; border-radius:4px; margin-bottom:24px;">
-                <span style="color:#ffffff; font-size:16px; font-weight:bold;">OsteoAge 문의 답변 안내</span>
-              </div>
+          <img src="http://osteoage.ai/assets/logo/di_wave_logo_color.png" alt="DiwaveLogo" style="width:101px; margin-top:16px;" />  
+          
+          <div style="padding:16px;width:100%; font-family:'Inter',Arial,sans-serif; font-size:16px; line-height:1.4; font-weight:500; color:#f8f9fa ">OsteoAge 문의 답변 안내</div>
 
               <!-- 답변 본문 -->
               <div style="padding:0 0 24px; line-height:1.8; font-size:14px;">
-                <p>안녕하세요<br/>OsteoAge 입니다.</p>
-                <div style="margin:16px 0;">${answer}</div>
-                <p>앞으로 안정적이고 신뢰할 수 있는 서비스 제공을 위해 최선을 다하겠습니다.</p>
+                <p>안녕하세요<br/>OsteoAge 입니다.</p><br/><br/>
+                <div>${answer}</div>
+                <br/><br/>
+                <p>앞으로 안정적이고 신뢰할 수 있는 서비스 제공을 위해 최선을 다하겠습니다.</p><br/><br/>
                 <p>OsteoAge 드림</p>
               </div>
 
-              <hr style="border:none; border-top:1px solid #e0e0e0; margin:24px 0;" />
+              <hr style="border:none; border-top:1px solid #DFE1E7; margin:20px 0;" />
 
               <!-- 고객 문의 내역 -->
               <div style="padding:0 0 24px;">
@@ -381,17 +376,18 @@ exports.answerInquiry = async (req, res) => {
                 <p style="font-size:14px; line-height:1.6;">${inquiry.content}</p>
               </div>
 
-              <hr style="border:none; border-top:1px solid #e0e0e0; margin:24px 0;" />
+              <hr style="border:none; border-top:1px solid #DFE1E7; margin:20px 0;" />
 
               <!-- 푸터 -->
-              <div style="font-size:12px; color:#999; line-height:1.8; padding-bottom:24px;">
-                <p>본 메일은 발송 전용으로 회신이 불가능합니다.</p>
-                <p>추가 문의 사항은 서비스 내 [문의하기] 게시판을 이용해 주세요.</p>
-                <p>Copyright &copy; OsteoAge. All rights reserved.</p>
+              <div style="font-size:12px; color:#999; line-height:1.4; padding-bottom:32px;">
+                <p>본 메일은 발송 전용으로 회신이 불가능합니다.<br/>
+추가 문의 사항은 서비스 내 [문의하기] 게시판을 이용해 주세요.<br/>
+Copyright © OsteoAge. All rights reserved.</p>
                 <br/>
-                <p>디웨이브주식회사<br/>02-2088-8728 [문의가능시간 : 10:00~17:00 (토 · 일 · 공휴일 휴무)]</p>
+                <p>디웨이브주식회사<br/>
+02-2088-8728 [문의가능시간 : 10:00~17:00 (토 · 일 · 공휴일 휴무)]</p>
                 <div style="margin-top:16px;">
-                  <img src="https://diwave.io/logo_diwave.png" alt="DiWAVE" style="height:28px;" />
+                  <img src="http://osteoage.ai/assets/logo/di_wave_logo_color.png" alt="diwaveLogo" style="width:185px;" />
                 </div>
               </div>
             </div>

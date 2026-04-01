@@ -84,11 +84,11 @@ exports.createAccount = async (req, res) => {
       await transporter.sendMail({
         from: process.env.MAIL_FROM,
         to: email,
-        subject: '[OsteoAge] 가입 승인 완료 안내',
+        subject: '[OsteoAge] 가입 승인이 완료되었습니다. 지금 바로 이용해 보세요!',
         html: `
           <div style="max-width:600px; font-family:'Inter',Arial,sans-serif; color:#353535;">
             <p style="font-size:14px; line-height:1.6;">
-              안녕하세요, <strong>${hospitalName}</strong>님.<br/>
+              <strong>${hospitalName}</strong>님.<br/>
               OsteoAge 서비스 가입이 승인되었습니다.
             </p>
             <table style="border-collapse:collapse; width:100%; margin:20px 0;">
@@ -240,35 +240,33 @@ await pool.query('UPDATE users SET is_active = TRUE WHERE hospital_id = ? AND ro
       await transporter.sendMail({
         from: process.env.MAIL_FROM,
         to: rows[0].email,
-        subject: '[OsteoAge] 가입 승인 완료 안내',
+        subject: '[OsteoAge] 가입 승인이 완료되었습니다. 지금 바로 이용해 보세요!',
         html: `
           <div style="max-width:600px; font-family:'Inter',Arial,sans-serif; color:#353535;">
-            <p style="font-size:14px; line-height:1.6;">
-              안녕하세요, <strong>${rows[0].name}</strong>님.<br/>
-              OsteoAge 서비스 가입이 승인되었습니다.
+            <p style="font-size:14px; line-height:1.6; margin-bottom:20px;">
+              <strong>${rows[0].name}</strong>님.<br/>
+              OsteoAge 서비스 가입 승인이 완료되었습니다.
             </p>
-            <table style="border-collapse:collapse; width:100%; margin:20px 0;">
-              <tr>
-                <td style="padding:8px 12px; background:#f5f5f5; border:1px solid #ddd; font-weight:bold;">병원명</td>
-                <td style="padding:8px 12px; border:1px solid #ddd;">${rows[0].name}</td>
-              </tr>
-              <tr>
-                <td style="padding:8px 12px; background:#f5f5f5; border:1px solid #ddd; font-weight:bold;">ID</td>
-                <td style="padding:8px 12px; border:1px solid #ddd;">${rows[0].login_id}</td>
-              </tr>
-              <tr>
-                <td style="padding:8px 12px; background:#f5f5f5; border:1px solid #ddd; font-weight:bold;">승인결과</td>
-                <td style="padding:8px 12px; border:1px solid #ddd; color:#305b86; font-weight:bold;">승인완료</td>
-              </tr>
-            </table>
-            <p style="font-size:13px; line-height:1.8;">
-              지금 바로 로그인하여 서비스를 이용하실 수 있습니다.
+            <p style="font-size:14px; line-height:1.6; margin-bottom:20px;">
+            지금 접속하여 OsteoAge를 이용해보세요.<br/>
+            아이디 : ${rows[0].login_id}
+            </p>
+
+            
+    <a href="http://osteoage.ai/login" target="_blank" style="width:415px; background: linear-gradient(180deg, #F8F8F8 0%, #E0E0E0 100%); display:block; margin-bottom:20px;">
+        <img src="http://osteoage.ai/assets/logo/osteo_age_logo.png" alt="osteo_logo"/>
+    </a>
+            <p style="font-size:12px; line-height:1.4;">
+본 메일은 발송 전용으로 회신이 불가능합니다.<br/>
+추가 문의 사항은 서비스 내 [문의하기] 게시판을 이용해 주세요.<br/>
+Copyright © OsteoAge. All rights reserved.
             </p>
             <p style="font-size:12px; color:#353535; margin-top:24px;">
-              디웨이브주식회사<br/>
-              csadmin@diwave.io<br/>
-              02-2088-8728 [문의가능시간 : 10:00~17:00 (토·일·공휴일 휴무)]
+디웨이브주식회사<br/>
+02-2088-8728 [문의가능시간 : 10:00~17:00 (토 · 일 · 공휴일 휴무)]
             </p>
+
+            <img src="http://osteoage.ai/assets/logo/di_wave_logo_color.png" alt="DiwaveLogo" style="width:185px; margin-top:8px;" />
           </div>
         `,
       });
@@ -310,41 +308,53 @@ await pool.query('UPDATE users SET is_active = FALSE WHERE hospital_id = ? AND r
       await transporter.sendMail({
         from: process.env.MAIL_FROM,
         to: rows[0].email,
-        subject: '[OsteoAge] 가입 반려 안내',
+        subject: '[OsteoAge] 가입 승인  결과 안내',
         html: `
-          <div style="max-width:600px; font-family:'Inter',Arial,sans-serif; color:#353535;">
-            <p style="font-size:14px; line-height:1.6;">
-              안녕하세요, <strong>${rows[0].name}</strong>님.<br/>
-              OsteoAge 서비스 가입 신청이 반려되었습니다.
-            </p>
-            <table style="border-collapse:collapse; width:100%; margin:20px 0;">
-              <tr>
-                <td style="padding:8px 12px; background:#f5f5f5; border:1px solid #ddd; font-weight:bold;">병원명</td>
-                <td style="padding:8px 12px; border:1px solid #ddd;">${rows[0].name}</td>
-              </tr>
-              <tr>
-                <td style="padding:8px 12px; background:#f5f5f5; border:1px solid #ddd; font-weight:bold;">ID</td>
-                <td style="padding:8px 12px; border:1px solid #ddd;">${rows[0].login_id}</td>
-              </tr>
-              <tr>
-                <td style="padding:8px 12px; background:#f5f5f5; border:1px solid #ddd; font-weight:bold;">승인결과</td>
-                <td style="padding:8px 12px; border:1px solid #ddd; color:#e74c3c; font-weight:bold;">${reason}</td>
-              </tr>
-              <tr>
-                <td style="padding:8px 12px; background:#f5f5f5; border:1px solid #ddd; font-weight:bold;">Comment</td>
-                <td style="padding:8px 12px; border:1px solid #ddd;">${comment || ''}</td>
-              </tr>
-            </table>
-            <p style="font-size:13px; line-height:1.8;">
-              사유 확인 후 재신청이 가능합니다.
-            </p>
-            <p style="font-size:12px; color:#353535; margin-top:24px;">
-              디웨이브주식회사<br/>
-              csadmin@diwave.io<br/>
-              02-2088-8728 [문의가능시간 : 10:00~17:00 (토·일·공휴일 휴무)]
-            </p>
-          </div>
-        `,
+  <div style="max-width:800px; font-family:'Inter',Arial,sans-serif; color:#353535;">
+    <img src="http://osteoage.ai/assets/logo/di_wave_logo_color.png" alt="DiwaveLogo" style="width:101px; margin-top:16px;" />
+    <div style="padding:16px; width:100%; font-family:'Inter',Arial,sans-serif; font-size:16px; line-height:1.4; font-weight:500; color:#f8f9fa">OsteoAge 회원가입 승인 결과 안내</div>
+    <p style="font-size:14px; line-height:1.6;">
+OsteoAge를 이용해 주셔서 감사합니다.<br/>
+가입 승인 결과를 안내드립니다.
+    </p>
+    <table style="max-width:700px; border-collapse:collapse; width:100%; margin:32px auto;">
+      <tr style="border-bottom:1px solid #DEE2E8; border-top:1px solid #C7CCD0">
+        <td style="padding:8px 12px; background:#F0F2F5; border:1px solid #ddd; font-weight:bold; width:168px; font-size:14px; line-height:1.4;">병원명</td>
+        <td style="font-size:14px; color:#353535; padding:8px 12px; border:1px solid #ddd;">${rows[0].name}</td>
+      </tr>
+      <tr style="border-bottom:1px solid #DEE2E8;">
+        <td style="padding:8px 12px; background:#F0F2F5; border:1px solid #ddd; font-weight:bold; width:168px; font-size:14px; line-height:1.4;">ID</td>
+        <td style="font-size:14px; color:#353535; padding:8px 12px; border:1px solid #ddd;">${rows[0].login_id}</td>
+      </tr>
+      <tr style="border-bottom:1px solid #DEE2E8;">
+        <td style="padding:8px 12px; background:#F0F2F5; border:1px solid #ddd; font-weight:bold; width:168px; font-size:14px; line-height:1.4;">승인결과</td>
+        <td style="font-size:14px; color:#353535; padding:8px 12px; border:1px solid #ddd; font-weight:bold;">${reason}</td>
+      </tr>
+      <tr style="border-bottom:1px solid #C7CCD0;">
+        <td style="padding:8px 12px; background:#F0F2F5; border:1px solid #ddd; font-weight:bold; width:168px; font-size:14px; line-height:1.4;">Comment</td>
+        <td style="font-size:14px; color:#353535; padding:8px 12px; border:1px solid #ddd;">${comment || ''}</td>
+      </tr>
+    </table>
+    <p style="font-size:12px; color:#353535; margin-bottom:20px;">
+승인 결과가 ‘반려’인 경우 아래  웹에 접속하여 로그인 후 보완서류를 다시 첨부해 주시기 바랍니다.
+    </p>
+
+    <a href="http://osteoage.ai/login" target="_blank" style="width:415px; background: linear-gradient(180deg, #F8F8F8 0%, #E0E0E0 100%);">
+        <img src="http://osteoage.ai/assets/logo/osteo_age_logo.png" alt="osteo_logo"/>
+    </a>
+
+    <p style="font-size:12px; color:#353535; margin-bottom:20px;">
+문의사항이 있을 경우 아래 문의처를 이용해 주시기 바랍니다.
+    </p>
+    <p style="font-size:12px; color:#353535; margin-bottom:8px;">
+디웨이브주식회사<br/>
+csadmin@diwave.io<br/>
+02-2088-8728 [문의가능시간 : 10:00~17:00 (토 · 일 · 공휴일 휴무)]
+    </p>
+    <img src="http://osteoage.ai/assets/logo/di_wave_logo_color.png" alt="diwaveLogo" style="width:185px;" />
+  </div>
+`,
+
       });
     }
 
@@ -635,36 +645,49 @@ exports.changeAccountStatus = async (req, res) => {
       await transporter.sendMail({
         from: process.env.MAIL_FROM,
         to: rows[0].email,
-        subject: '[OsteoAge] 계정 상태 변경 안내',
+        subject: '[OsteoAge] 회원님의 계정 상태가 변동되었습니다.',
         html: `
-          <div style="max-width:600px; font-family:'Inter',Arial,sans-serif; color:#353535;">
-            <p style="font-size:14px; line-height:1.6;">
-              안녕하세요, <strong>${rows[0].name}</strong>님.<br/>
-              계정 상태가 변경되었습니다.
+          <div style="max-width:800px; font-family:'Inter',Arial,sans-serif; color:#353535;">
+          <img src="http://osteoage.ai/assets/logo/di_wave_logo_color.png" alt="DiwaveLogo" style="width:101px; margin-top:16px;" />  
+          
+          <div style="padding:16px;width:100%; font-family:'Inter',Arial,sans-serif; font-size:16px; line-height:1.4; font-weight:500; color:#f8f9fa ">OsteoAge 계정 상태 변경 안내</div>
+          <p style="font-size:14px; line-height:1.6;">
+              OsteoAge를 이용해 주셔서 감사합니다.<br/><br/>
+
+회원님의 계정 상태가 변경되었습니다.
+변경 내역은 다음과 같습니다.
             </p>
-            <table style="border-collapse:collapse; width:100%; margin:20px 0;">
-              <tr>
-                <td style="padding:8px 12px; background:#f5f5f5; border:1px solid #ddd; font-weight:bold;">병원명</td>
-                <td style="padding:8px 12px; border:1px solid #ddd;">${rows[0].name}</td>
+            <table style="max-width: 700px; border-collapse:collapse; width:100%; margin:32px auto;">
+              <tr style="border-bottom:1px solid #DEE2E8; border-top: 1px solid #C7CCD0">
+                <td style="padding:8px 12px; background:#F0F2F5; border:1px solid #ddd; font-weight:bold; width: 168px; font-size: 14px;line-height:1.4; ">병원명</td>
+                <td style="font-size: 14px; color:#353535; padding:8px 12px; border:1px solid #ddd;">${rows[0].name}</td>
               </tr>
-              <tr>
-                <td style="padding:8px 12px; background:#f5f5f5; border:1px solid #ddd; font-weight:bold;">ID</td>
-                <td style="padding:8px 12px; border:1px solid #ddd;">${rows[0].login_id}</td>
+              <tr style="border-bottom:1px solid #DEE2E8;">
+                <td style="padding:8px 12px; background:#F0F2F5; border:1px solid #ddd; font-weight:bold;  width: 168px; font-size: 14px;line-height:1.4;">ID</td>
+                <td style="font-size: 14px; color:#353535; padding:8px 12px; border:1px solid #ddd;">${rows[0].login_id}</td>
               </tr>
-              <tr>
-                <td style="padding:8px 12px; background:#f5f5f5; border:1px solid #ddd; font-weight:bold;">변경상태</td>
-                <td style="padding:8px 12px; border:1px solid #ddd; font-weight:bold;">${statusLabels[status]}</td>
+              <tr style="border-bottom:1px solid #DEE2E8;">
+                <td style="padding:8px 12px; background:#F0F2F5; border:1px solid #ddd; font-weight:bold;  width: 168px; font-size: 14px;line-height:1.4;">변경상태</td>
+                <td style="font-size: 14px; color:#353535; padding:8px 12px; border:1px solid #ddd; font-weight:bold;">${statusLabels[status]}</td>
               </tr>
-              <tr>
-                <td style="padding:8px 12px; background:#f5f5f5; border:1px solid #ddd; font-weight:bold;">사유</td>
-                <td style="padding:8px 12px; border:1px solid #ddd;">${reason || '-'}</td>
+              <tr style="border-bottom:1px solid #C7CCD0;">
+                <td style="padding:8px 12px; background:#F0F2F5; border:1px solid #ddd; font-weight:bold;  width: 168px; font-size: 14px;line-height:1.4;
+                
+                ">사유</td>
+                <td style="font-size: 14px; color:#353535; padding:8px 12px; border:1px solid #ddd;">${reason || '-'}</td>
               </tr>
             </table>
-            <p style="font-size:12px; color:#353535; margin-top:24px;">
-              디웨이브주식회사<br/>
-              csadmin@diwave.io<br/>
-              02-2088-8728 [문의가능시간 : 10:00~17:00 (토·일·공휴일 휴무)]
+            <p style="font-size:12px; color:#353535; margin-bottom:20px;">
+본 메일은 발송 전용으로 회신이 불가능합니다.
+추가 문의 사항은 서비스 내 [문의하기] 게시판을 이용해 주세요.
+Copyright © OsteoAge. All rights reserved.
             </p>
+            <p style="font-size:12px; color:#353535; margin-bottom:8px;">
+디웨이브주식회사
+02-2088-8728 [문의가능시간 : 10:00~17:00 (토 · 일 · 공휴일 휴무)]
+            </p>
+
+            <img src="http://osteoage.ai/assets/logo/di_wave_logo_color.png" alt="diwaveLogo" style="width:185px; " />
           </div>
         `,
       });
