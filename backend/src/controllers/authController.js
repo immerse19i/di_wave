@@ -1,3 +1,4 @@
+const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
@@ -146,19 +147,21 @@ if(!user.is_active){
       }
     }
 
+    // 세션 ID 생성 (동시접속 방지)
+    const sessionId = uuidv4();
+
     //JWT 토큰 생성
     const token = jwt.sign(
-      {id: user.id, hospital_id: user.hospital_id , role: user.role}, 
+      {id: user.id, hospital_id: user.hospital_id, role: user.role, sessionId}, 
       config.jwt.secret, 
       {expiresIn: config.jwt.expiresIn}
     )
 
-    // 로그인 성공 실패횟수 초기화
+    // 로그인 성공: 실패횟수 초기화 + 세션 ID 저장
     await pool.query(
-      'UPDATE users SET login_attempts = 0, locked_until = NULL, last_login = NOW() WHERE id = ?',
-      [user.id]
+      'UPDATE users SET login_attempts = 0, locked_until = NULL, last_login = NOW(), current_session_id = ? WHERE id = ?',
+      [sessionId, user.id]
     )
-
     //마지막 로그인 시간
     // await pool.query('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id])
 
@@ -181,9 +184,18 @@ if(!user.is_active){
 }
 
 exports.logout = async (req, res) => {
-  // JWT는 서버에서 무효화 할 수 없음 (클라이언트에서 토큰 삭제)
-  res.json({message: '로그아웃 되었습니다.'});
+  try {
+    // 세션 ID 제거 (동시접속 방지 해제)
+    if (req.user && req.user.id) {
+      await pool.query('UPDATE users SET current_session_id = NULL WHERE id = ?', [req.user.id]);
+    }
+    res.json({message: '로그아웃 되었습니다.'});
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.json({message: '로그아웃 되었습니다.'});
+  }
 }
+
 
 // 내 정보 조회
 exports.getMe = async (req,res) => {
