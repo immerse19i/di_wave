@@ -90,12 +90,14 @@ function closePopup(popupId, hideToday) {
   updateVisible();
 }
 
-// 팝업 조회
+// 팝업 조회 (로그인 후 최초 1회만 표시)
 onMounted(async () => {
+  if (sessionStorage.getItem('popupShown')) return;
   try {
     const res = await adminAPI.getActivePopups();
     popups.value = res.data.data || [];
     updateVisible();
+    sessionStorage.setItem('popupShown', '1');
   } catch (e) {
     // 팝업 조회 실패 시 무시
   }

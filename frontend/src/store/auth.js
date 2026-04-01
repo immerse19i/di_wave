@@ -111,6 +111,7 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null;
     token.value = null;
     localStorage.removeItem('token');
+    sessionStorage.removeItem('popupShown');
     stopActivityTracking(); // 추적 중지
   }
 

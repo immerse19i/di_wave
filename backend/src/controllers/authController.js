@@ -333,14 +333,14 @@ exports.sendCode = async (req, res) => {
     await transporter.sendMail({
       from: process.env.MAIL_FROM,
       to: email,
-      subject: '[DI-WAVE] 이메일 인증번호',
+      subject: '[OsteoAge] 이메일 인증번호',
       html: `
         <div style="max-width:600px; text-align:left; font-family:'Inter',Arial,sans-serif; color:#353535
         
         ;">
       <p style="font-size:14px; font-weight:bold;">[OsteoAge]</p>
       
-      <p style="font-size:14px; line-height:1.6;">
+      <p style="font-size:14px; line-height:1.4;">
         OsteoAge 서비스 가입을 위해 본인 확인이 필요합니다.<br/>
         아래의 인증번호를 회원가입 화면의 '인증번호' 칸에 입력해 주세요.
       </p>
@@ -370,7 +370,7 @@ exports.sendCode = async (req, res) => {
         02-2088-8728 [문의가능시간 : 10:00~17:00 (토 · 일 · 공휴일 휴무)]
       </p>
 
-      <img src="https://diwave.io/logo.png" alt="DiWAVE" style="height:40px; margin-top:16px;" />
+      <img src="http://osteoage.ai/assets/logo/di_wave_logo_color.png" alt="OsteoAge" style="height:40px; margin-top:16px;" />
     </div>
       `,
     });
@@ -523,7 +523,7 @@ exports.findId = async (req, res) => {
       subject: '[DI-WAVE] ID 찾기 인증번호',
       html: `
         <div style="max-width:600px; text-align:left; font-family:'Inter',Arial,sans-serif; color:#353535;">
-          <p style="font-size:14px; line-height:1.6;">
+          <p style="font-size:14px; line-height:1.4;">
 아이디 찾기를 위한 인증번호가 발급되었습니다.<br/>
 아래 인증번호를 사용하여 아이디 확인을 진행해 주세요.
           </p>
@@ -532,11 +532,11 @@ exports.findId = async (req, res) => {
               ${code}
             </p>
           </div>
-          <p style="font-size:13px; line-height:1.8; color:#353535; margin-bottom:32px;">
+          <p style="font-size:12px; line-height:1.4; color:#353535; margin-bottom:32px;">
            인증번호는 10분 동안 유효합니다. 만료되기 전에 입력해 주시기 바랍니다.<br/>
            누군가가 잘못된 정보를 입력했을 수 있습니다. 이 경우, 이 이메일을 무시하셔도 됩니다. 다른 사람이 귀하의 계정에 접근할 수 없으므로 안심하셔도 됩니다.
           </p>
-          <p style="font-size:13px; line-height:1.8; color:#353535; margin-bottom:8px">
+          <p style="font-size:12px; line-height:1.8; color:#353535; margin-bottom:8px">
           문의사항이 있을 경우 아래 문의처를 이용해 주시기 바랍니다.
           </p>
           <p style="font-size:12px; color:#353535; margin-top:24px;">
@@ -544,6 +544,7 @@ exports.findId = async (req, res) => {
 csadmin@diwave.io<br/>
 02-2088-8728 [문의가능시간 : 10:00~17:00 (토 · 일 · 공휴일 휴무)]
           </p>
+          <img src="http://osteoage.ai/assets/logo/di_wave_logo_color.png" alt="OsteoAge" style="width:101px; margin-top:16px;" />
         </div>
       `,
     });
@@ -587,25 +588,26 @@ exports.findPassword = async (req, res) => {
       html: `
         <div style="max-width:600px; text-align:left; font-family:'Inter',Arial,sans-serif; color:#353535;">
           <p style="font-size:14px; line-height:1.6;">
-            비밀번호 찾기를 위해 본인 확인이 필요합니다.<br/>
-            아래의 인증번호를 입력해 주세요.
+비밀번호 재설정을 위한 인증번호가 발급되었습니다.<br/>
+아래 인증번호를 사용하여 비밀번호를 재설정해 주세요.
           </p>
           <div style="background-color:#55aba6; padding:12px 48px; display:inline-block; margin:20px 0;">
             <p style="font-family:'Inter',Arial,sans-serif; font-weight:500; font-size:36px; line-height:140%; color:#fff; margin:0; text-align:center;">
               ${code}
             </p>
           </div>
-          <p style="font-size:13px; line-height:1.8; color:#353535; margin-bottom:32px">
-            인증번호는 10분 동안 유효합니다. 만료되기 전에 입력해 주시기 바랍니다.<br/>
-            누군가가 잘못된 정보를 입력했을 수 있습니다. 이 경우, 이 이메일을 무시하셔도 됩니다. 다른 사람이 귀하의 계정에 접근할 수 없으므로 안심하셔도 됩니다.
+          <p style="font-size:12px; line-height:1.4; color:#353535; margin-bottom:32px">
+           인증번호는 10분 동안 유효합니다. 만료되기 전에 입력해 주시기 바랍니다.<br/>
+           누군가가 잘못된 정보를 입력했을 수 있습니다. 이 경우, 이 이메일을 무시하셔도 됩니다. 다른 사람이 귀하의 계정에 접근할 수 없으므로 안심하셔도 됩니다.
           </p>
           <p style="font-size:12px; color:#353535; margin-top:24px;">
             본 메일은 발신전용으로 회신이 불가능합니다.<br/>
             Copyright © OsteoAge. All rights reserved.
             <br/><br/>
-            디웨이브주식회사
+            디웨이브주식회사<br/>
 02-2088-8728 [문의가능시간 : 10:00~17:00 (토 · 일 · 공휴일 휴무)]
           </p>
+          <img src="http://osteoage.ai/assets/logo/di_wave_logo_color.png" alt="DiwaveLogo" style="width:101px; margin-top:16px;" />
         </div>
       `,
     });
