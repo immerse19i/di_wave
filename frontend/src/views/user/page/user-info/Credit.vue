@@ -152,7 +152,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { creditAPI } from '@/api/credit';
 import { useRouter } from 'vue-router';
 import DatePicker from '@/components/common/DatePicker.vue';
@@ -188,7 +188,7 @@ const setQuickRange = (range) => {
     start.setDate(start.getDate() - Number(range));
     startDate.value = start.toISOString().split('T')[0];
   }
-  isQuickRangeChange.value = false;
+  nextTick(() => { isQuickRangeChange.value = false; });
 };
 
 // API 호출
