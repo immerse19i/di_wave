@@ -160,16 +160,11 @@ exports.confirmVirtualAccount = async (req, res) => {
 
 // 토스 웹훅 수신 (입금 완료 등)
 exports.handleWebhook = async (req, res) => {
-  // 1) secret 검증 (body.secret 또는 body.data.secret과 시크릿키 비교)
-  const webhookSecret = req.body.secret || (req.body.data && req.body.data.secret)
-  if (!webhookSecret || webhookSecret !== config.toss.secretKey) {
-    console.error('웹훅 시크릿 검증 실패')
-    return res.status(400).json({ success: false, message: '시크릿 검증 실패' })
-  }
-
   const { eventType, data } = req.body
 
-  // 2) 처리 가능한 이벤트만 처리
+  console.log('웹훅 수신:', eventType, data?.paymentKey, data?.status)
+
+  // 1) 처리 가능한 이벤트만 처리
   if (eventType !== 'DEPOSIT_CALLBACK' && eventType !== 'PAYMENT_STATUS_CHANGED') {
     return res.json({ success: true })
   }
