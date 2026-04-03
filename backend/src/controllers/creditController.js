@@ -126,14 +126,15 @@ exports.getExpiring = async (req, res) => {
   try {
     const hospitalId = req.user.hospital_id
 
-    const [rows] = await pool.query(
-      `SELECT expires_at, remaining_amount FROM credit_transactions
-       WHERE hospital_id = ? AND type = 'charge'
-         AND expires_at IS NOT NULL AND expires_at > NOW()
-         AND remaining_amount > 0
-       ORDER BY expires_at ASC`,
-      [hospitalId]
-    )
+const [rows] = await pool.query(
+  `SELECT expires_at, remaining_amount FROM credit_transactions
+   WHERE hospital_id = ? AND type = 'charge'
+     AND expires_at IS NOT NULL AND expires_at > NOW()
+     AND expires_at <= DATE_ADD(NOW(), INTERVAL 30 DAY)
+     AND remaining_amount > 0
+   ORDER BY expires_at ASC`,
+  [hospitalId]
+)
 
     res.json({ success: true, data: rows })
   } catch (error) {
