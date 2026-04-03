@@ -105,7 +105,12 @@ CREATE TABLE payments (
     credit_amount INT NOT NULL,
     pg_provider VARCHAR(50),
     pg_transaction_id VARCHAR(100),
-    status ENUM('pending', 'completed', 'failed', 'cancelled') DEFAULT 'pending',
+    payment_method VARCHAR(30) DEFAULT 'CARD',
+    status ENUM('pending', 'completed', 'failed', 'cancelled', 'refunded') DEFAULT 'pending',
+    virtual_account_number VARCHAR(50) NULL,
+    virtual_bank_name VARCHAR(50) NULL,
+    virtual_due_date DATETIME NULL,
+    virtual_depositor_name VARCHAR(50) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (hospital_id) REFERENCES hospitals(id) ON DELETE CASCADE
 );

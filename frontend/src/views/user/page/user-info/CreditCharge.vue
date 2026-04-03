@@ -36,7 +36,16 @@
     <div class="section">
       <h4 class="section-title">결제 수단</h4>
       <div class="payment-method">
-        <button class="method-btn active">신용/체크카드</button>
+        <button
+          class="method-btn"
+          :class="{ active: paymentMethod === 'CARD' }"
+          @click="paymentMethod = 'CARD'"
+        >신용/체크카드</button>
+        <button
+          class="method-btn"
+          :class="{ active: paymentMethod === 'VIRTUAL_ACCOUNT' }"
+          @click="paymentMethod = 'VIRTUAL_ACCOUNT'"
+        >가상계좌</button>
       </div>
     </div>
 
@@ -82,8 +91,8 @@
       </p>
       <p>
         구매하신 크레딧은 사용하지 않은 경우에 한해 전자상거래법에 따라
-        구매일로부터 7일 이내에 청약철회(환불)가 가능합니다. 단, 크레딧의 일부를
-        사용했거나 구매 후 7일이 경과한 경우에는 청약철회가 제한됩니다.
+        구매일로부터 14일 이내에 청약철회(환불)가 가능합니다. 단, 크레딧의 일부를
+        사용했거나 구매 후 14일이 경과한 경우에는 청약철회가 제한됩니다.
       </p>
     </div>
 
@@ -97,15 +106,45 @@
         <button class="btn-cancel" @click="cancelPayment">결제취소</button>
       </div>
 
-      <!-- 결제 완료 팝업 -->
+      <!-- 카드 결제 완료 팝업 -->
       <div class="modal-box" v-if="paymentStep === 'success'">
         <h3 class="modal-title">결제 완료</h3>
         <p>결제가 정상적으로 완료되었습니다.</p>
         <div class="result-info">
           <p>충전 크레딧 : {{ chargedCredit }} Credit</p>
           <p>결제 금액 : {{ chargedAmount.toLocaleString() }}원 (VAT 포함)</p>
-          <p>결제수단 : 신용/체크카드</p>
+          <p>결제수단 : {{ chargedMethod === 'CARD' ? '신용/체크카드' : '가상계좌' }}</p>
         </div>
+        <button class="btn-confirm" @click="goToCreditMain">확인</button>
+      </div>
+
+      <!-- 가상계좌 발급 완료 팝업 -->
+      <div class="modal-box" v-if="paymentStep === 'virtual-issued'">
+        <h3 class="modal-title">가상계좌 발급 완료</h3>
+        <p>아래 계좌로 입금해 주시면 크레딧이 자동으로 충전됩니다.</p>
+        <div class="virtual-info">
+          <div class="info-row">
+            <span class="label">입금은행</span>
+            <span class="value">{{ virtualAccount.bankName }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">계좌번호</span>
+            <span class="value account-number">{{ virtualAccount.accountNumber }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">입금금액</span>
+            <span class="value">{{ chargedAmount.toLocaleString() }}원</span>
+          </div>
+          <div class="info-row">
+            <span class="label">충전 크레딧</span>
+            <span class="value">{{ chargedCredit }} Credit</span>
+          </div>
+          <div class="info-row">
+            <span class="label">입금기한</span>
+            <span class="value due-date">{{ formatDueDate(virtualAccount.dueDate) }}</span>
+          </div>
+        </div>
+        <p class="modal-warn">입금기한 내에 입금하지 않으면 자동 취소됩니다.</p>
         <button class="btn-confirm" @click="goToCreditMain">확인</button>
       </div>
 
@@ -129,6 +168,9 @@ import { paymentAPI } from '@/api/payment';
 const router = useRouter();
 const route = useRoute();
 const auth = useAuthStore();
+
+// 결제 수단 선택
+const paymentMethod = ref('CARD');
 
 // 약관
 const terms = reactive([
@@ -155,6 +197,7 @@ const openTerms = (termId) => {
 
 // 충전 패키지
 const plans = [
+  { credit: 1, unitPrice: 1000, totalPrice: 1000 },
   { credit: 30, unitPrice: 8900, totalPrice: 267000 },
   { credit: 50, unitPrice: 7900, totalPrice: 395000 },
   { credit: 100, unitPrice: 7400, totalPrice: 740000 },
@@ -170,7 +213,15 @@ const paymentStep = ref('idle');
 const failMessage = ref('');
 const chargedCredit = ref(0);
 const chargedAmount = ref(0);
+const chargedMethod = ref('CARD');
 const widgetReady = ref(false);
+
+// 가상계좌 정보
+const virtualAccount = ref({
+  bankName: '',
+  accountNumber: '',
+  dueDate: '',
+});
 
 // 위젯 인스턴스
 let widgets = null;
@@ -189,19 +240,39 @@ onMounted(async () => {
 
   if (paymentKey && orderId && amount) {
     paymentStep.value = 'processing';
+
+    // orderId 접두사로 결제 수단 판별
+    const isVirtual = orderId.startsWith('DIWAVE_VA_');
+
     try {
-      const res = await paymentAPI.confirm({
-        paymentKey,
-        orderId,
-        amount: Number(amount),
-      });
-      if (res.data.success) {
-        chargedCredit.value = res.data.data.creditAmount;
-        chargedAmount.value = Number(amount);
-        paymentStep.value = 'success';
+      let res;
+      if (isVirtual) {
+        res = await paymentAPI.confirmVirtual({ paymentKey, orderId, amount: Number(amount) });
+        if (res.data.success) {
+          chargedCredit.value = res.data.data.creditAmount;
+          chargedAmount.value = Number(amount);
+          chargedMethod.value = 'VIRTUAL_ACCOUNT';
+          virtualAccount.value = {
+            bankName: res.data.data.bankName,
+            accountNumber: res.data.data.accountNumber,
+            dueDate: res.data.data.dueDate,
+          };
+          paymentStep.value = 'virtual-issued';
+        } else {
+          failMessage.value = res.data.message || '가상계좌 발급 실패';
+          paymentStep.value = 'fail';
+        }
       } else {
-        failMessage.value = res.data.message || '승인 실패';
-        paymentStep.value = 'fail';
+        res = await paymentAPI.confirm({ paymentKey, orderId, amount: Number(amount) });
+        if (res.data.success) {
+          chargedCredit.value = res.data.data.creditAmount;
+          chargedAmount.value = Number(amount);
+          chargedMethod.value = 'CARD';
+          paymentStep.value = 'success';
+        } else {
+          failMessage.value = res.data.message || '승인 실패';
+          paymentStep.value = 'fail';
+        }
       }
     } catch (e) {
       failMessage.value = e.response?.data?.message || '결제 승인 중 오류';
@@ -251,19 +322,25 @@ const startPayment = async () => {
       customerKey: TossPayments.ANONYMOUS,
     });
 
-    await payment.requestPayment({
-      method: 'CARD',
+    // orderId에 결제 수단 구분 포함 (리다이렉트 시 판별용)
+    const orderIdPrefix = paymentMethod.value === 'VIRTUAL_ACCOUNT' ? 'DIWAVE_VA_' : 'DIWAVE_';
+    const orderId = `${orderIdPrefix}${auth.user.hospital_id}_${Date.now()}`;
+
+    const requestParams = {
+      method: paymentMethod.value === 'VIRTUAL_ACCOUNT' ? 'TRANSFER' : 'CARD',
       amount: {
         currency: 'KRW',
         value: selectedPlan.value.totalPrice,
       },
-      orderId: `DIWAVE_${auth.user.hospital_id}_${Date.now()}`,
+      orderId,
       orderName: `DI-WAVE 크레딧 ${selectedCredit.value}건`,
       successUrl: `${window.location.origin}/user-info/credit-charge`,
       failUrl: `${window.location.origin}/user-info/credit-charge`,
       customerEmail: auth.user.email || undefined,
       customerName: auth.user.name || undefined,
-    });
+    };
+
+    await payment.requestPayment(requestParams);
   } catch (error) {
     if (error.code === 'USER_CANCEL') {
       paymentStep.value = 'idle';
@@ -272,6 +349,17 @@ const startPayment = async () => {
       paymentStep.value = 'fail';
     }
   }
+};
+
+const formatDueDate = (dateStr) => {
+  if (!dateStr) return '-';
+  const d = new Date(dateStr);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const h = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  return `${y}-${m}-${day} ${h}:${min}`;
 };
 
 const cancelPayment = () => {
@@ -391,17 +479,23 @@ const goToCreditMain = () => {
 
 // 결제 수단
 .payment-method {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   .method-btn {
     padding: 10px 24px;
+    min-width: 132px;
     border: 1px solid $dark-line-gray;
-    border-radius: $radius-sm;
+    // border-radius: $radius-sm;
     color: $dark-text;
+    border: 1px solid $dark-gray;
     background: none;
     @include font-14-medium;
+    cursor: pointer;
 
     &.active {
-      border-color: $main-color;
-      color: $main-color;
+      border-color: $sub-color-2;
+      color: $sub-color-2;
     }
   }
 }
@@ -549,6 +643,48 @@ const goToCreditMain = () => {
       @include font-14-regular;
       color: $white;
       margin-bottom: 6px;
+    }
+  }
+
+  // 가상계좌 정보
+  .virtual-info {
+    text-align: left;
+    margin: 20px 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 16px 20px;
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+
+      &:not(:last-child) {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .label {
+        @include font-14-regular;
+        color: $dark-text;
+        min-width: 80px;
+      }
+
+      .value {
+        @include font-14-bold;
+        color: $white;
+        text-align: right;
+      }
+
+      .account-number {
+        color: $sub-color-2;
+        letter-spacing: 0.5px;
+      }
+
+      .due-date {
+        color: $dark-text;
+        @include font-14-regular;
+      }
     }
   }
 
