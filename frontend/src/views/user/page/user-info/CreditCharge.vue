@@ -327,7 +327,7 @@ const startPayment = async () => {
     const orderId = `${orderIdPrefix}${auth.user.hospital_id}_${Date.now()}`;
 
     const requestParams = {
-      method: paymentMethod.value === 'VIRTUAL_ACCOUNT' ? 'VIRTUAL_ACCOUNT' : 'CARD',
+      method: paymentMethod.value === 'VIRTUAL_ACCOUNT' ? '가상계좌' : '카드',
       amount: {
         currency: 'KRW',
         value: selectedPlan.value.totalPrice,
