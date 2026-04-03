@@ -162,14 +162,16 @@ exports.confirmVirtualAccount = async (req, res) => {
 exports.handleWebhook = async (req, res) => {
   const { eventType, data } = req.body
 
-  console.log('웹훅 수신:', eventType, data?.paymentKey, data?.status)
+  // eventType 없는 구형식 (body에 직접 paymentKey/status/orderId 포함)
+  const paymentKey = data?.paymentKey || req.body.paymentKey
+  const status = data?.status || req.body.status
 
-  // 1) 처리 가능한 이벤트만 처리
-  if (eventType !== 'DEPOSIT_CALLBACK' && eventType !== 'PAYMENT_STATUS_CHANGED') {
+  console.log('웹훅 수신:', eventType || '(구형식)', paymentKey, status)
+
+  // paymentKey 없으면 무시
+  if (!paymentKey) {
     return res.json({ success: true })
   }
-
-  const { paymentKey, status } = data
 
   // 입금 완료가 아닌 경우 (CANCELED 등)
   if (status !== 'DONE') {
