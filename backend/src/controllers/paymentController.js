@@ -136,7 +136,7 @@ exports.confirmVirtualAccount = async (req, res) => {
         hospitalId, amount, creditAmount, paymentKey,
         va.accountNumber || null,
         va.bankCode || null,
-        va.dueDate || null,
+        va.dueDate ? new Date(va.dueDate) : null,
         va.customerName || null
       ]
     )
