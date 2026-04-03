@@ -170,8 +170,8 @@ exports.handleWebhook = async (req, res) => {
 
   const { eventType, data } = req.body
 
-  // 2) 입금 완료 이벤트만 처리
-  if (eventType !== 'DEPOSIT_CALLBACK') {
+  // 2) 처리 가능한 이벤트만 처리
+  if (eventType !== 'DEPOSIT_CALLBACK' && eventType !== 'PAYMENT_STATUS_CHANGED') {
     return res.json({ success: true })
   }
 
