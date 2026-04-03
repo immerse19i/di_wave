@@ -160,9 +160,10 @@ exports.confirmVirtualAccount = async (req, res) => {
 
 // 토스 웹훅 수신 (입금 완료 등)
 exports.handleWebhook = async (req, res) => {
-  // 1) 서명 검증
+  // 1) 서명 검증 (raw body 사용)
   const signature = req.headers['tosspayments-signature']
-  if (!verifyWebhookSignature(req.body, signature, config.toss.webhookSecret)) {
+  const rawBody = req.rawBody || JSON.stringify(req.body)
+  if (!verifyWebhookSignature(rawBody, signature, config.toss.webhookSecret)) {
     console.error('웹훅 서명 검증 실패')
     return res.status(400).json({ success: false, message: '서명 검증 실패' })
   }
@@ -543,12 +544,12 @@ exports.refundPayment = async (req, res) => {
   }
 }
 
-// 웹훅 서명 검증
-function verifyWebhookSignature(body, signature, secret) {
+// 웹훅 서명 검증 (raw body 문자열 기준)
+function verifyWebhookSignature(rawBody, signature, secret) {
   if (!signature || !secret) return false
   const expected = crypto
     .createHmac('sha256', secret)
-    .update(JSON.stringify(body))
+    .update(rawBody)
     .digest('base64')
   return expected === signature
 }
