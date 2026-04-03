@@ -420,7 +420,7 @@ exports.getRefundablePayments = async (req, res) => {
 
 // 환불 처리
 exports.refundPayment = async (req, res) => {
-  const { paymentId } = req.body
+  const { paymentId, refundAccount } = req.body
   const hospitalId = req.user.hospital_id
 
   // 1) 결제 조회 (본인 병원)
@@ -461,10 +461,28 @@ exports.refundPayment = async (req, res) => {
     return res.status(400).json({ success: false, message: '크레딧이 일부 사용되어 환불이 불가합니다.\n부분 취소는 고객센터로 문의해 주세요.' })
   }
 
+  // 가상계좌 환불 시 환불 계좌 필수
+  if (payment.payment_method === 'VIRTUAL_ACCOUNT') {
+    if (!refundAccount || !refundAccount.bank || !refundAccount.accountNumber || !refundAccount.holderName) {
+      return res.status(400).json({ success: false, message: '가상계좌 환불 시 환불 계좌 정보가 필요합니다.' })
+    }
+  }
+
   // 3) 토스 결제 취소 API 호출
   try {
     const secretKey = config.toss.secretKey
     const encryptedSecretKey = 'Basic ' + Buffer.from(secretKey + ':').toString('base64')
+
+    const cancelBody = { cancelReason: '고객 환불 요청' }
+
+    // 가상계좌면 환불 계좌 정보 추가
+    if (payment.payment_method === 'VIRTUAL_ACCOUNT' && refundAccount) {
+      cancelBody.refundReceiveAccount = {
+        bank: refundAccount.bank,
+        accountNumber: refundAccount.accountNumber,
+        holderName: refundAccount.holderName
+      }
+    }
 
     const response = await fetch(`https://api.tosspayments.com/v1/payments/${payment.pg_transaction_id}/cancel`, {
       method: 'POST',
@@ -472,7 +490,7 @@ exports.refundPayment = async (req, res) => {
         Authorization: encryptedSecretKey,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ cancelReason: '고객 환불 요청' }),
+      body: JSON.stringify(cancelBody),
     })
 
     const tossResult = await response.json()
