@@ -197,6 +197,7 @@ const openTerms = (termId) => {
 
 // 충전 패키지
 const plans = [
+  { credit: 1, unitPrice: 1000, totalPrice: 1000 },
   { credit: 30, unitPrice: 8900, totalPrice: 267000 },
   { credit: 50, unitPrice: 7900, totalPrice: 395000 },
   { credit: 100, unitPrice: 7400, totalPrice: 740000 },

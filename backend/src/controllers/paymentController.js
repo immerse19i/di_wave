@@ -554,7 +554,7 @@ function verifyWebhookSignature(body, signature, secret) {
 }
 
 function getCreditByAmount(amount) {
-  const plans = { 267000: 30, 395000: 50, 740000: 100 }
+  const plans = { 1000: 1, 267000: 30, 395000: 50, 740000: 100 }
   return plans[amount] || 0
 }
 
