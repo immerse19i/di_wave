@@ -198,6 +198,39 @@
         </button>
       </div>
     </div>
+
+    <!-- 가상계좌 환불 계좌 입력 모달 -->
+    <div class="modal-overlay" v-if="showAccountForm" @click.self="showAccountForm = false">
+      <div class="account-modal">
+        <h3 class="modal-title">환불 계좌 입력</h3>
+        <p class="account-desc">가상계좌 결제 건은 환불받을 계좌 정보가 필요합니다.</p>
+
+        <div class="account-form">
+          <div class="form-row">
+            <label>은행</label>
+            <select v-model="refundAccountForm.bank">
+              <option value="">은행 선택</option>
+              <option v-for="bank in bankList" :key="bank.code" :value="bank.code">
+                {{ bank.name }}
+              </option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>계좌번호</label>
+            <input type="text" v-model="refundAccountForm.accountNumber" placeholder="'-' 없이 숫자만 입력" />
+          </div>
+          <div class="form-row">
+            <label>예금주</label>
+            <input type="text" v-model="refundAccountForm.holderName" placeholder="예금주명" />
+          </div>
+        </div>
+
+        <div class="account-btns">
+          <button class="btn-cancel" @click="showAccountForm = false">취소</button>
+          <button class="btn-submit" @click="submitAccountRefund">환불 요청</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -230,6 +263,39 @@ const perPage = 12;
 // 환불 모달
 const showRefundModal = ref(false);
 const refundableList = ref([]);
+
+// 가상계좌 환불 계좌 입력
+const showAccountForm = ref(false);
+const selectedRefundItem = ref(null);
+const refundAccountForm = ref({
+  bank: '',
+  accountNumber: '',
+  holderName: '',
+});
+
+const bankList = [
+  { code: '06', name: 'KB국민은행' },
+  { code: '88', name: '신한은행' },
+  { code: '20', name: '우리은행' },
+  { code: '81', name: '하나은행' },
+  { code: '11', name: 'NH농협은행' },
+  { code: '03', name: 'IBK기업은행' },
+  { code: '90', name: '카카오뱅크' },
+  { code: '92', name: '토스뱅크' },
+  { code: '89', name: '케이뱅크' },
+  { code: '23', name: 'SC제일은행' },
+  { code: '31', name: 'DGB대구은행' },
+  { code: '32', name: '부산은행' },
+  { code: '34', name: '광주은행' },
+  { code: '37', name: '전북은행' },
+  { code: '35', name: '제주은행' },
+  { code: '39', name: '경남은행' },
+  { code: '71', name: '우체국' },
+  { code: '45', name: '새마을금고' },
+  { code: '48', name: '신협' },
+  { code: '50', name: '저축은행' },
+  { code: '02', name: 'KDB산업은행' },
+];
 
 // 초기 30일 설정
 const setQuickRange = (range) => {
@@ -287,26 +353,53 @@ const openRefundModal = async () => {
 
 // 환불 확인
 const confirmRefund = (item) => {
+  if (item.payment_method === 'VIRTUAL_ACCOUNT') {
+    // 가상계좌: 계좌 입력 폼 표시
+    selectedRefundItem.value = item;
+    refundAccountForm.value = { bank: '', accountNumber: '', holderName: '' };
+    showAccountForm.value = true;
+  } else {
+    // 카드: 바로 확인 팝업
+    const dateStr = formatDate(item.created_at);
+    message.showConfirm(
+      `충전일시 : ${dateStr}\n충전크레딧 : ${item.credit_amount}\n정말 환불하시겠습니까?`,
+      () => executeRefund(item.id, null),
+    );
+  }
+};
+
+// 가상계좌 환불 계좌 입력 후 실행
+const submitAccountRefund = () => {
+  const { bank, accountNumber, holderName } = refundAccountForm.value;
+  if (!bank || !accountNumber || !holderName) {
+    message.showAlert('은행, 계좌번호, 예금주를 모두 입력해주세요.');
+    return;
+  }
+  const item = selectedRefundItem.value;
   const dateStr = formatDate(item.created_at);
   message.showConfirm(
     `충전일시 : ${dateStr}\n충전크레딧 : ${item.credit_amount}\n정말 환불하시겠습니까?`,
-    async () => {
-      try {
-        const res = await paymentAPI.refund(item.id);
-        if (res.data.success) {
-          message.showAlert('환불이 완료되었습니다.');
-          showRefundModal.value = false;
-          fetchList();
-        } else {
-          message.showAlert(res.data.message || '환불 처리에 실패했습니다.');
-        }
-      } catch (error) {
-        message.showAlert(
-          error.response?.data?.message || '환불 처리 중 오류가 발생했습니다.',
-        );
-      }
-    },
+    () => executeRefund(item.id, refundAccountForm.value),
   );
+};
+
+// 환불 실행 (공통)
+const executeRefund = async (paymentId, refundAccount) => {
+  try {
+    const res = await paymentAPI.refund(paymentId, refundAccount);
+    if (res.data.success) {
+      message.showAlert('환불이 완료되었습니다.');
+      showRefundModal.value = false;
+      showAccountForm.value = false;
+      fetchList();
+    } else {
+      message.showAlert(res.data.message || '환불 처리에 실패했습니다.');
+    }
+  } catch (error) {
+    message.showAlert(
+      error.response?.data?.message || '환불 처리 중 오류가 발생했습니다.',
+    );
+  }
 };
 
 // 결제 수단 텍스트
@@ -753,6 +846,100 @@ onMounted(() => {
 
     &:hover {
       background: $sub-color;
+    }
+  }
+}
+
+/* 가상계좌 환불 계좌 입력 모달 */
+.account-modal {
+  background: $dark-bg;
+  border-radius: $radius-lg;
+  padding: 40px;
+  max-width: 480px;
+  width: 90%;
+  color: $white;
+
+  .modal-title {
+    @include font-20-bold;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .account-desc {
+    @include font-14-regular;
+    color: $dark-text;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .account-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+
+    .form-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      label {
+        @include font-14-medium;
+      }
+
+      select,
+      input {
+        padding: 10px 12px;
+        background: $dark-input;
+        border: 1px solid $dark-line-gray;
+        border-radius: $radius-sm;
+        color: $white;
+        @include font-14-regular;
+
+        &::placeholder {
+          color: $dark-input-gray;
+        }
+
+        &:focus {
+          border-color: $sub-color-2;
+        }
+      }
+
+      select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 32px;
+      }
+    }
+  }
+
+  .account-btns {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+
+    .btn-cancel {
+      padding: 10px 32px;
+      background: $dark-line-gray;
+      color: $white;
+      border-radius: $radius-sm;
+      @include font-14-medium;
+      cursor: pointer;
+    }
+
+    .btn-submit {
+      padding: 10px 32px;
+      background: $main-color;
+      color: $white;
+      border-radius: $radius-sm;
+      @include font-14-medium;
+      cursor: pointer;
+
+      &:hover {
+        background: $sub-color;
+      }
     }
   }
 }

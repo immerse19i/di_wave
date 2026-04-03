@@ -31,8 +31,10 @@ export const paymentAPI = {
     return api.get('/payments/refundable')
   },
 
-  // 환불 처리
-  refund(paymentId) {
-    return api.post('/payments/refund', { paymentId })
+  // 환불 처리 (가상계좌면 refundAccount 포함)
+  refund(paymentId, refundAccount) {
+    const data = { paymentId }
+    if (refundAccount) data.refundAccount = refundAccount
+    return api.post('/payments/refund', data)
   }
 }
