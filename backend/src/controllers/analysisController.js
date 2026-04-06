@@ -96,47 +96,60 @@ const [result] = await pool.query(
             [boneAgeYears, boneAgeMonths, JSON.stringify(aiResult.data), analysisId] 
         );
 
-        // 6. 크레딧 차감
-        // 6. FIFO 크레딧 차감 (만료 임박 배치부터 소진)
-        let remainingCost = config.credit.perAnalysis;
+                // 6. FIFO 크레딧 차감 (트랜잭션으로 보호)
+        const creditConn = await pool.getConnection();
+        try {
+          await creditConn.beginTransaction();
 
-        // 잔여량 있는 charge 배치 조회 (만료 빠른 순, NULL=무기한은 마지막)
-        const [batches] = await pool.query(
+          // 잔여량 있는 charge 배치 조회 (FOR UPDATE 락)
+          const [batches] = await creditConn.query(
             `SELECT id, remaining_amount, expires_at FROM credit_transactions
              WHERE hospital_id = ? AND type = 'charge' AND remaining_amount > 0
                AND (expires_at IS NULL OR expires_at > NOW())
-             ORDER BY expires_at IS NULL ASC, expires_at ASC, id ASC`,
+             ORDER BY expires_at IS NULL ASC, expires_at ASC, id ASC
+             FOR UPDATE`,
             [hospitalId]
-        );
+          );
 
-        for (const batch of batches) {
+          let remainingCost = config.credit.perAnalysis;
+          for (const batch of batches) {
             if (remainingCost <= 0) break;
             const deduct = Math.min(batch.remaining_amount, remainingCost);
-            await pool.query(
-                'UPDATE credit_transactions SET remaining_amount = remaining_amount - ? WHERE id = ?',
-                [deduct, batch.id]
+            await creditConn.query(
+              'UPDATE credit_transactions SET remaining_amount = remaining_amount - ? WHERE id = ?',
+              [deduct, batch.id]
             );
             remainingCost -= deduct;
-        }
+          }
 
-        // credits balance 차감
-        await pool.query(
+          // credits balance 차감
+          await creditConn.query(
             'UPDATE credits SET balance = balance - ? WHERE hospital_id = ?',
             [config.credit.perAnalysis, hospitalId]
-        );
+          );
 
-        // 크레딧 거래 내역 기록
-        const [updatedCredit] = await pool.query(
+          // 변경 후 잔액 조회
+          const [updatedCredit] = await creditConn.query(
             'SELECT balance FROM credits WHERE hospital_id = ?',
             [hospitalId]
-        );
+          );
 
-        await pool.query(
+          // 크레딧 거래 내역 기록
+          await creditConn.query(
             `INSERT INTO credit_transactions (hospital_id, type, amount, balance_after, description, analysis_id)
              VALUES (?, 'use', ?, ?, ?, ?)`,
             [hospitalId, config.credit.perAnalysis, updatedCredit[0].balance, '뼈나이 분석', analysisId]
-        );
+          );
 
+          await creditConn.commit();
+        } catch (creditError) {
+          await creditConn.rollback();
+          // 분석은 완료됐지만 크레딧 차감 실패 → 로그 남기고 에러
+          console.error('Credit deduction error:', creditError);
+          return res.status(500).json({ success: false, message: '크레딧 차감 중 오류가 발생했습니다.' });
+        } finally {
+          creditConn.release();
+        }
 
         res.status(201).json({
             success: true,
@@ -146,8 +159,7 @@ const [result] = await pool.query(
             }
         });
 
-
-    }catch (error) {
+    } catch (error) {
         console.error('분석 오류:', error);
         res.status(500).json({
             success: false,
