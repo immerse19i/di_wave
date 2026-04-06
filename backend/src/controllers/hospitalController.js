@@ -726,22 +726,27 @@ exports.getAccountLogs = async (req, res) => {
 
 // PATCH /api/admin/hospitals/accounts/:id/credit - 크레딧 수동 조정
 exports.adjustCredit = async (req, res) => {
-  const conn = await pool.getConnection();
+  const { id } = req.params;
+  const { type, amount, reason } = req.body;
+
+  // ── validation을 커넥션 획득 전에 수행 ──
+  if (!['charge', 'deduct'].includes(type)) {
+    return res.status(400).json({ success: false, message: '유효하지 않은 조정 유형입니다.' });
+  }
+  const parsedAmount = Number(amount);
+  if (!Number.isInteger(parsedAmount) || parsedAmount <= 0) {
+    return res.status(400).json({ success: false, message: '유효한 정수 크레딧 양을 입력해 주세요.' });
+  }
+
+  let conn;
   try {
-    const { id } = req.params; // hospital_id
-    const { type, amount, reason } = req.body;
-
-    if (!['charge', 'deduct'].includes(type)) {
-      return res.status(400).json({ success: false, message: '유효하지 않은 조정 유형입니다.' });
-    }
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ success: false, message: '크레딧 양을 입력해 주세요.' });
-    }
-
+    conn = await pool.getConnection();
     await conn.beginTransaction();
 
-    // 현재 잔액 조회 (없으면 생성)
-    const [creditRows] = await conn.query('SELECT balance FROM credits WHERE hospital_id = ?', [id]);
+    // 현재 잔액 조회 (FOR UPDATE로 락)
+    const [creditRows] = await conn.query(
+      'SELECT balance FROM credits WHERE hospital_id = ? FOR UPDATE', [id]
+    );
     let currentBalance = 0;
     if (creditRows.length === 0) {
       await conn.query('INSERT INTO credits (hospital_id, balance) VALUES (?, 0)', [id]);
@@ -751,12 +756,35 @@ exports.adjustCredit = async (req, res) => {
 
     // 잔액 계산
     const newBalance = type === 'charge'
-      ? currentBalance + Number(amount)
-      : currentBalance - Number(amount);
+      ? currentBalance + parsedAmount
+      : currentBalance - parsedAmount;
 
     if (newBalance < 0) {
       await conn.rollback();
       return res.status(400).json({ success: false, message: '차감 후 잔액이 0 미만이 됩니다.' });
+    }
+
+    // ── 차감(deduct)인 경우: FIFO로 remaining_amount 소진 ──
+    if (type === 'deduct') {
+      let remaining = parsedAmount;
+      const [batches] = await conn.query(
+        `SELECT id, remaining_amount FROM credit_transactions
+         WHERE hospital_id = ? AND type = 'charge' AND remaining_amount > 0
+           AND (expires_at IS NULL OR expires_at > NOW())
+         ORDER BY expires_at IS NULL ASC, expires_at ASC, id ASC
+         FOR UPDATE`,
+        [id]
+      );
+
+      for (const batch of batches) {
+        if (remaining <= 0) break;
+        const deduct = Math.min(batch.remaining_amount, remaining);
+        await conn.query(
+          'UPDATE credit_transactions SET remaining_amount = remaining_amount - ? WHERE id = ?',
+          [deduct, batch.id]
+        );
+        remaining -= deduct;
+      }
     }
 
     // credits 업데이트
@@ -765,32 +793,35 @@ exports.adjustCredit = async (req, res) => {
     // credit_transactions 기록
     const txType = type === 'charge' ? 'charge' : 'use';
     const expiresAt = type === 'charge' ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null;
-    const source = 'admin_grant';
+    const source = type === 'charge' ? 'admin_grant' : 'admin_deduct';
     await conn.query(
       `INSERT INTO credit_transactions (hospital_id, type, amount, balance_after, description, expires_at, source, is_notified, remaining_amount)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id, txType, Number(amount), newBalance, reason, expiresAt, source, 0, type === 'charge' ? Number(amount) : null]
+      [id, txType, parsedAmount, newBalance, reason, expiresAt, source, 0,
+       type === 'charge' ? parsedAmount : null]
     );
-
 
     // admin_logs 기록
     const typeLabel = type === 'charge' ? '지급' : '차감';
     await conn.query(
       `INSERT INTO admin_logs (hospital_id, target_type, target_id, category, details, operator, actor_type)
        VALUES (?, 'account', ?, '크레딧 수동 관리', ?, ?, 'admin')`,
-      [id, id, `${typeLabel} : ${amount} / 사유 : [${reason}]`, req.user.name || 'admin']
+      [id, id, `${typeLabel} : ${parsedAmount} / 사유 : [${reason}]`, req.user.name || 'admin']
     );
 
     await conn.commit();
     res.json({ success: true, data: { balance: newBalance } });
   } catch (error) {
-    await conn.rollback();
+    if (conn) {
+      try { await conn.rollback(); } catch (e) { console.error('Rollback error:', e); }
+    }
     console.error('AdjustCredit error:', error);
     res.status(500).json({ success: false, message: '서버 오류' });
   } finally {
-    conn.release();
+    if (conn) conn.release();
   }
 };
+
 // GET /api/admin/hospitals/accounts/:id/credit-history - 크레딧 이력 조회
 exports.getCreditHistory = async (req, res) => {
   try {
