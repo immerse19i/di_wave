@@ -247,7 +247,7 @@
             <span>M</span>
           </div>
           <button class="btn-default" @click="resetToDefault">기본값</button>
-          <button class="btn-save" @click="saveDoctorBoneAge">저장</button>
+          <button class="btn-save" @click="saveDoctorBoneAge" :disabled="isSaving">{{ isSaving ? '저장중...' : '저장' }}</button>
           <span class="doctor-note">*의료진 최종 확인 필수</span>
         </div>
 
@@ -503,7 +503,7 @@
   <div v-else class="loading">데이터를 불러오는 중...</div>
 </template>
 <script setup>
-import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue';
+import { ref, reactive, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 
 import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router';
 import { analysisAPI } from '@/api/analysis';
@@ -541,6 +541,7 @@ const doctorBoneAgeMonths = ref(0);
 const savedDoctorYears = ref(0);
 const savedDoctorMonths = ref(0);
 const skipGuard = ref(false);
+const isSaving = ref(false);
 
 // 변경 여부
 const isDoctorBoneAgeChanged = computed(() => {
@@ -648,6 +649,7 @@ const fetchAnalysis = async () => {
     fetchPreviousRecords();
   } catch (error) {
     console.error('분석 상세 조회 오류:', error);
+    message.showAlert('분석 데이터를 불러오는데 실패했습니다.\n잠시 후 다시 시도해주세요.');
   }
 };
 
@@ -656,7 +658,7 @@ const fetchPreviousRecords = async () => {
     const res = await analysisAPI.getList({
       page: 1,
       limit: 100,
-      search: analysis.value.patient_name,
+      search: analysis.value.patient_code,
     });
     const currentDate = new Date(analysis.value.analysis_date || analysis.value.created_at);
     previousRecords.value = res.data.data.filter(
@@ -671,13 +673,20 @@ const fetchPreviousRecords = async () => {
   }
 };
 
+// result_json 파싱 유틸
+const parseResultJson = (jsonData) => {
+  if (!jsonData) return {};
+  if (typeof jsonData !== 'string') return jsonData;
+  try {
+    return JSON.parse(jsonData);
+  } catch {
+    console.error('result_json 파싱 실패');
+    return {};
+  }
+};
+
 // AI result_json 파싱
-const resultData = computed(() => {
-  if (!analysis.value?.result_json) return {};
-  return typeof analysis.value.result_json === 'string'
-    ? JSON.parse(analysis.value.result_json)
-    : analysis.value.result_json;
-});
+const resultData = computed(() => parseResultJson(analysis.value?.result_json));
 
 // MPH (유전적 예측 키)
 const mphHeight = computed(() => {
@@ -687,12 +696,7 @@ const mphHeight = computed(() => {
 });
 
 // 비교 기록 result_json 파싱
-const comparisonResultData = computed(() => {
-  if (!comparisonRecord.value?.result_json) return {};
-  return typeof comparisonRecord.value.result_json === 'string'
-    ? JSON.parse(comparisonRecord.value.result_json)
-    : comparisonRecord.value.result_json;
-});
+const comparisonResultData = computed(() => parseResultJson(comparisonRecord.value?.result_json));
 
 // 비교 기록 유전적 예측 키
 const comparisonMphHeight = computed(() => {
@@ -754,7 +758,8 @@ const resetToDefault = () => {
 
 // 의사 뼈나이 저장
 const saveDoctorBoneAge = async () => {
-  if (!analysis.value?.id) return;
+  if (!analysis.value?.id || isSaving.value) return;
+  isSaving.value = true;
   try {
     const res = await analysisAPI.updateDoctorBoneAge(analysis.value.id, {
       bone_age_years: doctorBoneAgeYears.value,
@@ -775,6 +780,8 @@ const saveDoctorBoneAge = async () => {
   } catch (e) {
     console.error('의사 뼈나이 저장 오류:', e);
     message.showAlert('저장에 실패했습니다.');
+  } finally {
+    isSaving.value = false;
   }
 };
 
@@ -998,6 +1005,14 @@ onBeforeRouteLeave((to) => {
 onMounted(async () => {
   await fetchAnalysis();
   nextTick(() => drawGrowthChart());
+});
+
+// Chart.js 인스턴스 정리 (메모리 누수 방지)
+onBeforeUnmount(() => {
+  if (growthChart) {
+    growthChart.destroy();
+    growthChart = null;
+  }
 });
 
 // 라우트 변경 시 (이전기록 클릭)
