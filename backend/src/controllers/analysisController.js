@@ -301,13 +301,18 @@ exports.updateDoctorBoneAge = async (req, res) => {
       return res.status(500).json({ success: false, message: 'PAH 재계산 실패' });
     }
 
+    // 기존 result_json에서 AI 원본 뼈나이 보존
+    const existingResult = JSON.parse(analysis.result_json || '{}');
+    const newResult = aiResult.data;
+    newResult.AI_BoneAge = existingResult.AI_BoneAge || existingResult.BoneAge;
+
     // 의사 뼈나이 + 새 result_json 저장
     await pool.query(
       'UPDATE analyses SET bone_age_years = ?, bone_age_months = ?, result_json = ? WHERE id = ? AND hospital_id = ?',
-      [bone_age_years, bone_age_months, JSON.stringify(aiResult.data), id, hospitalId]
+      [bone_age_years, bone_age_months, JSON.stringify(newResult), id, hospitalId]
     );
 
-    res.json({ success: true, data: aiResult.data });
+    res.json({ success: true, data: newResult });
   } catch (error) {
     console.error('의사 뼈나이 저장 오류:', error);
     res.status(500).json({ success: false, message: '저장 실패' });
