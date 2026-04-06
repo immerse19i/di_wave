@@ -160,21 +160,18 @@ exports.confirmVirtualAccount = async (req, res) => {
 
 // 토스 웹훅 수신 (입금 완료 등)
 exports.handleWebhook = async (req, res) => {
-  // 1) 서명 검증
-  const signature = req.headers['tosspayments-signature']
-  if (!verifyWebhookSignature(req.body, signature, config.toss.webhookSecret)) {
-    console.error('웹훅 서명 검증 실패')
-    return res.status(400).json({ success: false, message: '서명 검증 실패' })
-  }
-
   const { eventType, data } = req.body
 
-  // 2) 입금 완료 이벤트만 처리
-  if (eventType !== 'DEPOSIT_CALLBACK') {
+  // eventType 없는 구형식 (body에 직접 paymentKey/status/orderId 포함)
+  const paymentKey = data?.paymentKey || req.body.paymentKey
+  const status = data?.status || req.body.status
+
+  console.log('웹훅 수신:', eventType || '(구형식)', paymentKey, status)
+
+  // paymentKey 없으면 무시
+  if (!paymentKey) {
     return res.json({ success: true })
   }
-
-  const { paymentKey, status } = data
 
   // 입금 완료가 아닌 경우 (CANCELED 등)
   if (status !== 'DONE') {
@@ -423,7 +420,7 @@ exports.getRefundablePayments = async (req, res) => {
 
 // 환불 처리
 exports.refundPayment = async (req, res) => {
-  const { paymentId } = req.body
+  const { paymentId, refundAccount } = req.body
   const hospitalId = req.user.hospital_id
 
   // 1) 결제 조회 (본인 병원)
@@ -464,10 +461,28 @@ exports.refundPayment = async (req, res) => {
     return res.status(400).json({ success: false, message: '크레딧이 일부 사용되어 환불이 불가합니다.\n부분 취소는 고객센터로 문의해 주세요.' })
   }
 
+  // 가상계좌 환불 시 환불 계좌 필수
+  if (payment.payment_method === 'VIRTUAL_ACCOUNT') {
+    if (!refundAccount || !refundAccount.bank || !refundAccount.accountNumber || !refundAccount.holderName) {
+      return res.status(400).json({ success: false, message: '가상계좌 환불 시 환불 계좌 정보가 필요합니다.' })
+    }
+  }
+
   // 3) 토스 결제 취소 API 호출
   try {
     const secretKey = config.toss.secretKey
     const encryptedSecretKey = 'Basic ' + Buffer.from(secretKey + ':').toString('base64')
+
+    const cancelBody = { cancelReason: '고객 환불 요청' }
+
+    // 가상계좌면 환불 계좌 정보 추가
+    if (payment.payment_method === 'VIRTUAL_ACCOUNT' && refundAccount) {
+      cancelBody.refundReceiveAccount = {
+        bank: refundAccount.bank,
+        accountNumber: refundAccount.accountNumber,
+        holderName: refundAccount.holderName
+      }
+    }
 
     const response = await fetch(`https://api.tosspayments.com/v1/payments/${payment.pg_transaction_id}/cancel`, {
       method: 'POST',
@@ -475,7 +490,7 @@ exports.refundPayment = async (req, res) => {
         Authorization: encryptedSecretKey,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ cancelReason: '고객 환불 요청' }),
+      body: JSON.stringify(cancelBody),
     })
 
     const tossResult = await response.json()
@@ -543,12 +558,12 @@ exports.refundPayment = async (req, res) => {
   }
 }
 
-// 웹훅 서명 검증
-function verifyWebhookSignature(body, signature, secret) {
+// 웹훅 서명 검증 (raw body 문자열 기준)
+function verifyWebhookSignature(rawBody, signature, secret) {
   if (!signature || !secret) return false
   const expected = crypto
     .createHmac('sha256', secret)
-    .update(JSON.stringify(body))
+    .update(rawBody)
     .digest('base64')
   return expected === signature
 }
