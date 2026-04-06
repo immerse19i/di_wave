@@ -658,11 +658,13 @@ const fetchPreviousRecords = async () => {
       limit: 100,
       search: analysis.value.patient_name,
     });
+    const currentDate = new Date(analysis.value.analysis_date || analysis.value.created_at);
     previousRecords.value = res.data.data.filter(
       (item) =>
         item.id !== analysis.value.id &&
         item.patient_code === analysis.value.patient_code &&
-        item.patient_name === analysis.value.patient_name,
+        item.patient_name === analysis.value.patient_name &&
+        new Date(item.analysis_date || item.created_at) < currentDate,
     );
   } catch (error) {
     console.error('이전기록 조회 오류:', error);
@@ -740,7 +742,8 @@ const finalPercent = computed(() =>
 // 의사 판독값 변경 시 서버에 저장
 // 기본값 복원 (AI 원본)
 const resetToDefault = () => {
-  const boneAge = resultData.value?.BoneAge;
+  // AI 원본 뼈나이 우선 참조
+  const boneAge = resultData.value?.AI_BoneAge || resultData.value?.BoneAge;
   if (!boneAge) return;
   const match = boneAge.match(/(\d+)Y\s*(\d+)M/);
   if (match) {
