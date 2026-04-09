@@ -6,6 +6,8 @@ export const authAPI = {
   getMe: () => api.get('/auth/me'),
   changePassword: (currentPassword, newPassword) => api.put('/auth/password', { currentPassword, newPassword }),
   checkId: (loginId) => api.post('/auth/check-id', { loginId }),
+  checkEmail: (email) => api.post('/auth/check-email', { email }),
+
   sendCode: (data) => api.post('/auth/send-code', data),
   verifyCode: (data) => api.post('/auth/verify-code', data),
   register: (formData) => api.post('/auth/register', formData, {
