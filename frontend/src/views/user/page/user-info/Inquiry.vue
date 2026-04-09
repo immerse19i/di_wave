@@ -25,7 +25,7 @@
     <div class="form-group">
       <label>첨부파일</label>
       <span class="file-guide"
-        >jpg,pjeg,png,pdf 형식의 파일만 등록됩니다. 최대 10mb</span
+        >jpg,jpeg,png,pdf 형식의 파일만 등록됩니다. 최대 10mb</span
       >
     </div>
 
