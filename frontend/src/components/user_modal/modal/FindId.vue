@@ -13,7 +13,9 @@
           placeholder="가입시 입력한 이메일 주소를 입력해 주세요"
           @blur="validateEmail"
         />
-        <p v-if="emailError" class="error-msg">올바른 이메일 주소를 입력해 주세요</p>
+        <p v-if="emailError" class="error-msg">
+          올바른 이메일 주소를 입력해 주세요
+        </p>
       </div>
 
       <div class="form-group">
@@ -32,7 +34,9 @@
     <!-- 2단계: 인증번호 입력 -->
     <div v-else-if="step === 2">
       <div class="resend-row">
-        <span class="resend-link" @click="handleResend">인증번호가 오지 않을경우 (클릭)</span>
+        <span class="resend-link" @click="handleResend"
+          >인증번호가 오지 않을경우 (클릭)</span
+        >
         <span class="resend-info">30초마다 재전송가능</span>
       </div>
 
@@ -48,15 +52,17 @@
           />
         </div>
 
-        <button type="submit" class="btn-submit" :disabled="loading">인증번호 확인</button>
+        <button type="submit" class="btn-submit" :disabled="loading">
+          인증번호 확인
+        </button>
       </form>
     </div>
 
     <!-- 3단계: ID 확인 결과 -->
-    <div v-else-if="step === 3" class="result-wrap">
+    <!-- <div v-else-if="step === 3" class="result-wrap">
       <p class="result-text">고객님의 ID는 [{{ foundId }}] 입니다.</p>
       <button class="btn-submit" @click="handleClose">닫기</button>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -84,7 +90,8 @@ const form = ref({
 // 이메일 형식 검증
 const validateEmail = () => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  emailError.value = form.value.email !== '' && !emailRegex.test(form.value.email);
+  emailError.value =
+    form.value.email !== '' && !emailRegex.test(form.value.email);
   return !emailError.value;
 };
 
@@ -113,6 +120,7 @@ const handleStep1 = async () => {
 };
 
 // 2단계: 인증번호 확인
+// 2단계: 인증번호 확인
 const handleStep2 = async () => {
   if (!form.value.code) {
     message.showAlert('인증번호를 입력해 주세요.');
@@ -127,11 +135,14 @@ const handleStep2 = async () => {
       type: 'find_id',
     });
     if (res.data.success) {
-      foundId.value = res.data.loginId;
-      step.value = 3;
+      message.showAlert(`고객님의 ID는 [${res.data.loginId}] 입니다.`, () => {
+        modal.close();
+      });
     }
   } catch (error) {
-    const msg = error.response?.data?.message || '인증번호가 올바르지 않거나 만료되었습니다.';
+    const msg =
+      error.response?.data?.message ||
+      '인증번호가 올바르지 않거나 만료되었습니다.';
     message.showAlert(msg);
   } finally {
     loading.value = false;
