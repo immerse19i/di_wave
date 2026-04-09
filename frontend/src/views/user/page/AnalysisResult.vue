@@ -247,7 +247,13 @@
             <span>M</span>
           </div>
           <button class="btn-default" @click="resetToDefault">기본값</button>
-          <button class="btn-save" @click="saveDoctorBoneAge" :disabled="isSaving">{{ isSaving ? '저장중...' : '저장' }}</button>
+          <button
+            class="btn-save"
+            @click="saveDoctorBoneAge"
+            :disabled="isSaving"
+          >
+            {{ isSaving ? '저장중...' : '저장' }}
+          </button>
           <span class="doctor-note">*의료진 최종 확인 필수</span>
         </div>
 
@@ -503,7 +509,15 @@
   <div v-else class="loading">데이터를 불러오는 중...</div>
 </template>
 <script setup>
-import { ref, reactive, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
+import {
+  ref,
+  reactive,
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  watch,
+  nextTick,
+} from 'vue';
 
 import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router';
 import { analysisAPI } from '@/api/analysis';
@@ -649,7 +663,9 @@ const fetchAnalysis = async () => {
     fetchPreviousRecords();
   } catch (error) {
     console.error('분석 상세 조회 오류:', error);
-    message.showAlert('분석 데이터를 불러오는데 실패했습니다.\n잠시 후 다시 시도해주세요.');
+    message.showAlert(
+      '분석 데이터를 불러오는데 실패했습니다.\n잠시 후 다시 시도해주세요.',
+    );
   }
 };
 
@@ -660,7 +676,9 @@ const fetchPreviousRecords = async () => {
       limit: 100,
       search: analysis.value.patient_code,
     });
-    const currentDate = new Date(analysis.value.analysis_date || analysis.value.created_at);
+    const currentDate = new Date(
+      analysis.value.analysis_date || analysis.value.created_at,
+    );
     previousRecords.value = res.data.data.filter(
       (item) =>
         item.id !== analysis.value.id &&
@@ -696,7 +714,9 @@ const mphHeight = computed(() => {
 });
 
 // 비교 기록 result_json 파싱
-const comparisonResultData = computed(() => parseResultJson(comparisonRecord.value?.result_json));
+const comparisonResultData = computed(() =>
+  parseResultJson(comparisonRecord.value?.result_json),
+);
 
 // 비교 기록 유전적 예측 키
 const comparisonMphHeight = computed(() => {
@@ -802,6 +822,33 @@ const briefingText = computed(() => {
   return `${analysis.value.patient_name} 님의 실제 나이보다 뼈 나이가 ${y}Y ${m}M 만큼 ${direction}`;
 });
 
+const customTitle = {
+  id: 'customTitle',
+  beforeLayout: (chart, args, opts) => {
+    const { display, font } = opts;
+    if (!display) return;
+
+    const { ctx } = chart;
+    ctx.font = font || '12px "Helvetica Neue", Helvetica, Arial, sans-serif';
+
+    const { width } = ctx.measureText(opts.text);
+    chart.options.layout.padding.left = width * 1.1 + 5;
+  },
+  afterDraw: (chart, args, opts) => {
+    const { font, text, color } = opts;
+    const {
+      ctx,
+      chartArea: { top, bottom },
+    } = chart;
+
+    if (opts.display) {
+      ctx.fillStyle = color || Chart.defaults.color;
+      ctx.font = font || '12px "Helvetica Neue", Helvetica, Arial, sans-serif';
+      ctx.fillText(text, 3, 16);
+    }
+  },
+};
+
 // 표준성장도표 차트 그리기
 const drawGrowthChart = () => {
   if (!growthChartRef.value || !analysis.value) return;
@@ -901,7 +948,7 @@ const drawGrowthChart = () => {
           grid: { color: 'rgba(255,255,255,0.1)' },
         },
         y: {
-          title: { display: true, text: '키', color: '#aaa' },
+          title: { display: false }, // 기본 title 제거
           min: 40,
           max: 200,
           ticks: { color: '#aaa' },
@@ -910,8 +957,14 @@ const drawGrowthChart = () => {
       },
       plugins: {
         legend: { display: false },
+        customTitle: {
+          display: true,
+          text: '키',
+          color: '#aaa',
+        },
       },
     },
+    plugins: [customTitle], // 플러그인 등록
   });
 };
 
