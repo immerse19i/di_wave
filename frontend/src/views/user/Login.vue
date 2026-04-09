@@ -60,7 +60,7 @@
       </div>
 
       <div class="login-copyright">
-        Copyright © DiWAVE Inc. 2023 All Right Reserved
+        Copyright © DiWAVE Inc. 2026 All Right Reserved
       </div>
     </div>
     <UserModalBody v-if="modal.isOpen && modal.role === 'sign'" />
