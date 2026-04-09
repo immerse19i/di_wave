@@ -113,7 +113,7 @@ const onFileChange = (e) => {
   if (!file) return;
 
   if (file.size > 10 * 1024 * 1024) {
-    message.showAlert('파일 크기는 최대 10MB까지 가능합니다.');
+    message.showAlert('용량이 10mb를 초과하였습니다.');
     return;
   }
 
@@ -164,7 +164,7 @@ const submitInquiry = async () => {
   }
 
   message.showConfirm(
-    '문의내용은 제출 후에는 수정할 수 없습니다.\n계속하시겠습니까?',
+    '문의내용은 제출 후에는 수정할 수 없습니다. 계속하시겠습니까?',
     async () => {
       if (isSubmitting.value) return;
       isSubmitting.value = true;
