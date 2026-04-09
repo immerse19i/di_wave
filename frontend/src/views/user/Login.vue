@@ -183,6 +183,13 @@ const handleLogin = async () => {
       }
     } catch (e) {}
 
+    // 아이디 저장 처리
+    if (rememberUserId.value) {
+      localStorage.setItem('savedUserId', form.value.userId);
+    } else {
+      localStorage.removeItem('savedUserId');
+    }
+
     router.push('/main');
   } catch (error) {
     const status = error.response?.status;
@@ -214,8 +221,17 @@ const handleLogin = async () => {
 
 // 세션 만료 팝업
 onMounted(() => {
+  // 저장된 아이디 불러오기
+  const savedId = localStorage.getItem('savedUserId');
+  if (savedId) {
+    form.value.userId = savedId;
+    rememberUserId.value = true;
+  }
+
   if (route.query.expired === 'true') {
-    message.showAlert('보안을 위해 일정 시간 동안 움직임이 없어 자동 로그아웃되었습니다.\n다시 로그인해 주세요.');
+    message.showAlert(
+      '보안을 위해 일정 시간 동안 움직임이 없어 자동 로그아웃되었습니다.\n다시 로그인해 주세요.',
+    );
     router.replace({ query: {} });
   }
 });
