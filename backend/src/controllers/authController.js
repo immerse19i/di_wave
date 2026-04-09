@@ -452,6 +452,31 @@ if (existingEmail.length > 0) {
   return res.status(400).json({ success: false, message: '이미 등록된 이메일입니다.' });
 }
 
+exports.checkEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: '이메일을 입력해주세요.' });
+    }
+
+    const [rows] = await pool.query(
+      'SELECT id FROM hospitals WHERE email = ?',
+      [email]
+    );
+
+    if (rows.length > 0) {
+      return res.json({ success: false, message: '이미 가입된 이메일 입니다.' });
+    }
+
+    res.json({ success: true, message: '가입가능한 이메일 입니다.' });
+  } catch (error) {
+    console.error('checkEmail error:', error);
+    res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
+  }
+};
+
+
+
 // 사업자번호 중복 확인
 const [existingBiz] = await conn.query('SELECT id FROM hospitals WHERE business_number = ?', [businessNumber]);
 if (existingBiz.length > 0) {
