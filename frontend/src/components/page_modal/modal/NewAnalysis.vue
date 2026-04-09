@@ -174,13 +174,23 @@
           <div class="form-row">
             <label> <span class="required">*</span>현재 키 </label>
             <div class="dual-input">
-              <input type="text" v-model="form.currentHeight" @input="onNumericInput($event, 'currentHeight')" inputmode="decimal" />
+              <input
+                type="text"
+                v-model="form.currentHeight"
+                @input="onNumericInput($event, 'currentHeight')"
+                inputmode="decimal"
+              />
               <span class="unit">cm</span>
 
               <label class="second-label">
                 <span class="required">*</span>몸무게
               </label>
-              <input type="text" v-model="form.weight" @input="onNumericInput($event, 'weight')" inputmode="decimal" />
+              <input
+                type="text"
+                v-model="form.weight"
+                @input="onNumericInput($event, 'weight')"
+                inputmode="decimal"
+              />
               <span class="unit">kg</span>
             </div>
           </div>
@@ -189,7 +199,12 @@
           <div class="form-row">
             <label>아버지 키</label>
             <div class="single-input-unit">
-              <input type="text" v-model="form.fatherHeight" @input="onNumericInput($event, 'fatherHeight')" inputmode="decimal" />
+              <input
+                type="text"
+                v-model="form.fatherHeight"
+                @input="onNumericInput($event, 'fatherHeight')"
+                inputmode="decimal"
+              />
               <span class="unit">cm</span>
             </div>
           </div>
@@ -198,7 +213,12 @@
           <div class="form-row">
             <label>어머니 키</label>
             <div class="single-input-unit">
-              <input type="text" v-model="form.motherHeight" @input="onNumericInput($event, 'motherHeight')" inputmode="decimal" />
+              <input
+                type="text"
+                v-model="form.motherHeight"
+                @input="onNumericInput($event, 'motherHeight')"
+                inputmode="decimal"
+              />
               <span class="unit">cm</span>
             </div>
           </div>
@@ -429,6 +449,12 @@ const handleSubmit = async () => {
     return;
   }
 
+  if (!form.value.physician) {
+    message.showAlert('담당주치의를 입력해주세요.');
+    return;
+  }
+  // alert('분석 실행까지 왔음');
+  // return;
   // Step 2: 키/몸무게 유효성
   if (!validateHeightWeight()) {
     message.showConfirm(
