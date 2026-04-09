@@ -429,6 +429,30 @@ res.json({ success: true, message: '인증되었습니다.' });
   }
 };
 
+
+exports.checkEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: '이메일을 입력해주세요.' });
+    }
+
+const [rows] = await pool.query(
+  'SELECT id FROM users WHERE email = ?',
+  [email]
+);
+
+    if (rows.length > 0) {
+      return res.json({ success: false, message: '이미 가입된 이메일 입니다.' });
+    }
+
+    res.json({ success: true, message: '가입가능한 이메일 입니다.' });
+  } catch (error) {
+    console.error('checkEmail error:', error);
+    res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
+  }
+};
+
 // 회원 가입
 // POST /api/auth/register
 exports.register = async (req, res) => {
@@ -452,28 +476,7 @@ if (existingEmail.length > 0) {
   return res.status(400).json({ success: false, message: '이미 등록된 이메일입니다.' });
 }
 
-exports.checkEmail = async (req, res) => {
-  try {
-    const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ success: false, message: '이메일을 입력해주세요.' });
-    }
 
-    const [rows] = await pool.query(
-      'SELECT id FROM hospitals WHERE email = ?',
-      [email]
-    );
-
-    if (rows.length > 0) {
-      return res.json({ success: false, message: '이미 가입된 이메일 입니다.' });
-    }
-
-    res.json({ success: true, message: '가입가능한 이메일 입니다.' });
-  } catch (error) {
-    console.error('checkEmail error:', error);
-    res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
-  }
-};
 
 
 
@@ -526,6 +529,9 @@ if (existingBiz.length > 0) {
 };
 
 
+
+
+
 // POST /api/auth/find-id 아이디 찾기
 exports.findId = async (req, res) => {
   try {
@@ -557,7 +563,7 @@ exports.findId = async (req, res) => {
     await transporter.sendMail({
       from: process.env.MAIL_FROM,
       to: email,
-      subject: '[DI-WAVE] ID 찾기 인증번호',
+      subject: '[OsteoAge] ID 찾기 인증번호 안내',
       html: `
         <div style="max-width:600px; text-align:left; font-family:'Inter',Arial,sans-serif; color:#353535;">
           <p style="font-size:14px; line-height:1.4;">
