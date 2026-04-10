@@ -200,34 +200,56 @@
     </div>
 
     <!-- 가상계좌 환불 계좌 입력 모달 -->
-    <div class="modal-overlay" v-if="showAccountForm" @click.self="showAccountForm = false">
+    <div
+      class="modal-overlay"
+      v-if="showAccountForm"
+      @click.self="showAccountForm = false"
+    >
       <div class="account-modal">
         <h3 class="modal-title">환불 계좌 입력</h3>
-        <p class="account-desc">가상계좌 결제 건은 환불받을 계좌 정보가 필요합니다.</p>
+        <p class="account-desc">
+          가상계좌 결제 건은 환불받을 계좌 정보가 필요합니다.
+        </p>
 
         <div class="account-form">
           <div class="form-row">
             <label>은행</label>
             <select v-model="refundAccountForm.bank">
               <option value="">은행 선택</option>
-              <option v-for="bank in bankList" :key="bank.code" :value="bank.code">
+              <option
+                v-for="bank in bankList"
+                :key="bank.code"
+                :value="bank.code"
+              >
                 {{ bank.name }}
               </option>
             </select>
           </div>
           <div class="form-row">
             <label>계좌번호</label>
-            <input type="text" v-model="refundAccountForm.accountNumber" placeholder="'-' 없이 숫자만 입력" />
+            <input
+              type="text"
+              v-model="refundAccountForm.accountNumber"
+              placeholder="'-' 없이 숫자만 입력"
+            />
           </div>
           <div class="form-row">
             <label>예금주</label>
-            <input type="text" v-model="refundAccountForm.holderName" placeholder="예금주명" />
+            <input
+              type="text"
+              v-model="refundAccountForm.holderName"
+              placeholder="예금주명"
+            />
           </div>
         </div>
 
         <div class="account-btns">
-          <button class="btn-cancel" @click="showAccountForm = false">취소</button>
-          <button class="btn-submit" @click="submitAccountRefund">환불 요청</button>
+          <button class="btn-cancel" @click="showAccountForm = false">
+            취소
+          </button>
+          <button class="btn-submit" @click="submitAccountRefund">
+            환불 요청
+          </button>
         </div>
       </div>
     </div>
@@ -656,7 +678,7 @@ onMounted(() => {
         }
 
         &:hover {
-          background: rgba(255, 255, 255, 0.05);
+          background: $sub-color;
         }
 
         td {
