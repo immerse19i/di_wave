@@ -382,7 +382,7 @@ exports.answerInquiry = async (req, res) => {
               <div style="font-size:12px; color:#999; line-height:1.4; padding-bottom:32px;">
                 <p>본 메일은 발송 전용으로 회신이 불가능합니다.<br/>
 추가 문의 사항은 서비스 내 [문의하기] 게시판을 이용해 주세요.<br/>
-Copyright © OsteoAge. All rights reserved.</p>
+Copyright © DiWAVE Inc. All rights reserved.</p>
                 <br/>
                 <p>디웨이브주식회사<br/>
 02-2088-8728 [문의가능시간 : 10:00~17:00 (토 · 일 · 공휴일 휴무)]</p>

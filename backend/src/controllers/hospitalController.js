@@ -103,7 +103,7 @@ exports.createAccount = async (req, res) => {
             <p style="font-size:12px; line-height:1.4;">
 본 메일은 발송 전용으로 회신이 불가능합니다.<br/>
 추가 문의 사항은 서비스 내 [문의하기] 게시판을 이용해 주세요.<br/>
-Copyright © OsteoAge. All rights reserved.
+Copyright © DiWAVE Inc. All rights reserved.
             </p>
             <p style="font-size:12px; color:#353535; margin-top:24px;">
 디웨이브주식회사<br/>
@@ -257,7 +257,7 @@ await pool.query('UPDATE users SET is_active = TRUE WHERE hospital_id = ? AND ro
             <p style="font-size:12px; line-height:1.4;">
 본 메일은 발송 전용으로 회신이 불가능합니다.<br/>
 추가 문의 사항은 서비스 내 [문의하기] 게시판을 이용해 주세요.<br/>
-Copyright © OsteoAge. All rights reserved.
+Copyright © DiWAVE Inc. All rights reserved.
             </p>
             <p style="font-size:12px; color:#353535; margin-top:24px;">
 디웨이브주식회사<br/>
@@ -678,7 +678,7 @@ exports.changeAccountStatus = async (req, res) => {
             <p style="font-size:12px; color:#353535; margin-bottom:20px;">
 본 메일은 발송 전용으로 회신이 불가능합니다.
 추가 문의 사항은 서비스 내 [문의하기] 게시판을 이용해 주세요.
-Copyright © OsteoAge. All rights reserved.
+Copyright © DiWAVE Inc. All rights reserved.
             </p>
             <p style="font-size:12px; color:#353535; margin-bottom:8px;">
 디웨이브주식회사

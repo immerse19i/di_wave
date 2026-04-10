@@ -371,7 +371,7 @@ exports.sendCode = async (req, res) => {
 
       <p style="font-size:12px; color:#353535; margin-top:24px;">
         본 메일은 발송 전용으로 회신이 불가능합니다.<br/>
-        Copyright © OsteoAge. All rights reserved.
+        Copyright © DiWAVE Inc. All rights reserved.
       </p>
 
       
@@ -645,7 +645,7 @@ exports.findPassword = async (req, res) => {
           </p>
           <p style="font-size:12px; color:#353535; margin-top:24px;">
             본 메일은 발신전용으로 회신이 불가능합니다.<br/>
-            Copyright © OsteoAge. All rights reserved.
+            Copyright © DiWAVE Inc. All rights reserved.
             <br/><br/>
             디웨이브주식회사<br/>
 02-2088-8728 [문의가능시간 : 10:00~17:00 (토 · 일 · 공휴일 휴무)]
