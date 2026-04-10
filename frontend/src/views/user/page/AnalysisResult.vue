@@ -1444,7 +1444,7 @@ watch(
     }
   }
   &.has-changes {
-    border: 1px solid $sub-color-2;
+    // border: 1px solid $sub-color-2;
 
     .btn-save {
       border: 1px solid $sub-color-2;
