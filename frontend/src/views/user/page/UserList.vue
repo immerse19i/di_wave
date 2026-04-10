@@ -22,7 +22,7 @@
       <table>
         <colgroup>
           <col style="width: auto" />
-          <col style="width: 128px" />
+          <col style="width: auto" />
           <col style="width: 100px" />
           <col style="width: 100px" />
           <col style="width: 100px" />
@@ -30,7 +30,7 @@
           <col style="width: 100px" />
           <col style="width: 100px" />
           <col style="width: 100px" />
-          <col style="width: 128px" />
+          <col style="width: auto" />
           <col style="width: 100px" />
         </colgroup>
         <thead>
