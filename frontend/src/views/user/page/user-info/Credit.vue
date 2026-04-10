@@ -162,7 +162,7 @@
       <div class="refund-modal">
         <h3 class="modal-title">환불 가능 내역 선택</h3>
 
-        <table class="refund-table" v-if="refundableList.length > 0">
+        <table class="refund-table">
           <thead>
             <tr>
               <th>날짜</th>
@@ -171,8 +171,8 @@
               <th>환불하기</th>
             </tr>
           </thead>
-          <tbody>
-            <tr v-for="item in refundableList" :key="item.id">
+          <tbody v-if="refundableList.length > 0">
+            <tr v-for="item in pagedRefundList" :key="item.id">
               <td>{{ formatDate(item.created_at) }}</td>
               <td>+{{ item.credit_amount }}</td>
               <td>{{ getMethodText(item.payment_method) }}</td>
@@ -183,9 +183,54 @@
               </td>
             </tr>
           </tbody>
+          <tbody v-else>
+            <tr>
+              <td colspan="4" class="no-refundable">
+                환불 가능한 내역이 없습니다.
+              </td>
+            </tr>
+          </tbody>
         </table>
 
-        <p v-else class="no-refundable">환불 가능한 내역이 없습니다.</p>
+        <!-- 페이지네이션 -->
+        <div class="refund-pagination" v-if="refundTotalPages > 1">
+          <button
+            class="arrow"
+            :disabled="refundPage <= 1"
+            @click="refundPage = 1"
+          >
+            <img src="/assets/icons/arrow_first.svg" alt="first" />
+          </button>
+          <button
+            class="arrow"
+            :disabled="refundPage <= 1"
+            @click="refundPage--"
+          >
+            <img src="/assets/icons/arrow_prev.svg" alt="prev" />
+          </button>
+          <button
+            v-for="p in refundVisiblePages"
+            :key="p"
+            :class="{ active: p === refundPage }"
+            @click="refundPage = p"
+          >
+            {{ p }}
+          </button>
+          <button
+            class="arrow"
+            :disabled="refundPage >= refundTotalPages"
+            @click="refundPage++"
+          >
+            <img src="/assets/icons/arrow_next.svg" alt="next" />
+          </button>
+          <button
+            class="arrow"
+            :disabled="refundPage >= refundTotalPages"
+            @click="refundPage = refundTotalPages"
+          >
+            <img src="/assets/icons/arrow_last.svg" alt="last" />
+          </button>
+        </div>
 
         <div class="refund-modal-info">
           <p class="info-bold">전액 미사용된 충전 건만 리스트에 표시됩니다.</p>
@@ -285,6 +330,27 @@ const perPage = 12;
 // 환불 모달
 const showRefundModal = ref(false);
 const refundableList = ref([]);
+const refundPage = ref(1);
+const refundPerPage = 6;
+
+// 환불 모달 페이지네이션
+const refundTotalPages = computed(() =>
+  Math.max(1, Math.ceil(refundableList.value.length / refundPerPage)),
+);
+const pagedRefundList = computed(() => {
+  const start = (refundPage.value - 1) * refundPerPage;
+  return refundableList.value.slice(start, start + refundPerPage);
+});
+const refundVisiblePages = computed(() => {
+  const t = refundTotalPages.value;
+  const c = refundPage.value;
+  const pages = [];
+  let start = Math.max(1, c - 4);
+  let end = Math.min(t, start + 9);
+  start = Math.max(1, end - 9);
+  for (let i = start; i <= end; i++) pages.push(i);
+  return pages;
+});
 
 // 가상계좌 환불 계좌 입력
 const showAccountForm = ref(false);
@@ -370,6 +436,7 @@ const openRefundModal = async () => {
     console.error('환불 가능 목록 조회 실패:', error);
     refundableList.value = [];
   }
+  refundPage.value = 1;
   showRefundModal.value = true;
 };
 
@@ -774,7 +841,7 @@ onMounted(() => {
   border-radius: $radius-lg;
   padding: 40px;
   max-width: 812px;
-  min-height: 540px;
+  // min-height: 540px;
   width: 90%;
   color: $white;
   display: flex;
@@ -804,10 +871,11 @@ onMounted(() => {
     }
 
     tbody tr {
-      &:nth-child(odd) {
-        background: $bg-op;
-      }
+      background: $bg-op;
 
+      &:has(.no-refundable) {
+        background: transparent;
+      }
       td {
         @include font-12-regular;
         padding: 10px 8px;
@@ -827,13 +895,53 @@ onMounted(() => {
         opacity: 0.85;
       }
     }
+
+    .no-refundable {
+      @include font-14-regular;
+      color: $dark-input-gray;
+      text-align: center;
+      padding: 60px 0;
+    }
   }
 
-  .no-refundable {
-    @include font-14-regular;
-    color: $dark-input-gray;
-    text-align: center;
-    padding: 40px 0;
+  .refund-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 24px;
+
+    button {
+      min-width: 32px;
+      height: 32px;
+      background: none;
+      color: $white;
+      border: none;
+      border-radius: $radius-sm;
+      @include font-14-regular;
+      cursor: pointer;
+
+      &.active {
+        background: $main-gad;
+        @include font-14-bold;
+      }
+
+      &:disabled {
+        opacity: 0.3;
+        cursor: default;
+      }
+
+      &.arrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        img {
+          width: 16px;
+          height: 16px;
+        }
+      }
+    }
   }
 
   .refund-modal-info {
