@@ -357,7 +357,7 @@ exports.sendCode = async (req, res) => {
         아래의 인증번호를 회원가입 화면의 '인증번호' 칸에 입력해 주세요.
       </p>
 
-      <div style="background-color:#353535; padding:12px 48px; display:inline-block; margin:20px 0;">
+      <div style="background-color:#55aba6; padding:12px 48px; display:inline-block; margin:20px 0;">
         <p style="font-family:'Inter',Arial,sans-serif; font-weight:500; font-size:36px; line-height:140%; letter-spacing:0; color:#fff; margin:0; text-align:center;">
           ${code}
         </p>
@@ -373,7 +373,7 @@ exports.sendCode = async (req, res) => {
         본 메일은 발송 전용으로 회신이 불가능합니다.<br/>
         Copyright © DiWAVE Inc. All rights reserved.
       </p>
-
+      <br/><br/>
       
 
       <p style="font-size:12px; color:#353535; line-height:1.8;">
