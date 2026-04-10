@@ -53,15 +53,26 @@
           <div class="form-row">
             <label><span class="required">*</span>생년월일</label>
             <div class="birth-inputs">
-              <input type="text" v-model="form.birthYear" class="input-year" />
+              <input
+                type="text"
+                v-model="form.birthYear"
+                class="input-year"
+                @input="onNumericInput($event, 'birthYear')"
+              />
               <span class="unit">년</span>
               <input
                 type="text"
                 v-model="form.birthMonth"
                 class="input-month"
+                @input="onNumericInput($event, 'birthMonth')"
               />
               <span class="unit">월</span>
-              <input type="text" v-model="form.birthDay" class="input-day" />
+              <input
+                type="text"
+                v-model="form.birthDay"
+                class="input-day"
+                @input="onNumericInput($event, 'birthDay')"
+              />
               <span class="unit">일</span>
             </div>
           </div>

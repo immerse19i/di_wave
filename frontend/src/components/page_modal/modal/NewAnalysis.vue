@@ -125,6 +125,7 @@
                 v-model="form.birthYear"
                 placeholder=""
                 class="input-year"
+                @input="onNumericInput($event, 'birthYear')"
               />
               <span class="unit">년</span>
               <input
@@ -132,11 +133,13 @@
                 v-model="form.birthMonth"
                 placeholder=""
                 class="input-month"
+                @input="onNumericInput($event, 'birthMonth')"
               />
               <span class="unit">월</span>
               <input
                 type="text"
                 v-model="form.birthDay"
+                @input="onNumericInput($event, 'birthDay')"
                 placeholder=""
                 class="input-day"
               />
