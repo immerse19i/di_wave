@@ -79,24 +79,24 @@
             <th class="col-draft">임시저장</th>
             <th class="col-title sortable" @click="toggleSort('title')">
               제목
-              <span class="sort-icon">{{ getSortIcon('title') }}</span>
+              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
             </th>
             <th class="col-attach">첨부</th>
             <th class="col-pinned sortable" @click="toggleSort('is_pinned')">
               상단고정여부
-              <span class="sort-icon">{{ getSortIcon('is_pinned') }}</span>
+              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
             </th>
             <th class="col-status sortable" @click="toggleSort('status')">
               상태
-              <span class="sort-icon">{{ getSortIcon('status') }}</span>
+              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
             </th>
             <th class="col-date sortable" @click="toggleSort('created_at')">
               작성일
-              <span class="sort-icon">{{ getSortIcon('created_at') }}</span>
+              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
             </th>
             <th class="col-author sortable" @click="toggleSort('author_name')">
               작성자
-              <span class="sort-icon">{{ getSortIcon('author_name') }}</span>
+              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
             </th>
             <th class="col-delete">삭제</th>
           </tr>
@@ -242,11 +242,6 @@ const toggleSort = (field) => {
   }
   fetchList();
 };
-const getSortIcon = (field) => {
-  if (sortField.value !== field) return '⇅';
-  return sortOrder.value === 'asc' ? '↑' : '↓';
-};
-
 // ---- 데이터 ----
 const noticeList = ref([]);
 const total = ref(0);
@@ -620,6 +615,7 @@ const onResize = () => {
     th {
       @include font-14-bold;
       color: $gray;
+      height: 40px;
     }
 
     th.sortable {
@@ -630,7 +626,10 @@ const onResize = () => {
       }
       .sort-icon {
         margin-left: 4px;
-        font-size: 10px;
+        width: 16px;
+        height: 16px;
+        display: inline-block;
+        vertical-align: middle;
       }
     }
 

@@ -65,6 +65,7 @@
         </div>
 
         <!-- 이메일 -->
+        <!-- 이메일 -->
         <div class="form-group">
           <label>이메일</label>
           <div class="input-with-btn">
@@ -73,7 +74,12 @@
               placeholder="이메일을 입력해 주세요"
               @input="validateEmail"
             />
-            <button type="button" @click="sendVerificationCode">
+            <button type="button" @click="checkDuplicateEmail">중복확인</button>
+            <button
+              type="button"
+              @click="sendVerificationCode"
+              :disabled="!isEmailChecked"
+            >
               {{ isCodeSent ? '재전송' : '인증번호 전송' }}
             </button>
           </div>
@@ -198,32 +204,16 @@
             <span>전체동의</span>
           </label>
           <hr />
-          <label class="checkbox-item">
-            <input type="checkbox" v-model="form.agreeTerms" />
+          <label
+            v-for="term in signupTerms"
+            :key="term.type"
+            class="checkbox-item"
+          >
+            <input type="checkbox" v-model="term.checked" />
             <span
-              ><a href="#" @click.stop.prevent="openTerms('terms_of_service')"
-                >이용약관</a
-              >
-              동의 (필수)</span
-            >
-          </label>
-          <label class="checkbox-item">
-            <input type="checkbox" v-model="form.agreePrivacy" />
-            <span
-              ><a href="#" @click.stop.prevent="openTerms('privacy_collection')"
-                >서비스 이용을 위한 개인정보 수집 및 이용</a
-              >
-              동의 (필수)</span
-            >
-          </label>
-          <label class="checkbox-item">
-            <input type="checkbox" v-model="form.agreeMarketing" />
-            <span
-              ><a
-                href="#"
-                @click.stop.prevent="openTerms('privacy_consignment')"
-                >회원가입을 위한 개인정보 수집 및 이용</a
-              >
+              ><a href="#" @click.stop.prevent="openTerms(term.type)">{{
+                term.name
+              }}</a>
               동의 (필수)</span
             >
           </label>
@@ -245,6 +235,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { authAPI } from '@/api/auth';
+import { termsAPI } from '@/api/terms';
 import { UseMessageStore } from '@/store/message';
 const message = UseMessageStore();
 const router = useRouter();
@@ -273,6 +264,7 @@ const pwConfirmMessage = ref('');
 // 이메일 유효성
 const emailMessage = ref('');
 const emailMessageType = ref('');
+const isEmailChecked = ref(false);
 
 //인증번호 부분
 // 인증번호 재전송
@@ -301,11 +293,10 @@ const form = ref({
   address: '',
   addressDetail: '',
   businessNumber: '',
-  // 약관
-  agreeTerms: false,
-  agreePrivacy: false,
-  agreeMarketing: false,
 });
+
+// 약관 (API에서 동적 로딩)
+const signupTerms = ref([]);
 
 // Step 1 유효성
 const isStep1Valid = computed(() => {
@@ -329,9 +320,8 @@ const isStep2Valid = computed(() => {
     form.value.address &&
     form.value.businessNumber &&
     selectedFile.value &&
-    form.value.agreeTerms &&
-    form.value.agreePrivacy &&
-    form.value.agreeMarketing
+    signupTerms.value.length > 0 &&
+    signupTerms.value.every((t) => t.checked)
   );
 });
 
@@ -343,22 +333,15 @@ function handlePopState(e) {
 
 // 전체동의
 const agreeAll = computed({
-  get: () =>
-    form.value.agreeTerms &&
-    form.value.agreePrivacy &&
-    form.value.agreeMarketing,
+  get: () => signupTerms.value.length > 0 && signupTerms.value.every((t) => t.checked),
   set: (val) => {
-    form.value.agreeTerms = val;
-    form.value.agreePrivacy = val;
-    form.value.agreeMarketing = val;
+    signupTerms.value.forEach((t) => (t.checked = val));
   },
 });
 
 function toggleAll() {
   const val = agreeAll.value;
-  form.value.agreeTerms = val;
-  form.value.agreePrivacy = val;
-  form.value.agreeMarketing = val;
+  signupTerms.value.forEach((t) => (t.checked = val));
 }
 
 function validateLoginId() {
@@ -439,6 +422,7 @@ function validatePasswordConfirm() {
 
 //이메일 유효성
 function validateEmail() {
+  isEmailChecked.value = false; // 이메일 변경 시 초기화
   const email = form.value.email;
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -451,6 +435,32 @@ function validateEmail() {
   } else {
     emailMessage.value = '';
     emailMessageType.value = '';
+  }
+}
+// 이메일 중복확인
+async function checkDuplicateEmail() {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!regex.test(form.value.email)) {
+    emailMessage.value = '올바른 이메일 주소를 입력해 주세요';
+    emailMessageType.value = 'error';
+    return;
+  }
+  try {
+    const res = await authAPI.checkEmail(form.value.email);
+    if (res.data.success) {
+      isEmailChecked.value = true;
+      emailMessage.value =
+        '가입가능한 이메일 입니다. 인증번호 전송 버튼을 눌러주세요.';
+      emailMessageType.value = 'success';
+    } else {
+      isEmailChecked.value = false;
+      emailMessage.value = res.data.message;
+      emailMessageType.value = 'error';
+    }
+  } catch (error) {
+    emailMessage.value =
+      error.response?.data?.message || '이메일 확인에 실패했습니다.';
+    emailMessageType.value = 'error';
   }
 }
 
@@ -615,8 +625,18 @@ async function handleRegister() {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   window.addEventListener('popstate', handlePopState);
+
+  // 약관 목록 API 로딩
+  try {
+    const res = await termsAPI.getPublicTerms();
+    signupTerms.value = res.data.data
+      .filter((t) => t.group_type === 'signup')
+      .map((t) => ({ type: t.type, name: t.name, checked: false }));
+  } catch (e) {
+    console.error('약관 목록 로딩 실패:', e);
+  }
 });
 
 onBeforeUnmount(() => {
@@ -748,6 +768,16 @@ onBeforeUnmount(() => {
         background-color: $main-color;
         color: $white;
       }
+      &:disabled {
+        background: $dark-line-gray;
+        color: $gray;
+        cursor: not-allowed;
+
+        &:hover {
+          background: $dark-line-gray;
+          color: $gray;
+        }
+      }
     }
   }
 
@@ -808,11 +838,34 @@ onBeforeUnmount(() => {
     }
 
     input[type='checkbox'] {
+      -webkit-appearance: none;
+      appearance: none;
       width: 18px;
       height: 18px;
-      min-height: auto;
-      accent-color: $main-color;
+      min-width: 18px;
+      min-height: 18px;
+      border: 2px solid $dark-line-gray;
+      border-radius: 3px;
+      background: transparent;
       cursor: pointer;
+      position: relative;
+
+      &:checked {
+        background: $main-color;
+        border-color: $main-color;
+
+        &::after {
+          content: '';
+          position: absolute;
+          left: 5px;
+          top: 1px;
+          width: 5px;
+          height: 10px;
+          border: solid $white;
+          border-width: 0 2px 2px 0;
+          transform: rotate(45deg);
+        }
+      }
     }
 
     span {

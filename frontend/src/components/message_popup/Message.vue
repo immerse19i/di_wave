@@ -21,8 +21,12 @@
 
       <!-- 아니오/예 (기본) or 커스텀 텍스트 -->
       <div v-if="message.type === 'confirm'" class="message-actions">
-        <button class="btn-cancel" @click="message.cancel()">{{ message.cancelText || '아니오' }}</button>
-        <button class="btn-confirm" @click="message.confirm()">{{ message.confirmText || '예' }}</button>
+        <button class="btn-cancel" @click="message.cancel()">
+          {{ message.cancelText || '아니오' }}
+        </button>
+        <button class="btn-confirm" @click="message.confirm()">
+          {{ message.confirmText || '예' }}
+        </button>
       </div>
     </div>
   </div>
@@ -47,11 +51,11 @@ const message = UseMessageStore();
 .message-content {
   min-width: 548px;
   max-width: 548px;
-  min-height: 173px;
+  // min-height: 173px;
   background-color: $dark-bg;
   // border: 1px solid $dark-line-gray;
   border-radius: $radius-md;
-  padding: 40px;
+  padding: 24px 40px;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -87,7 +91,7 @@ const message = UseMessageStore();
 
 .btn-confirm {
   padding: 12px 40px;
-  background: $main-color;
+  background: $main-gad;
   border: none;
   border-radius: $radius-sm;
   color: $white;

@@ -85,20 +85,20 @@
         <thead>
           <tr>
             <th class="sortable" @click="toggleSort('login_id')">
-              ID <span class="sort-icon">{{ getSortIcon('login_id') }}</span>
+              ID <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
             </th>
             <th class="sortable" @click="toggleSort('name')">
-              병원명 <span class="sort-icon">{{ getSortIcon('name') }}</span>
+              병원명 <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
             </th>
             <th class="sortable" @click="toggleSort('email')">
-              이메일 <span class="sort-icon">{{ getSortIcon('email') }}</span>
+              이메일 <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
             </th>
             <th class="sortable" @click="toggleSort('phone')">
-              전화 <span class="sort-icon">{{ getSortIcon('phone') }}</span>
+              전화 <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
             </th>
             <th class="sortable" @click="toggleSort('created_at')">
               가입일
-              <span class="sort-icon">{{ getSortIcon('created_at') }}</span>
+              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
             </th>
             <th>상태</th>
             <th>상세보기</th>
@@ -310,11 +310,6 @@ const toggleSort = (field) => {
   }
   sortClickCount.value[field] = count;
   fetchList();
-};
-
-const getSortIcon = (field) => {
-  if (sortFieldVal.value !== field) return '↕';
-  return sortOrderVal.value === 'ASC' ? '↑' : '↓';
 };
 
 const goToPage = (page) => {
@@ -577,6 +572,7 @@ onMounted(() => fetchList());
     th {
       @include font-14-bold;
       color: $gray;
+      height: 40px;
     }
 
     th.sortable {
@@ -587,7 +583,10 @@ onMounted(() => fetchList());
       }
       .sort-icon {
         margin-left: 4px;
-        font-size: 10px;
+        width: 16px;
+        height: 16px;
+        display: inline-block;
+        vertical-align: middle;
       }
     }
 

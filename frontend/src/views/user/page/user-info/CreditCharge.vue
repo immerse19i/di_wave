@@ -164,6 +164,7 @@ import { ref, computed, reactive, watch, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/store/auth';
 import { paymentAPI } from '@/api/payment';
+import { termsAPI } from '@/api/terms';
 
 const router = useRouter();
 const route = useRoute();
@@ -172,16 +173,8 @@ const auth = useAuthStore();
 // 결제 수단 선택
 const paymentMethod = ref('CARD');
 
-// 약관
-const terms = reactive([
-  { id: 'paid_service', name: '유료서비스 이용약관', checked: false },
-  { id: 'third_party', name: '개인정보 제3자 제공', checked: false },
-  {
-    id: 'refund_policy',
-    name: '결제 상품 확인 및 취소/환불 규정',
-    checked: false,
-  },
-]);
+// 약관 (API에서 동적 로딩)
+const terms = reactive([]);
 
 const isAllChecked = computed(() => terms.every((t) => t.checked));
 const canPay = computed(() => terms.every((t) => t.checked));
@@ -227,6 +220,15 @@ let widgets = null;
 
 // ★ 위젯 초기화 + 렌더링
 onMounted(async () => {
+  // 약관 목록 API 로딩
+  try {
+    const res = await termsAPI.getPublicTerms();
+    const creditTerms = res.data.data.filter((t) => t.group_type === 'credit');
+    terms.splice(0, terms.length, ...creditTerms.map((t) => ({ id: t.type, name: t.name, checked: false })));
+  } catch (e) {
+    console.error('약관 목록 로딩 실패:', e);
+  }
+
   // 토스 리다이렉트 결과 처리
   const { paymentKey, orderId, amount, code, message } = route.query;
 
