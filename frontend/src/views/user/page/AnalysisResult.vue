@@ -1628,7 +1628,7 @@ watch(
   border: $border-op;
   padding: 36.5px 20px 14px;
   margin-bottom: 16px;
-
+  min-height: 370px;
   .predict-row {
     display: flex;
     align-items: center;
