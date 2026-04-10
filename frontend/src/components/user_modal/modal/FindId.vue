@@ -59,10 +59,10 @@
     </div>
 
     <!-- 3단계: ID 확인 결과 -->
-    <!-- <div v-else-if="step === 3" class="result-wrap">
+    <div v-else-if="step === 3" class="result-wrap">
       <p class="result-text">고객님의 ID는 [{{ foundId }}] 입니다.</p>
       <button class="btn-submit" @click="handleClose">닫기</button>
-    </div> -->
+    </div>
   </div>
 </template>
 
@@ -120,7 +120,6 @@ const handleStep1 = async () => {
 };
 
 // 2단계: 인증번호 확인
-// 2단계: 인증번호 확인
 const handleStep2 = async () => {
   if (!form.value.code) {
     message.showAlert('인증번호를 입력해 주세요.');
@@ -135,9 +134,8 @@ const handleStep2 = async () => {
       type: 'find_id',
     });
     if (res.data.success) {
-      message.showAlert(`고객님의 ID는 [${res.data.loginId}] 입니다.`, () => {
-        modal.close();
-      });
+      foundId.value = res.data.loginId;
+      step.value = 3;
     }
   } catch (error) {
     const msg =
@@ -177,7 +175,7 @@ defineExpose({ step });
 
 <style lang="scss" scoped>
 .find-id {
-  width: 610px;
+  width: 650px;
   padding: 20px 0;
 }
 
