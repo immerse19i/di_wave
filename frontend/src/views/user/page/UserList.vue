@@ -53,7 +53,7 @@
             </th>
             <th>생년월일</th>
             <th>성별</th>
-            <th class="sortable" @click="toggleSort('created_at')">
+            <th class="sortable" @click="toggleSort('analysis_date')">
               분석일
               <img
                 class="sort-icon"
