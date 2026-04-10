@@ -942,14 +942,14 @@ const drawGrowthChart = () => {
         x: {
           type: 'linear',
           title: { display: true, text: '나이', color: '#aaa' },
-          min: 0,
+          min: 3,
           max: 19,
           ticks: { color: '#aaa' },
           grid: { color: 'rgba(255,255,255,0.1)' },
         },
         y: {
           title: { display: false }, // 기본 title 제거
-          min: 40,
+          min: 80,
           max: 200,
           ticks: { color: '#aaa' },
           grid: { color: 'rgba(255,255,255,0.1)' },
