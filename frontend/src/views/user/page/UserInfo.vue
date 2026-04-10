@@ -8,7 +8,10 @@
         <ul class="menu_list">
           <li>
             <router-link to="/main">
-              <img src="/assets/icons/home_icon.svg" alt="home_icon" />메인
+              <img
+                src="/assets/icons/home_icon.svg"
+                alt="home_icon"
+              />메인화면으로
             </router-link>
           </li>
           <li>
