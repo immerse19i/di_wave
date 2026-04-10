@@ -660,7 +660,7 @@ const fetchAnalysis = async () => {
     savedDoctorMonths.value = analysis.value.bone_age_months || 0; // 추가
 
     // 이전기록 조회
-    fetchPreviousRecords();
+    await fetchPreviousRecords();
   } catch (error) {
     console.error('분석 상세 조회 오류:', error);
     message.showAlert(
