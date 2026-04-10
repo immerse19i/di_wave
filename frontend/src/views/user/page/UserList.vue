@@ -37,17 +37,29 @@
           <tr>
             <th class="sortable" @click="toggleSort('patient_code')">
               환자ID
-              <span class="sort-icon">{{ getSortIcon('patient_code') }}</span>
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th class="sortable" @click="toggleSort('patient_name')">
               환자명
-              <span class="sort-icon">{{ getSortIcon('patient_name') }}</span>
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th>생년월일</th>
             <th>성별</th>
             <th class="sortable" @click="toggleSort('created_at')">
               분석일
-              <span class="sort-icon">{{ getSortIcon('created_at') }}</span>
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th>나이</th>
             <th>뼈나이</th>
@@ -224,11 +236,6 @@ const toggleSort = (field) => {
   fetchList();
 };
 
-const getSortIcon = (field) => {
-  if (sortField.value !== field) return '↕';
-  return sortOrder.value === 'ASC' ? '↑' : '↓';
-};
-
 // 페이지 이동
 const goToPage = (page) => {
   if (page < 1 || page > pagination.value.totalPages) return;
@@ -288,6 +295,7 @@ onMounted(() => {
 
       th {
         @include font-14-bold;
+        height: 40px;
       }
 
       // 정렬 가능 헤더
@@ -299,7 +307,10 @@ onMounted(() => {
         }
         .sort-icon {
           margin-left: 4px;
-          font-size: 10px;
+          width: 16px;
+          height: 16px;
+          display: inline-block;
+          vertical-align: middle;
         }
       }
 

@@ -44,11 +44,11 @@
           <tr>
             <th class="sortable" @click="toggleSort('name')">
               병원명
-              <span class="sort-icon">{{ getSortIcon('name') }}</span>
+              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
             </th>
             <th class="sortable" @click="toggleSort('created_at')">
               신청일
-              <span class="sort-icon">{{ getSortIcon('created_at') }}</span>
+              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
             </th>
             <th>상태</th>
             <th>상세보기</th>
@@ -215,11 +215,6 @@ const toggleSort = (field) => {
   }
   sortClickCount.value[field] = count;
   fetchList();
-};
-
-const getSortIcon = (field) => {
-  if (sortField.value !== field) return '↕';
-  return sortOrder.value === 'ASC' ? '↑' : '↓';
 };
 
 const goToPage = (page) => {
@@ -392,6 +387,7 @@ onMounted(() => {
 
     th {
       @include font-14-bold;
+      height: 40px;
     }
 
     th.sortable {
@@ -402,7 +398,10 @@ onMounted(() => {
       }
       .sort-icon {
         margin-left: 4px;
-        font-size: 10px;
+        width: 16px;
+        height: 16px;
+        display: inline-block;
+        vertical-align: middle;
       }
     }
 

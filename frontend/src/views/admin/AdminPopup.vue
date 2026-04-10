@@ -38,33 +38,33 @@
             <th class="col-no">No</th>
             <th class="col-draft">임시저장</th>
             <th class="col-title sortable" @click="toggleSort('title')">
-              제목 <span class="sort-icon">{{ getSortIcon('title') }}</span>
+              제목 <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
             </th>
             <th
               class="col-period sortable"
               @click="toggleSort('display_start')"
             >
               팝업 게시기간
-              <span class="sort-icon">{{ getSortIcon('display_start') }}</span>
+              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
             </th>
             <th class="col-author sortable" @click="toggleSort('author_name')">
               작성자
-              <span class="sort-icon">{{ getSortIcon('author_name') }}</span>
+              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
             </th>
             <th
               class="col-published sortable"
               @click="toggleSort('published_at')"
             >
               게시일시
-              <span class="sort-icon">{{ getSortIcon('published_at') }}</span>
+              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
             </th>
             <th class="col-updated sortable" @click="toggleSort('updated_at')">
               최근수정일시
-              <span class="sort-icon">{{ getSortIcon('updated_at') }}</span>
+              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
             </th>
             <th class="col-active sortable" @click="toggleSort('is_active')">
               현재 게시여부
-              <span class="sort-icon">{{ getSortIcon('is_active') }}</span>
+              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
             </th>
             <th class="col-edit">수정</th>
             <th class="col-delete">삭제</th>
@@ -176,11 +176,6 @@ const toggleSort = (field) => {
   }
   fetchList();
 };
-const getSortIcon = (field) => {
-  if (sortField.value !== field) return '⇅';
-  return sortOrder.value === 'asc' ? '↑' : '↓';
-};
-
 // ---- 데이터 ----
 const popupList = ref([]);
 const total = ref(0);
@@ -437,6 +432,7 @@ const onResize = () => {
     th {
       @include font-14-bold;
       color: $gray;
+      height: 40px;
     }
 
     th.sortable {
@@ -447,7 +443,10 @@ const onResize = () => {
       }
       .sort-icon {
         margin-left: 4px;
-        font-size: 10px;
+        width: 16px;
+        height: 16px;
+        display: inline-block;
+        vertical-align: middle;
       }
     }
 
