@@ -13,7 +13,9 @@
           placeholder="가입시 입력한 이메일 주소를 입력해 주세요"
           @blur="validateEmail"
         />
-        <p v-if="emailError" class="error-msg">올바른 이메일 주소를 입력해 주세요</p>
+        <p v-if="emailError" class="error-msg">
+          올바른 이메일 주소를 입력해 주세요
+        </p>
       </div>
 
       <div class="form-group">
@@ -32,7 +34,9 @@
     <!-- 2단계: 인증번호 입력 -->
     <div v-else-if="step === 2">
       <div class="resend-row">
-        <span class="resend-link" @click="handleResend">인증번호가 오지 않을경우 (클릭)</span>
+        <span class="resend-link" @click="handleResend"
+          >인증번호가 오지 않을경우 (클릭)</span
+        >
         <span class="resend-info">30초마다 재전송가능</span>
       </div>
 
@@ -48,7 +52,9 @@
           />
         </div>
 
-        <button type="submit" class="btn-submit" :disabled="loading">인증번호 확인</button>
+        <button type="submit" class="btn-submit" :disabled="loading">
+          인증번호 확인
+        </button>
       </form>
     </div>
 
@@ -84,7 +90,8 @@ const form = ref({
 // 이메일 형식 검증
 const validateEmail = () => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  emailError.value = form.value.email !== '' && !emailRegex.test(form.value.email);
+  emailError.value =
+    form.value.email !== '' && !emailRegex.test(form.value.email);
   return !emailError.value;
 };
 
@@ -131,7 +138,9 @@ const handleStep2 = async () => {
       step.value = 3;
     }
   } catch (error) {
-    const msg = error.response?.data?.message || '인증번호가 올바르지 않거나 만료되었습니다.';
+    const msg =
+      error.response?.data?.message ||
+      '인증번호가 올바르지 않거나 만료되었습니다.';
     message.showAlert(msg);
   } finally {
     loading.value = false;
@@ -166,7 +175,7 @@ defineExpose({ step });
 
 <style lang="scss" scoped>
 .find-id {
-  width: 610px;
+  width: 650px;
   padding: 20px 0;
 }
 

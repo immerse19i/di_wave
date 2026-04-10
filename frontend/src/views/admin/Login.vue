@@ -58,7 +58,7 @@
       </div>
 
       <div class="login-copyright">
-        Copyright © DiWAVE Inc. 2023 All Right Reserved
+        Copyright © DiWAVE Inc. 2026 All Right Reserved
       </div>
     </div>
   </div>
@@ -128,7 +128,9 @@ const handleLogin = async () => {
 // 세션 만료 팝업
 onMounted(() => {
   if (route.query.expired === 'true') {
-    message.showAlert('보안을 위해 일정 시간 동안 움직임이 없어 자동 로그아웃되었습니다.\n다시 로그인해 주세요.');
+    message.showAlert(
+      '보안을 위해 일정 시간 동안 움직임이 없어 자동 로그아웃되었습니다.\n다시 로그인해 주세요.',
+    );
     router.replace({ query: {} });
   }
 });

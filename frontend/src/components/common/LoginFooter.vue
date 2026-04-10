@@ -12,7 +12,9 @@
         <li class="ph_mail">csadmin@diwave.io | 02-2088-8728</li>
       </ul>
       <div class="terms_copy">
-        <router-link to="/terms" class="terms"> 약관 및 정책 </router-link>
+        <router-link to="/terms" class="terms" target="_blank">
+          약관 및 정책
+        </router-link>
         <div class="copy">© DiWAVE Inc. 2026 All Right Reserved</div>
       </div>
     </div>

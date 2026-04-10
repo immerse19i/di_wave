@@ -84,7 +84,7 @@
         >
           {{ extractFileName(form.business_license_path) }}
         </a>
-        <span v-else class="file-name">등록된 파일이 없습니다.</span>
+        <span v-else class="file-none">등록된 파일이 없습니다.</span>
         <button
           type="button"
           class="preview"
@@ -346,7 +346,10 @@ onBeforeUnmount(() => {
     cursor: pointer;
     @include font-14-regular;
   }
-
+  .file-none {
+    @include font-14-regular;
+    color: $white;
+  }
   .preview {
     @include font-14-regular;
     color: $white;

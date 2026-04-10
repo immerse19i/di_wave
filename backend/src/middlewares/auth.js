@@ -26,7 +26,7 @@ exports.verifyToken = async (req, res, next) => {
       if (!rows.length || rows[0].current_session_id !== decoded.sessionId) {
         return res.status(401).json({
           code: 'SESSION_EXPIRED',
-          message: '다른 기기에서 로그인하여 현재 세션이 종료되었습니다.'
+          message: '다른 기기에서 로그인하여 로그아웃 처리되었습니다.'
         });
       }
     }

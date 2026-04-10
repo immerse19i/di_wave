@@ -25,7 +25,7 @@
     <div class="form-group">
       <label>첨부파일</label>
       <span class="file-guide"
-        >jpg,pjeg,png,pdf 형식의 파일만 등록됩니다. 최대 10mb</span
+        >jpg,jpeg,png,pdf 형식의 파일만 등록됩니다. 최대 10mb</span
       >
     </div>
 
@@ -113,7 +113,7 @@ const onFileChange = (e) => {
   if (!file) return;
 
   if (file.size > 10 * 1024 * 1024) {
-    message.showAlert('파일 크기는 최대 10MB까지 가능합니다.');
+    message.showAlert('용량이 10mb를 초과하였습니다.');
     return;
   }
 
@@ -164,7 +164,7 @@ const submitInquiry = async () => {
   }
 
   message.showConfirm(
-    '문의내용은 제출 후에는 수정할 수 없습니다.\n계속하시겠습니까?',
+    '문의내용은 제출 후에는 수정할 수 없습니다. 계속하시겠습니까?',
     async () => {
       if (isSubmitting.value) return;
       isSubmitting.value = true;

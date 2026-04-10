@@ -16,6 +16,13 @@
     :min-date="minDate"
     input-class-name="dp-custom-input"
     menu-class-name="dp-custom-menu"
+    :hide-navigation="['time']"
+    :action-row="{
+      showNow: false,
+      showPreview: false,
+      showCancel: false,
+      showSelect: false,
+    }"
   >
     <template #dp-input="{ onBlur }">
       <div :class="['dp-input-wrap', { 'dp-disabled': disabled }]">
@@ -26,7 +33,12 @@
           :disabled="disabled"
           maxlength="10"
           @input="handleInput"
-          @blur="(e) => { applyInput(e); onBlur(e); }"
+          @blur="
+            (e) => {
+              applyInput(e);
+              onBlur(e);
+            }
+          "
           @keydown.enter="applyInput"
         />
         <img src="/assets/icons/calendar_icon.svg" alt="" class="dp-cal-icon" />

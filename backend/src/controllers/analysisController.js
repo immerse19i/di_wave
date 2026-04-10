@@ -185,7 +185,8 @@ exports.getAnalyses = async (req, res) => {
         const allowedSortFields = {
             'patient_code': 'p.patient_code',
             'patient_name': 'p.name',
-            'created_at': 'a.created_at'
+            'created_at': 'a.created_at',
+            'analysis_date': 'a.analysis_date' 
         };
         const dbSortField = allowedSortFields[sortField] || 'a.created_at';
         const dbSortOrder = sortOrder === 'ASC' ? 'ASC' : 'DESC';

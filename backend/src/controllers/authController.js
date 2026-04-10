@@ -357,7 +357,7 @@ exports.sendCode = async (req, res) => {
         아래의 인증번호를 회원가입 화면의 '인증번호' 칸에 입력해 주세요.
       </p>
 
-      <div style="background-color:#353535; padding:12px 48px; display:inline-block; margin:20px 0;">
+      <div style="background-color:#55aba6; padding:12px 48px; display:inline-block; margin:20px 0;">
         <p style="font-family:'Inter',Arial,sans-serif; font-weight:500; font-size:36px; line-height:140%; letter-spacing:0; color:#fff; margin:0; text-align:center;">
           ${code}
         </p>
@@ -371,9 +371,9 @@ exports.sendCode = async (req, res) => {
 
       <p style="font-size:12px; color:#353535; margin-top:24px;">
         본 메일은 발송 전용으로 회신이 불가능합니다.<br/>
-        Copyright © OsteoAge. All rights reserved.
+        Copyright © DiWAVE Inc. All rights reserved.
       </p>
-
+      <br/><br/>
       
 
       <p style="font-size:12px; color:#353535; line-height:1.8;">
@@ -429,6 +429,30 @@ res.json({ success: true, message: '인증되었습니다.' });
   }
 };
 
+
+exports.checkEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: '이메일을 입력해주세요.' });
+    }
+
+const [rows] = await pool.query(
+  'SELECT id FROM users WHERE email = ?',
+  [email]
+);
+
+    if (rows.length > 0) {
+      return res.json({ success: false, message: '이미 가입된 이메일 입니다.' });
+    }
+
+    res.json({ success: true, message: '가입가능한 이메일 입니다.' });
+  } catch (error) {
+    console.error('checkEmail error:', error);
+    res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
+  }
+};
+
 // 회원 가입
 // POST /api/auth/register
 exports.register = async (req, res) => {
@@ -451,6 +475,10 @@ if (existingEmail.length > 0) {
   await conn.rollback();
   return res.status(400).json({ success: false, message: '이미 등록된 이메일입니다.' });
 }
+
+
+
+
 
 // 사업자번호 중복 확인
 const [existingBiz] = await conn.query('SELECT id FROM hospitals WHERE business_number = ?', [businessNumber]);
@@ -501,6 +529,9 @@ if (existingBiz.length > 0) {
 };
 
 
+
+
+
 // POST /api/auth/find-id 아이디 찾기
 exports.findId = async (req, res) => {
   try {
@@ -532,7 +563,7 @@ exports.findId = async (req, res) => {
     await transporter.sendMail({
       from: process.env.MAIL_FROM,
       to: email,
-      subject: '[DI-WAVE] ID 찾기 인증번호',
+      subject: '[OsteoAge] ID 찾기 인증번호 안내',
       html: `
         <div style="max-width:600px; text-align:left; font-family:'Inter',Arial,sans-serif; color:#353535;">
           <p style="font-size:14px; line-height:1.4;">
@@ -614,7 +645,7 @@ exports.findPassword = async (req, res) => {
           </p>
           <p style="font-size:12px; color:#353535; margin-top:24px;">
             본 메일은 발신전용으로 회신이 불가능합니다.<br/>
-            Copyright © OsteoAge. All rights reserved.
+            Copyright © DiWAVE Inc. All rights reserved.
             <br/><br/>
             디웨이브주식회사<br/>
 02-2088-8728 [문의가능시간 : 10:00~17:00 (토 · 일 · 공휴일 휴무)]

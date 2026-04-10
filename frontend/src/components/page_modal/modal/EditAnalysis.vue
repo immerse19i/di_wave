@@ -53,15 +53,26 @@
           <div class="form-row">
             <label><span class="required">*</span>생년월일</label>
             <div class="birth-inputs">
-              <input type="text" v-model="form.birthYear" class="input-year" />
+              <input
+                type="text"
+                v-model="form.birthYear"
+                class="input-year"
+                @input="onNumericInput($event, 'birthYear')"
+              />
               <span class="unit">년</span>
               <input
                 type="text"
                 v-model="form.birthMonth"
                 class="input-month"
+                @input="onNumericInput($event, 'birthMonth')"
               />
               <span class="unit">월</span>
-              <input type="text" v-model="form.birthDay" class="input-day" />
+              <input
+                type="text"
+                v-model="form.birthDay"
+                class="input-day"
+                @input="onNumericInput($event, 'birthDay')"
+              />
               <span class="unit">일</span>
             </div>
           </div>
@@ -490,15 +501,15 @@ onMounted(() => {
 <style lang="scss" scoped>
 .edit-analysis {
   width: 540px;
-  padding: 20px 0;
+  // padding: 20px 20px;
 }
 
 .modal-title {
   font-weight: $font-weight-bold;
-  font-size: 24px;
+  font-size: 20px;
   color: $white;
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .modal-body {
@@ -617,7 +628,9 @@ onMounted(() => {
     display: flex;
     align-items: center;
     margin-bottom: 16px;
-
+    &:last-child {
+      margin-bottom: 0;
+    }
     > label {
       width: 108px;
       flex-shrink: 0;
@@ -625,6 +638,7 @@ onMounted(() => {
       color: $white;
       display: flex;
       align-items: center;
+      margin-right: 8px;
       &:has(.required) {
         color: $sub-color-2;
       }
@@ -641,7 +655,7 @@ onMounted(() => {
       border: 1px solid $dark-line-gray;
       border-radius: $radius-sm;
       color: $white;
-      @include font-14-regular;
+      @include font-12-regular;
       transition: border-color $transition-fast;
 
       &::placeholder {
@@ -748,12 +762,15 @@ onMounted(() => {
     .second-label {
       @include font-14-regular;
       color: $sub-color-2;
-      margin-left: 16px;
+      // margin-left: 16px;
+      white-space: nowrap;
       max-height: 100%;
       height: 38px;
       align-items: center;
       display: flex;
-
+      & + input {
+        width: 110px;
+      }
       .required {
         color: $sub-color-2;
         margin-right: 2px;
@@ -831,7 +848,7 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   gap: 16px;
-  margin-top: 32px;
+  margin-top: 16px;
 
   button {
     width: 140px;

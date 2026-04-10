@@ -35,6 +35,8 @@ router.post('/find-password', authController.findPassword);
 router.post('/reset-password', authController.resetPassword);
 // 회원가입로직
 router.post('/check-id', authController.checkId);
+router.post('/check-email', authController.checkEmail);
+
 router.post('/send-code', authController.sendCode);
 router.post('/verify-code', authController.verifyCode);
 router.post('/register', uploadBusiness.single('businessLicense'), authController.register);

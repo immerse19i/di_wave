@@ -7,6 +7,14 @@
         <div class="bar_title">설정/계정</div>
         <ul class="menu_list">
           <li>
+            <router-link to="/main">
+              <img
+                src="/assets/icons/home_icon.svg"
+                alt="home_icon"
+              />메인화면으로
+            </router-link>
+          </li>
+          <li>
             <router-link to="/user-info/profile">
               <!-- <img src="/assets/icons/profile.svg" alt="" /> -->
               프로필
@@ -114,7 +122,7 @@ const pageTitle = computed(() => {
       display: flex;
       align-items: center;
       padding: 14.5px 16px;
-
+      gap: 8px;
       color: $white;
       border-radius: $radius-md;
       @include font-16-regular;

@@ -132,6 +132,7 @@ function generateReportHTML(data) {
   const diffMo = absD % 12;
   const diffText = (diffY > 0 ? `${diffY}세 ` : '') + `${String(diffMo).padStart(2, '0')}개월`;
   const ageDiffText = `뼈나이가 ${diffText} ${diff >= 0 ? '많습니다' : '적습니다'}.`;
+  const arrowRotate = boneM > chronoM ? 'rotate(180deg)' : 'none';
   // 파일 ID & 표시값
   const displayName = maskName(analysis.patient_name);
   const displayHospital = maskHospital(hospitalName);
@@ -281,7 +282,7 @@ function generateReportHTML(data) {
       transform: translate(-50%, -50%); width: 100%; z-index: -1;
     }
     .cover-page .cover-info-box {
-      border: 2px solid #4a90d9; border-radius: 10px;
+      border: 1px solid #a8c8e8; border-radius: 10px;
       padding: 16px; display: inline-flex; flex-direction: column; row-gap: 10px;
       position: absolute; top: 38%; z-index: 1;
       background: rgba(255, 255, 255, 0.5);
@@ -509,7 +510,7 @@ function generateReportHTML(data) {
     <div class="age-score-section">
       <div class="age-row">
         <span>만나이 <strong>${age.years}세 ${String(age.months).padStart(2, '0')}개월</strong></span>
-        <span class="age-arrow"><img src="${baseUrl}/report-assets/arrow_left.svg" style="width:22px;transform:rotateX(-1)" /></span>
+        <span class="age-arrow"><img src="${baseUrl}/report-assets/arrow_left.svg" style="width:22px;transform:${arrowRotate}" /></span>
         <span>뼈 나이(AI) <strong>${analysis.bone_age_years}세 ${String(analysis.bone_age_months || 0).padStart(2, '0')}개월</strong></span>
         <span class="age-diff">${ageDiffText}</span>
       </div>
@@ -561,7 +562,7 @@ function generateReportHTML(data) {
       <div class="health-title">체질량 지수 <strong>${bmiValue} <span class="unit">kg/m&sup2;</span></strong></div>
       <div class="right_section">
       ${levelBarHTML(['저체중', '정상', '과체중', '비만'], bmiLevel)}
-      <p class="health-desc">체질량 지수(BMI: Body Mass Index) = 체중(kg) / (키(m) x 키(m))<br/>체질량 지수 기준 : 5th 미만(저체중) / 5th ~ 84th(정상) / 85th ~ 94th(과체중) / 95th 이상(비만)</p>
+      <p class="health-desc">체질량 지수(BMI: Body Mass Index) = 체중(kg) / (키(m) x 키(m))<br/>체질량 지수 기준: 5th 미만(저체중) / 5th ~ 84th(정상) / 85th ~ 94th(과체중) / 95th 이상(비만)</p>
       
       </div>
     </div>
@@ -570,7 +571,7 @@ function generateReportHTML(data) {
       <div class="health-title">비만도 <strong>${obesityRate} <span class="unit">%</span></strong></div>
       <div class="right_section">
       ${levelBarHTML(['저체중', '정상', '경도비만', '중등도비만', '고도비만'], obesityLevel)}
-      <p class="health-desc">비만도 (%) = 표준 체중 대비 백분율(%) = 측정 체중 / 표준 체중 x 100<br/>비만도 기준 : 90미만(저체중) / 90~119(정상) / 120~129(경도비만) / 130~149(중등도비만) / 150이상(고도비만)</p>
+      <p class="health-desc">비만도 (%) = 표준 체중 대비 백분율(%) = 측정 체중 / 표준 체중 x 100<br/>비만도 기준: 90미만(저체중) / 90~119(정상) / 120~129(경도비만) / 130~149(중등도비만) / 150이상(고도비만)</p>
       </div>
     </div>
 
@@ -753,11 +754,11 @@ function generateReportHTML(data) {
 
       if (currentAge && currentHeight) {
         ctx.beginPath(); ctx.fillStyle = '#4ECDC4';
-        ctx.arc(toX(currentAge), toY(currentHeight), 6, 0, Math.PI * 2); ctx.fill();
+        ctx.arc(toX(currentAge), toY(currentHeight), 4, 0, Math.PI * 2); ctx.fill();
       }
       if (predictedAge && predictedHeight) {
         ctx.beginPath(); ctx.fillStyle = '#FF6B6B';
-        ctx.arc(toX(predictedAge), toY(predictedHeight), 6, 0, Math.PI * 2); ctx.fill();
+        ctx.arc(toX(predictedAge), toY(predictedHeight), 4, 0, Math.PI * 2); ctx.fill();
       }
     }
 
