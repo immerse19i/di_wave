@@ -22,16 +22,16 @@
       <table>
         <colgroup>
           <col style="width: auto" />
-          <col style="width: 220px" />
-          <col style="width: 112px" />
-          <col style="width: 60px" />
-          <col style="width: 112px" />
-          <col style="width: 88px" />
-          <col style="width: 88px" />
-          <col style="width: 88px" />
-          <col style="width: 88px" />
-          <col style="width: 88px" />
-          <col style="width: 60px" />
+          <col style="width: 128px" />
+          <col style="width: 100px" />
+          <col style="width: 100px" />
+          <col style="width: 100px" />
+          <col style="width: 100px" />
+          <col style="width: 100px" />
+          <col style="width: 100px" />
+          <col style="width: 100px" />
+          <col style="width: 128px" />
+          <col style="width: 100px" />
         </colgroup>
         <thead>
           <tr>
