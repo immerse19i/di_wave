@@ -852,11 +852,34 @@ onBeforeUnmount(() => {
     }
 
     input[type='checkbox'] {
+      -webkit-appearance: none;
+      appearance: none;
       width: 18px;
       height: 18px;
-      min-height: auto;
-      accent-color: $main-color;
+      min-width: 18px;
+      min-height: 18px;
+      border: 2px solid $dark-line-gray;
+      border-radius: 3px;
+      background: transparent;
       cursor: pointer;
+      position: relative;
+
+      &:checked {
+        background: $main-color;
+        border-color: $main-color;
+
+        &::after {
+          content: '';
+          position: absolute;
+          left: 5px;
+          top: 1px;
+          width: 5px;
+          height: 10px;
+          border: solid $white;
+          border-width: 0 2px 2px 0;
+          transform: rotate(45deg);
+        }
+      }
     }
 
     span {
