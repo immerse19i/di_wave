@@ -204,32 +204,16 @@
             <span>전체동의</span>
           </label>
           <hr />
-          <label class="checkbox-item">
-            <input type="checkbox" v-model="form.agreeTerms" />
+          <label
+            v-for="term in signupTerms"
+            :key="term.type"
+            class="checkbox-item"
+          >
+            <input type="checkbox" v-model="term.checked" />
             <span
-              ><a href="#" @click.stop.prevent="openTerms('terms_of_service')"
-                >이용약관</a
-              >
-              동의 (필수)</span
-            >
-          </label>
-          <label class="checkbox-item">
-            <input type="checkbox" v-model="form.agreePrivacy" />
-            <span
-              ><a href="#" @click.stop.prevent="openTerms('privacy_collection')"
-                >서비스 이용을 위한 개인정보 수집 및 이용</a
-              >
-              동의 (필수)</span
-            >
-          </label>
-          <label class="checkbox-item">
-            <input type="checkbox" v-model="form.agreeMarketing" />
-            <span
-              ><a
-                href="#"
-                @click.stop.prevent="openTerms('privacy_consignment')"
-                >회원가입을 위한 개인정보 수집 및 이용</a
-              >
+              ><a href="#" @click.stop.prevent="openTerms(term.type)">{{
+                term.name
+              }}</a>
               동의 (필수)</span
             >
           </label>
@@ -251,6 +235,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { authAPI } from '@/api/auth';
+import { termsAPI } from '@/api/terms';
 import { UseMessageStore } from '@/store/message';
 const message = UseMessageStore();
 const router = useRouter();
@@ -308,11 +293,10 @@ const form = ref({
   address: '',
   addressDetail: '',
   businessNumber: '',
-  // 약관
-  agreeTerms: false,
-  agreePrivacy: false,
-  agreeMarketing: false,
 });
+
+// 약관 (API에서 동적 로딩)
+const signupTerms = ref([]);
 
 // Step 1 유효성
 const isStep1Valid = computed(() => {
@@ -336,9 +320,8 @@ const isStep2Valid = computed(() => {
     form.value.address &&
     form.value.businessNumber &&
     selectedFile.value &&
-    form.value.agreeTerms &&
-    form.value.agreePrivacy &&
-    form.value.agreeMarketing
+    signupTerms.value.length > 0 &&
+    signupTerms.value.every((t) => t.checked)
   );
 });
 
@@ -350,22 +333,15 @@ function handlePopState(e) {
 
 // 전체동의
 const agreeAll = computed({
-  get: () =>
-    form.value.agreeTerms &&
-    form.value.agreePrivacy &&
-    form.value.agreeMarketing,
+  get: () => signupTerms.value.length > 0 && signupTerms.value.every((t) => t.checked),
   set: (val) => {
-    form.value.agreeTerms = val;
-    form.value.agreePrivacy = val;
-    form.value.agreeMarketing = val;
+    signupTerms.value.forEach((t) => (t.checked = val));
   },
 });
 
 function toggleAll() {
   const val = agreeAll.value;
-  form.value.agreeTerms = val;
-  form.value.agreePrivacy = val;
-  form.value.agreeMarketing = val;
+  signupTerms.value.forEach((t) => (t.checked = val));
 }
 
 function validateLoginId() {
@@ -649,8 +625,18 @@ async function handleRegister() {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   window.addEventListener('popstate', handlePopState);
+
+  // 약관 목록 API 로딩
+  try {
+    const res = await termsAPI.getPublicTerms();
+    signupTerms.value = res.data.data
+      .filter((t) => t.group_type === 'signup')
+      .map((t) => ({ type: t.type, name: t.name, checked: false }));
+  } catch (e) {
+    console.error('약관 목록 로딩 실패:', e);
+  }
 });
 
 onBeforeUnmount(() => {
