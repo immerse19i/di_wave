@@ -1,5 +1,6 @@
 <template>
   <div class="report-viewer">
+    <FadeLoader v-if="isProcessing" />
     <!-- 상단 툴바 -->
     <div class="toolbar">
       <button class="btn-back" @click="goBack">
@@ -36,7 +37,7 @@
       <div
         v-else
         class="pages-wrapper"
-        :style="{ transform: `scale(${zoomLevels[zoomIndex] / 100})` }"
+        :style="{ zoom: zoomLevels[zoomIndex] / 100 }"
       >
         <!-- ===== 1페이지: 커버 ===== -->
         <div class="pdf-page cover-page" ref="page1">
@@ -120,14 +121,18 @@
           <div class="age-score-section">
             <div class="age-row">
               <span class="age-item"
-                >만나이
+                >만 나이
                 <strong
                   >{{ ageDisplay.years }}세
                   {{ String(ageDisplay.months).padStart(2, '0') }}개월</strong
                 ></span
               >
               <span class="age-arrow">
-                <img src="/assets/icons/arrow_left.svg" alt="arrow_left" />
+                <img
+                  src="/assets/icons/arrow_left.svg"
+                  alt="arrow"
+                  :style="{ transform: isBoneAgeGreater ? 'rotate(180deg)' : 'none' }"
+                />
               </span>
               <span class="age-item"
                 >뼈 나이(AI)
@@ -380,9 +385,10 @@
               </div>
               <p class="health-desc">
                 정상: 연령별 체중 5백분위수 이상이고, 연령별 체질량 지수
-                85백분위수 미만<br />저체중: 연령별 체중 5백분위수 미만<br />과체중:
-                연령별 체질량 지수 85 ~ 95백분위수<br />비만: 연령별 체질량 지수
-                95백분위수 이상
+                85백분위수 미만<br />
+                저체중: 연령별 체중 5백분위수 미만<br />
+                과체중: 연령별 체질량 지수 85 ~ 95백분위수<br />
+                비만: 연령별 체질량 지수 95백분위수 이상
               </p>
             </div>
           </div>
@@ -402,7 +408,7 @@
               </div>
               <p class="health-desc">
                 체질량 지수(BMI: Body Mass Index) = 체중(kg) / (키(m) x
-                키(m))<br />체질량 지수 기준 : 5th 미만(저체중) / 5th ~
+                키(m))<br />체질량 지수 기준: 5th 미만(저체중) / 5th ~
                 84th(정상) / 85th ~ 94th(과체중) / 95th 이상(비만)
               </p>
             </div>
@@ -432,7 +438,7 @@
               </div>
               <p class="health-desc">
                 비만도 (%) = 표준 체중 대비 백분율(%) = 측정 체중 / 표준 체중 x
-                100<br />비만도 기준 : 90미만(저체중) / 90~119(정상) /
+                100<br />비만도 기준: 90미만(저체중) / 90~119(정상) /
                 120~129(경도비만) / 130~149(중등도비만) / 150이상(고도비만)
               </p>
             </div>
@@ -523,12 +529,13 @@
               class="percentile-text"
               v-if="resultData?.Genetic_Predicted_Height"
             >
-              백분위 <strong>{{ geneticPercentile }}</strong> : 큰 순서로 상위
+              백분위 <strong>{{ geneticPercentile }}</strong
+              >: 큰 순서로 상위
               <strong>{{ 100 - geneticPercentile }}%</strong>에 해당하는 키
               입니다.
             </p>
             <p class="percentile-text" v-else>
-              백분위 <strong>-</strong> : 큰 순서로 상위 <strong>-%</strong>에
+              백분위 <strong>-</strong>: 큰 순서로 상위 <strong>-%</strong>에
               해당하는 키 입니다.
             </p>
             <div class="chart-with-desc">
@@ -585,7 +592,8 @@
               <strong>{{ resultData?.Growth_Curve_Predicted_Height }}cm</strong>
             </h3>
             <p class="percentile-text">
-              백분위 <strong>{{ boneAgePercentile }}</strong> : 큰 순서로 상위
+              백분위 <strong>{{ boneAgePercentile }}</strong
+              >: 큰 순서로 상위
               <strong>{{ 100 - boneAgePercentile }}%</strong>에 해당하는 키
               입니다.
             </p>
@@ -655,9 +663,9 @@
               <strong>{{ resultData?.Final_Predicted_Height }}cm</strong>
             </h3>
             <p class="percentile-text">
-              백분위 <strong>{{ finalPercentile }}</strong> : 큰 순서로 상위
-              <strong>{{ 100 - finalPercentile }}%</strong>에 해당하는 키
-              입니다.
+              백분위 <strong>{{ finalPercentile }}</strong
+              >: 큰 순서로 상위 <strong>{{ 100 - finalPercentile }}%</strong>에
+              해당하는 키 입니다.
             </p>
             <div class="chart-with-desc">
               <canvas ref="chartCanvas5" width="340" height="286"></canvas>
@@ -739,6 +747,7 @@ import { analysisAPI } from '@/api/analysis';
 import growthHeightData from '@/data/growth_height.json';
 import growthWeightData from '@/data/growth_weight.json';
 import growthBmiData from '@/data/growth_bmi.json';
+import FadeLoader from '@/components/common/FadeLoader.vue';
 // import html2canvas from 'html2canvas';
 // import { jsPDF } from 'jspdf';
 
@@ -749,6 +758,7 @@ const userStore = useAuthStore();
 // ===== 상태 =====
 const hidePersonalInfo = ref(false);
 const loading = ref(true);
+const isProcessing = ref(false);
 const pdfUrl = ref(null);
 const pdfBlob = ref(null);
 const analysis = ref(null);
@@ -888,7 +898,19 @@ const ageDiffText = computed(() => {
   const y = Math.floor(abs / 12);
   const m = abs % 12;
   const text = (y > 0 ? `${y}세 ` : '') + `${String(m).padStart(2, '0')}개월`;
-  return `뼈나이가 ${text} ${diff >= 0 ? '많습니다' : '적습니다'}.`;
+  return `뼈 나이가 ${text} ${diff >= 0 ? '많습니다' : '적습니다'}.`;
+});
+
+// 뼈나이가 만나이보다 큰지 (화살표 방향 결정)
+const isBoneAgeGreater = computed(() => {
+  if (!analysis.value) return false;
+  const chronoM =
+    (analysis.value.chronological_age_years || 0) * 12 +
+    (analysis.value.chronological_age_months || 0);
+  const boneM =
+    (analysis.value.bone_age_years || 0) * 12 +
+    (analysis.value.bone_age_months || 0);
+  return boneM > chronoM;
 });
 
 // 백분위 계산 함수
@@ -1146,7 +1168,7 @@ const drawGrowthChart = (canvas, options) => {
   if (currentAge && currentHeight) {
     ctx.beginPath();
     ctx.fillStyle = '#4ECDC4';
-    ctx.arc(toX(currentAge), toY(currentHeight), 6, 0, Math.PI * 2);
+    ctx.arc(toX(currentAge), toY(currentHeight), 4, 0, Math.PI * 2);
     ctx.fill();
   }
 
@@ -1154,7 +1176,7 @@ const drawGrowthChart = (canvas, options) => {
   if (predictedAge && predictedHeight) {
     ctx.beginPath();
     ctx.fillStyle = '#FF6B6B';
-    ctx.arc(toX(predictedAge), toY(predictedHeight), 6, 0, Math.PI * 2);
+    ctx.arc(toX(predictedAge), toY(predictedHeight), 4, 0, Math.PI * 2);
     ctx.fill();
   }
 };
@@ -1258,8 +1280,9 @@ const getCurrentHeightPredicted18 = () => {
 // ===== 인쇄 / 다운로드 =====
 
 const handlePrint = async () => {
+  if (isProcessing.value) return;
   try {
-    loading.value = true;
+    isProcessing.value = true;
     const res = await analysisAPI.getReportPdf(
       route.params.id,
       hidePersonalInfo.value,
@@ -1271,13 +1294,14 @@ const handlePrint = async () => {
   } catch (error) {
     console.error('PDF 인쇄 실패:', error);
   } finally {
-    loading.value = false;
+    isProcessing.value = false;
   }
 };
 
 const handleDownload = async () => {
+  if (isProcessing.value) return;
   try {
-    loading.value = true;
+    isProcessing.value = true;
     const res = await analysisAPI.getReportPdf(
       route.params.id,
       hidePersonalInfo.value,
@@ -1296,7 +1320,7 @@ const handleDownload = async () => {
   } catch (error) {
     console.error('PDF 다운로드 실패:', error);
   } finally {
-    loading.value = false;
+    isProcessing.value = false;
   }
 };
 // ===== 마운트 =====
@@ -1476,7 +1500,6 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  transform-origin: top center;
   padding-bottom: 40px;
   margin: auto;
 }
@@ -1551,7 +1574,7 @@ onUnmounted(() => {
     }
   }
   .cover-info-box {
-    border: 2px solid $sub-color-2;
+    border: 1px solid $sub-color-2;
     border-radius: 10px;
     padding: 16px;
     display: inline-flex;
