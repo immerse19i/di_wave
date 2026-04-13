@@ -131,7 +131,9 @@
                 <img
                   src="/assets/icons/arrow_left.svg"
                   alt="arrow"
-                  :style="{ transform: isBoneAgeGreater ? 'rotate(180deg)' : 'none' }"
+                  :style="{
+                    transform: isBoneAgeGreater ? 'none' : 'rotate(180deg)',
+                  }"
                 />
               </span>
               <span class="age-item"
@@ -1064,6 +1066,12 @@ const drawGrowthChart = (canvas, options) => {
   const ctx = canvas.getContext('2d');
   const W = canvas.width,
     H = canvas.height;
+  const dpr = 2;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
   const margin = { top: 20, right: 10, bottom: 40, left: 50 };
   const plotW = W - margin.left - margin.right;
   const plotH = H - margin.top - margin.bottom;
@@ -1123,14 +1131,6 @@ const drawGrowthChart = (canvas, options) => {
     });
     ctx.stroke();
     ctx.setLineDash([]);
-
-    // 라벨
-    const last = filtered[filtered.length - 1];
-    if (last) {
-      ctx.fillStyle = is50 ? '#4A90D9' : '#999';
-      ctx.font = is50 ? 'bold 10px Pretendard' : '9px Pretendard';
-      ctx.fillText(pLabels[key], toX(last.month) + 3, toY(last[key]) + 3);
-    }
   });
 
   // X축
