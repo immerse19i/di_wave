@@ -9,8 +9,7 @@ const pool = mysql.createPool({
     database: config.db.database,
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0,
-    timezone: '+09:00'
+    queueLimit: 0
 });
 
 // 연결 테스트
