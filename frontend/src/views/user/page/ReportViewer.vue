@@ -457,11 +457,6 @@
             <div class="chart-with-desc">
               <canvas ref="chartCanvas3" width="340" height="286"></canvas>
               <div class="chart-right">
-                <div class="chart-desc-box">
-                  <strong>현재 키 기반 예측 키</strong><br />
-                  질병관리청 성장도표를 기반으로 현재의 성장 속도가 성인이 될
-                  때까지 유지될 경우를 예측한 결과입니다.
-                </div>
                 <div class="chart-line-legend">
                   <h4>범례</h4>
                   <div class="line-item">
@@ -494,6 +489,11 @@
                   <div class="line-item">
                     <span class="line dashed"></span> 3rd
                   </div>
+                </div>
+                <div class="chart-desc-box">
+                  <strong>현재 키 기반 예측 키</strong><br />
+                  질병관리청 성장도표를 기반으로 현재의 성장 속도가 성인이 될
+                  때까지 유지될 경우를 예측한 결과입니다.
                 </div>
               </div>
             </div>
@@ -543,11 +543,6 @@
             <div class="chart-with-desc">
               <canvas ref="chartCanvas4a" width="340" height="286"></canvas>
               <div class="chart-right">
-                <div class="chart-desc-box">
-                  <strong>유전 기반 예측 키</strong><br />
-                  부모의 신장을 바탕으로 산출된 자녀의 유전적 기대
-                  신장(Mid-Parental Height)입니다.
-                </div>
                 <div class="chart-line-legend">
                   <h4>범례</h4>
                   <div class="line-item">
@@ -578,6 +573,11 @@
                   <div class="line-item">
                     <span class="line dashed"></span> 3rd
                   </div>
+                </div>
+                <div class="chart-desc-box">
+                  <strong>유전 기반 예측 키</strong><br />
+                  부모의 신장을 바탕으로 산출된 자녀의 유전적 기대
+                  신장(Mid-Parental Height)입니다.
                 </div>
               </div>
             </div>
@@ -602,10 +602,6 @@
             <div class="chart-with-desc">
               <canvas ref="chartCanvas4b" width="340" height="286"></canvas>
               <div class="chart-right">
-                <div class="chart-desc-box">
-                  <strong>뼈나이 기반 예측 키</strong><br />
-                  AI가 판독한 뼈나이 값과 현재 키를 사용하여 추정한 값입니다.
-                </div>
                 <div class="chart-line-legend">
                   <h4>범례</h4>
                   <div class="line-item">
@@ -636,6 +632,10 @@
                   <div class="line-item">
                     <span class="line dashed"></span> 3rd
                   </div>
+                </div>
+                <div class="chart-desc-box">
+                  <strong>뼈나이 기반 예측 키</strong><br />
+                  AI가 판독한 뼈나이 값과 현재 키를 사용하여 추정한 값입니다.
                 </div>
               </div>
             </div>
@@ -672,11 +672,6 @@
             <div class="chart-with-desc">
               <canvas ref="chartCanvas5" width="340" height="286"></canvas>
               <div class="chart-right">
-                <div class="chart-desc-box">
-                  <strong>최종 예측 키</strong><br />
-                  표준 성장 곡선 기반 예측 키에 유전적 요인 및 골연령 성숙도를
-                  반영하여 보정한 최종 예측키 입니다.
-                </div>
                 <div class="chart-line-legend">
                   <h4>범례</h4>
                   <div class="line-item">
@@ -707,6 +702,11 @@
                   <div class="line-item">
                     <span class="line dashed"></span> 3rd
                   </div>
+                </div>
+                <div class="chart-desc-box">
+                  <strong>최종 예측 키</strong><br />
+                  표준 성장 곡선 기반 예측 키에 유전적 요인 및 골연령 성숙도를
+                  반영하여 보정한 최종 예측키 입니다.
                 </div>
               </div>
             </div>
