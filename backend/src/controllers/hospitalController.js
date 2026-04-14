@@ -792,12 +792,11 @@ exports.adjustCredit = async (req, res) => {
 
     // credit_transactions 기록
     const txType = type === 'charge' ? 'charge' : 'use';
-    const expiresAt = type === 'charge' ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null;
     const source = type === 'charge' ? 'admin_grant' : 'admin_deduct';
     await conn.query(
       `INSERT INTO credit_transactions (hospital_id, type, amount, balance_after, description, expires_at, source, is_notified, remaining_amount)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id, txType, parsedAmount, newBalance, reason, expiresAt, source, 0,
+       VALUES (?, ?, ?, ?, ?, ${type === 'charge' ? 'DATE_ADD(NOW(), INTERVAL 30 DAY)' : 'NULL'}, ?, ?, ?)`,
+      [id, txType, parsedAmount, newBalance, reason, source, 0,
        type === 'charge' ? parsedAmount : null]
     );
 
