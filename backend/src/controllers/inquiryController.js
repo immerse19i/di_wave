@@ -357,11 +357,8 @@ exports.answerInquiry = async (req, res) => {
 
               <!-- 답변 본문 -->
               <div style="padding:0 0 24px; line-height:1.8; font-size:14px;">
-                <p>안녕하세요<br/>OsteoAge 입니다.</p><br/><br/>
                 <div>${answer}</div>
                 <br/><br/>
-                <p>앞으로 안정적이고 신뢰할 수 있는 서비스 제공을 위해 최선을 다하겠습니다.</p><br/><br/>
-                <p>OsteoAge 드림</p>
               </div>
 
               <hr style="border:none; border-top:1px solid #DFE1E7; margin:20px 0;" />

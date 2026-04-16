@@ -65,12 +65,12 @@ const message = UseMessageStore();
 
 .message-title {
   @include font-20-bold;
-  color: $white;
+  color: $dark-text;
   margin-bottom: 16px;
 }
 
 .message-text {
-  color: $white;
+  color: $dark-text;
   @include font-16-regular;
   line-height: 1.6;
   white-space: pre-line;

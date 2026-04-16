@@ -25,46 +25,70 @@
       <button class="btn-create" @click="goToCreate">생성</button>
     </div>
 
-    <!-- ④ 총 건수 -->
-    <div class="count-row">
-      <span class="total-count">총 {{ total }}건</span>
-    </div>
-
     <!-- ⑤⑥ 테이블 -->
     <div class="table-area">
+      <!-- ④ 총 건수 -->
+      <div class="count-row">
+        <span class="total-count">총 {{ total }}건</span>
+      </div>
       <table class="data-table">
         <thead>
           <tr>
             <th class="col-no">No</th>
             <th class="col-draft">임시저장</th>
             <th class="col-title sortable" @click="toggleSort('title')">
-              제목 <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              제목
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th
               class="col-period sortable"
               @click="toggleSort('display_start')"
             >
               팝업 게시기간
-              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th class="col-author sortable" @click="toggleSort('author_name')">
               작성자
-              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th
               class="col-published sortable"
               @click="toggleSort('published_at')"
             >
               게시일시
-              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th class="col-updated sortable" @click="toggleSort('updated_at')">
               최근수정일시
-              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th class="col-active sortable" @click="toggleSort('is_active')">
               현재 게시여부
-              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th class="col-edit">수정</th>
             <th class="col-delete">삭제</th>
@@ -338,7 +362,7 @@ const onResize = () => {
     display: flex;
     align-items: center;
     padding: 4px 16px;
-    padding-left: 4px;
+    padding-left: 12px;
     border-radius: $radius-sm;
     background: $bg-op;
     border: 1px solid $dark-line-gray;
@@ -370,6 +394,7 @@ const onResize = () => {
     background: $main-gad;
     min-width: 136px;
     padding: 7.5px 16px;
+    min-height: 32px;
     border-radius: $radius-sm;
     @include font-14-medium;
     cursor: pointer;
@@ -384,8 +409,10 @@ const onResize = () => {
 }
 .btn-create {
   padding: 8px 28px;
-  background: $main-color;
+  background: $main-gad;
   color: $white;
+  min-height: 32px;
+  min-width: 136px;
   border: none;
   border-radius: $radius-sm;
   @include font-14-medium;
@@ -402,7 +429,7 @@ const onResize = () => {
   margin-bottom: 8px;
 }
 .total-count {
-  @include font-14-regular;
+  @include font-14-bold;
   color: $dark-text;
 }
 

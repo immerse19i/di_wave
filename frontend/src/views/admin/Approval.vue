@@ -44,11 +44,19 @@
           <tr>
             <th class="sortable" @click="toggleSort('name')">
               병원명
-              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th class="sortable" @click="toggleSort('created_at')">
               신청일
-              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th>상태</th>
             <th>상세보기</th>
@@ -379,7 +387,12 @@ onMounted(() => {
       padding: 12px 8px;
       @include font-12-regular;
     }
-
+    th {
+      color: $gray;
+    }
+    td {
+      color: $dark-gray-light;
+    }
     thead tr {
       // background: $main-gad;
       background: $bg-op;

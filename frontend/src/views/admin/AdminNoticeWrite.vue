@@ -63,11 +63,16 @@
           statusMsg
         }}</span>
         <div class="action-right">
-          <span v-if="isPublished && notice.published_at" class="published-date">
+          <span
+            v-if="isPublished && notice.published_at"
+            class="published-date"
+          >
             {{ formatDateTime(notice.published_at) }} 작성
           </span>
           <div class="action-buttons">
-            <button v-if="!isPublished" class="btn-draft" @click="saveDraft">임시저장</button>
+            <button v-if="!isPublished" class="btn-draft" @click="saveDraft">
+              임시저장
+            </button>
             <button class="btn-publish" @click="publish">게시하기</button>
           </div>
         </div>
@@ -272,7 +277,11 @@ const props = defineProps({ id: [String, Number] });
 const isEditMode = computed(() => !!props.id);
 const isDeleted = ref(false);
 const isPublished = computed(() => {
-  return isEditMode.value && notice.value && (notice.value.status === 'published' || notice.value.status === 'private');
+  return (
+    isEditMode.value &&
+    notice.value &&
+    (notice.value.status === 'published' || notice.value.status === 'private')
+  );
 });
 
 // 폼 데이터
@@ -685,14 +694,14 @@ const goBack = () => {
   @include font-14-medium;
 }
 .btn-draft {
-  background: $main-color;
+  background: $main-gad;
   color: $white;
   &:hover {
     background: $sub-color;
   }
 }
 .btn-publish {
-  background: $main-color;
+  background: $main-gad;
   color: $white;
   &:hover {
     background: $sub-color;

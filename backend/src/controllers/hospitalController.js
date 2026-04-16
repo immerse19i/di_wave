@@ -640,55 +640,59 @@ exports.changeAccountStatus = async (req, res) => {
     const statusLabels = { active: '정상', suspended: '정지', withdrawn: '탈퇴' };
 
     if (rows.length > 0 && rows[0].email) {
-      await transporter.sendMail({
-        from: process.env.MAIL_FROM,
-        to: rows[0].email,
-        subject: '[OsteoAge] 회원님의 계정 상태가 변동되었습니다.',
-        html: `
-          <div style="max-width:800px; font-family:'Inter',Arial,sans-serif; color:#353535;">
-          <img src="http://osteoage.ai/assets/logo/di_wave_logo_color.png" alt="DiwaveLogo" style="width:101px; margin-top:16px;" />  
-          
-          <div style="padding:16px;width:100%; font-family:'Inter',Arial,sans-serif; font-size:16px; line-height:1.4; font-weight:500; color:#f8f9fa ">OsteoAge 계정 상태 변경 안내</div>
-          <p style="font-size:14px; line-height:1.6;">
-              OsteoAge를 이용해 주셔서 감사합니다.<br/><br/>
+      try {
+        await transporter.sendMail({
+          from: process.env.MAIL_FROM,
+          to: rows[0].email,
+          subject: '[OsteoAge] 회원님의 계정 상태가 변동되었습니다.',
+          html: `
+            <div style="max-width:800px; font-family:'Inter',Arial,sans-serif; color:#353535;">
+            <img src="http://osteoage.ai/assets/logo/di_wave_logo_color.png" alt="DiwaveLogo" style="width:101px; margin-top:16px;" />
+
+            <div style="padding:16px;width:100%; font-family:'Inter',Arial,sans-serif; font-size:16px; line-height:1.4; font-weight:500; color:#f8f9fa ">OsteoAge 계정 상태 변경 안내</div>
+            <p style="font-size:14px; line-height:1.6;">
+                OsteoAge를 이용해 주셔서 감사합니다.<br/><br/>
 
 회원님의 계정 상태가 변경되었습니다.
 변경 내역은 다음과 같습니다.
-            </p>
-            <table style="max-width: 700px; border-collapse:collapse; width:100%; margin:32px auto;">
-              <tr style="border-bottom:1px solid #DEE2E8; border-top: 1px solid #C7CCD0">
-                <td style="padding:8px 12px; background:#F0F2F5; border:1px solid #ddd; font-weight:bold; width: 168px; font-size: 14px;line-height:1.4; ">병원명</td>
-                <td style="font-size: 14px; color:#353535; padding:8px 12px; border:1px solid #ddd;">${rows[0].name}</td>
-              </tr>
-              <tr style="border-bottom:1px solid #DEE2E8;">
-                <td style="padding:8px 12px; background:#F0F2F5; border:1px solid #ddd; font-weight:bold;  width: 168px; font-size: 14px;line-height:1.4;">ID</td>
-                <td style="font-size: 14px; color:#353535; padding:8px 12px; border:1px solid #ddd;">${rows[0].login_id}</td>
-              </tr>
-              <tr style="border-bottom:1px solid #DEE2E8;">
-                <td style="padding:8px 12px; background:#F0F2F5; border:1px solid #ddd; font-weight:bold;  width: 168px; font-size: 14px;line-height:1.4;">변경상태</td>
-                <td style="font-size: 14px; color:#353535; padding:8px 12px; border:1px solid #ddd; font-weight:bold;">${statusLabels[status]}</td>
-              </tr>
-              <tr style="border-bottom:1px solid #C7CCD0;">
-                <td style="padding:8px 12px; background:#F0F2F5; border:1px solid #ddd; font-weight:bold;  width: 168px; font-size: 14px;line-height:1.4;
-                
-                ">사유</td>
-                <td style="font-size: 14px; color:#353535; padding:8px 12px; border:1px solid #ddd;">${reason || '-'}</td>
-              </tr>
-            </table>
-            <p style="font-size:12px; color:#353535; margin-bottom:20px;">
+              </p>
+              <table style="max-width: 700px; border-collapse:collapse; width:100%; margin:32px auto;">
+                <tr style="border-bottom:1px solid #DEE2E8; border-top: 1px solid #C7CCD0">
+                  <td style="padding:8px 12px; background:#F0F2F5; border:1px solid #ddd; font-weight:bold; width: 168px; font-size: 14px;line-height:1.4; ">병원명</td>
+                  <td style="font-size: 14px; color:#353535; padding:8px 12px; border:1px solid #ddd;">${rows[0].name}</td>
+                </tr>
+                <tr style="border-bottom:1px solid #DEE2E8;">
+                  <td style="padding:8px 12px; background:#F0F2F5; border:1px solid #ddd; font-weight:bold;  width: 168px; font-size: 14px;line-height:1.4;">ID</td>
+                  <td style="font-size: 14px; color:#353535; padding:8px 12px; border:1px solid #ddd;">${rows[0].login_id}</td>
+                </tr>
+                <tr style="border-bottom:1px solid #DEE2E8;">
+                  <td style="padding:8px 12px; background:#F0F2F5; border:1px solid #ddd; font-weight:bold;  width: 168px; font-size: 14px;line-height:1.4;">변경상태</td>
+                  <td style="font-size: 14px; color:#353535; padding:8px 12px; border:1px solid #ddd; font-weight:bold;">${statusLabels[status]}</td>
+                </tr>
+                <tr style="border-bottom:1px solid #C7CCD0;">
+                  <td style="padding:8px 12px; background:#F0F2F5; border:1px solid #ddd; font-weight:bold;  width: 168px; font-size: 14px;line-height:1.4;
+
+                  ">사유</td>
+                  <td style="font-size: 14px; color:#353535; padding:8px 12px; border:1px solid #ddd;">${reason || '-'}</td>
+                </tr>
+              </table>
+              <p style="font-size:12px; color:#353535; margin-bottom:20px;">
 본 메일은 발송 전용으로 회신이 불가능합니다.
 추가 문의 사항은 서비스 내 [문의하기] 게시판을 이용해 주세요.
 Copyright © DiWAVE Inc. All rights reserved.
-            </p>
-            <p style="font-size:12px; color:#353535; margin-bottom:8px;">
+              </p>
+              <p style="font-size:12px; color:#353535; margin-bottom:8px;">
 디웨이브주식회사
 02-2088-8728 [문의가능시간 : 10:00~17:00 (토 · 일 · 공휴일 휴무)]
-            </p>
+              </p>
 
-            <img src="http://osteoage.ai/assets/logo/di_wave_logo_color.png" alt="diwaveLogo" style="width:185px; " />
-          </div>
-        `,
-      });
+              <img src="http://osteoage.ai/assets/logo/di_wave_logo_color.png" alt="diwaveLogo" style="width:185px; " />
+            </div>
+          `,
+        });
+      } catch (mailErr) {
+        console.error('상태변경 메일 발송 실패:', mailErr.message);
+      }
     }
 
 

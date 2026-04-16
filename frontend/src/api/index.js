@@ -8,9 +8,14 @@ const api = axios.create({
   },
 });
 
+// 경로 기반 토큰 키 결정
+function getTokenKey() {
+  return window.location.pathname.startsWith('/admin') ? 'token_a' : 'token_u';
+}
+
 // 요청 인터셉터
 api.interceptors.request.use((config)=> {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem(getTokenKey());
   if(token) {
     config.headers.Authorization =`Bearer ${token}`;
   }
@@ -27,14 +32,14 @@ api.interceptors.response.use(
       if (code === 'SESSION_EXPIRED') {
         // 동시접속 감지: 알림 후 로그아웃
         alert('다른 기기에서 로그인하여 현재 세션이 종료되었습니다.');
-        localStorage.removeItem('token');
+        localStorage.removeItem(getTokenKey());
         const isAdmin = window.location.pathname.startsWith('/admin');
         window.location.href = isAdmin ? '/admin/login' : '/login';
         return Promise.reject(error);
       }
 
       // 일반 토큰 만료
-      localStorage.removeItem('token');
+      localStorage.removeItem(getTokenKey());
       const isAdmin = window.location.pathname.startsWith('/admin');
       window.location.href = isAdmin ? '/admin/login' : '/login';
     }

@@ -43,9 +43,19 @@
             <span class="radio-custom"></span>
             등록일
           </label>
-          <DatePicker v-model="startDate" :max-date="endDate" />
+          <DatePicker
+            v-model="startDate"
+            :max-date="endDate"
+            :disabled="dateMode !== 'date'"
+            :class="{ 'date-active': dateMode === 'date' }"
+          />
           <span class="date-separator">~</span>
-          <DatePicker v-model="endDate" :min-date="startDate" />
+          <DatePicker
+            v-model="endDate"
+            :min-date="startDate"
+            :disabled="dateMode !== 'date'"
+            :class="{ 'date-active': dateMode === 'date' }"
+          />
         </div>
       </div>
 
@@ -64,14 +74,17 @@
       </div>
     </div>
 
-    <!-- ④ 작성 버튼 + 총 건수 -->
+    <!-- ④ 작성 버튼 -->
     <div class="toolbar">
-      <span class="total-count">총 {{ total }}건</span>
+      <div></div>
       <button class="btn-write" @click="goToWrite">작성</button>
     </div>
 
     <!-- ⑤⑥ 테이블 -->
     <div class="table-area">
+      <div class="table-top">
+        <span class="total-count">총 {{ total }}건</span>
+      </div>
       <table class="data-table">
         <thead>
           <tr>
@@ -79,24 +92,44 @@
             <th class="col-draft">임시저장</th>
             <th class="col-title sortable" @click="toggleSort('title')">
               제목
-              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th class="col-attach">첨부</th>
             <th class="col-pinned sortable" @click="toggleSort('is_pinned')">
               상단고정여부
-              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th class="col-status sortable" @click="toggleSort('status')">
               상태
-              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th class="col-date sortable" @click="toggleSort('created_at')">
               작성일
-              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th class="col-author sortable" @click="toggleSort('author_name')">
               작성자
-              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th class="col-delete">삭제</th>
           </tr>
@@ -113,7 +146,12 @@
             <td>{{ item.status === 'draft' ? 'O' : '' }}</td>
             <td class="td-title">{{ item.title }}</td>
             <td>
-              <img v-if="item.has_attachment" src="/assets/icons/attach_icon.svg" alt="첨부" class="attach-icon" />
+              <img
+                v-if="item.has_attachment"
+                src="/assets/icons/attach_icon.svg"
+                alt="첨부"
+                class="attach-icon"
+              />
             </td>
             <td>{{ getPinnedDisplay(item) }}</td>
             <td>
@@ -207,8 +245,9 @@ const toggleStatus = (key) => {
 
 // ---- 날짜 필터 ----
 const dateMode = ref('none');
-const startDate = ref('');
-const endDate = ref('');
+const today = new Date().toISOString().slice(0, 10);
+const startDate = ref(today);
+const endDate = ref(today);
 
 // 등록일 선택 시 기본값 세팅
 import { watch } from 'vue';
@@ -355,15 +394,20 @@ const handleDelete = (item) => {
   if (item.status === 'deleted') {
     return message.showAlert('이미 삭제된 게시물입니다.');
   }
-  message.showConfirm('해당 공지사항을 삭제하시겠습니까?', async () => {
-    try {
-      await adminAPI.deleteNotice(item.id);
-      message.showAlert('삭제되었습니다.');
-      fetchList();
-    } catch (e) {
-      message.showAlert('삭제에 실패했습니다.');
-    }
-  });
+  message.showConfirm(
+    `선택하신 공지사항을 정말 삭제하시겠습니까?\n\n대상 : ${item.title}`,
+    async () => {
+      try {
+        await adminAPI.deleteNotice(item.id);
+        message.showAlert('삭제되었습니다.');
+        fetchList();
+      } catch (e) {
+        message.showAlert('삭제에 실패했습니다.');
+      }
+    },
+    null,
+    { title: '공지사항 삭제', confirmText: '확인', cancelText: '취소' }
+  );
 };
 
 // ---- 초기화 ----
@@ -520,6 +564,14 @@ const onResize = () => {
   }
 }
 
+.date-filter :deep(.dp-input-wrap) {
+  width: 126px;
+}
+
+.date-active :deep(.dp-input-wrap:focus-within) {
+  border-color: $sub-color-2;
+}
+
 .date-separator {
   color: $dark-text;
 }
@@ -574,12 +626,19 @@ const onResize = () => {
   margin: 0 0 8px;
 }
 
+.table-top {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
 .total-count {
-  @include font-14-regular;
+  @include font-14-bold;
   color: $dark-text;
 }
 
 .btn-write {
+  min-width: 136px;
   padding: 8px 20px;
   background: $main-gad;
   color: $white;
@@ -591,7 +650,7 @@ const onResize = () => {
 
 // 테이블
 .table-area {
-  padding: 12px 16px;
+  padding: 16px 12px;
   background: $table-bg;
   border-radius: 12px;
   .data-table {
@@ -621,15 +680,16 @@ const onResize = () => {
     th.sortable {
       cursor: pointer;
       user-select: none;
-      &:hover {
-        opacity: 0.8;
-      }
+      white-space: nowrap;
       .sort-icon {
         margin-left: 4px;
         width: 16px;
         height: 16px;
         display: inline-block;
         vertical-align: middle;
+      }
+      &:hover {
+        opacity: 0.8;
       }
     }
 
