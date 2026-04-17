@@ -400,6 +400,14 @@ function generateReportHTML(data) {
   line-height: 1; max-width: calc(100% - 40px);
   margin: 8px auto 0; background: #f6f6f6;
 }
+.pdf-desc {
+  max-width: calc(100% - 52px);
+  margin: 6px auto 0;
+  font-size: 8px;
+  color: #737373;
+}
+
+
 .score-desc p { margin: 0 0 8px; font-size: 8px; }
 .score-desc strong { margin: 4px 0; font-size: 10px; display: inline-block; }
 
@@ -538,6 +546,9 @@ function generateReportHTML(data) {
       <p><strong>Height Score</strong><br/>동일 연령 및 성별 대비 현재 신장의 위치(백분위)를 나타내는 점수입니다. 100점에 가까울수록 또래 100명 중 신장이 큰 편에 속함을 의미합니다.</p>
       <p><strong>Potential Score</strong><br/>실제 나이 대비 골연령의 성숙도를 바탕으로 산출된 향후 성장 여력 점수입니다.<br/>· 골연령이 실제 나이보다 낮아 성숙이 느릴수록(Late Maturity) 점수가 높으며, 이는 앞으로 성장할 수 있는 잠재적 시간이 더 많이 남았음을 시사합니다.<br/>· 범위: 뼈의 성숙도 차이를 0~100점으로 환산하며, 50점은 평균적인 성숙 속도를 의미합니다.</p>
     </div>
+              <p class="pdf-desc">
+            ※해당 결과는 인공지능을 활용해 생성된 결과가 포함되어 있습니다.
+          </p>
   </div>
 
   <!-- ===== 3페이지: 체중/BMI/비만도 + 현재키 기반 예측 키 ===== -->
