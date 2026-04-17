@@ -2,6 +2,8 @@ const jwt = require('jsonwebtoken');
 const config = require('../config/config');
 const {pool} = require('../config/database');
 
+const isDev = config.nodeEnv !== 'production';
+
 
 // JWT 토큰 검증 + 동시접속 체크
 exports.verifyToken = async (req, res, next) => {
@@ -36,10 +38,20 @@ exports.verifyToken = async (req, res, next) => {
 
     next();
   } catch (error) {
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({message: '토큰이 만료되었습니다.'});
+    // 운영: 원인 미노출 (통합 메시지)
+    // 개발: 디버깅을 위해 원인 구분 + 에러 상세 포함
+    if (isDev) {
+      console.error('[Auth] JWT 검증 실패:', error.name, error.message);
+      return res.status(401).json({
+        message: '인증에 실패했습니다.',
+        debug: {
+          name: error.name,
+          reason: error.name === 'TokenExpiredError' ? 'expired' : 'invalid',
+          detail: error.message,
+        },
+      });
     }
-    return res.status(401).json({message: '유효하지 않은 토큰입니다.'});
+    return res.status(401).json({ message: '인증에 실패했습니다.' });
   }
 };
 
