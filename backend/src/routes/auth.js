@@ -24,6 +24,9 @@ router.post('/verify-password', verifyToken, authController.verifyPassword);
 // 비밀번호 변경
 router.put('/password', verifyToken, authController.changePassword);
 
+// 비밀번호 변경 90일 유예 (다음에 변경하기)
+router.post('/postpone-password', verifyToken, authController.postponePassword);
+
 // 프로필 수정
 router.put('/profile', verifyToken, authController.updateProfile);
 

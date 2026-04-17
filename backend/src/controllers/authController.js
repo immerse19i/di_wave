@@ -25,7 +25,11 @@ exports.login = async (req,res)=> {
     //id로 사용자 조회
 const { loginId, password } = req.body;
 const [users] = await pool.query(
-  'SELECT * FROM users WHERE login_id = ?',
+  `SELECT u.*,
+          DATEDIFF(NOW(), u.created_at) AS account_age_days,
+          DATEDIFF(NOW(), u.password_changed_at) AS pw_age_days,
+          DATEDIFF(u.password_postpone_until, NOW()) AS postpone_left_days
+     FROM users u WHERE u.login_id = ?`,
   [loginId]
 );
     if (users.length === 0){
@@ -164,6 +168,14 @@ if(!user.is_active){
     //마지막 로그인 시간
     // await pool.query('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id])
 
+    // 비밀번호 변경 필요 여부 판정 (스펙 3조건) — 관리자(admin)는 제외
+    const PW_EXPIRY_DAYS = 90;
+    const accountExpired = (user.account_age_days || 0) >= PW_EXPIRY_DAYS;
+    const passwordExpired = (user.pw_age_days || 0) >= PW_EXPIRY_DAYS;
+    const postponeActive = user.password_postpone_until && (user.postpone_left_days || 0) > 0;
+    const passwordChangeRequired =
+      user.role !== 'admin' && !postponeActive && (accountExpired || passwordExpired);
+
     res.json({
       token,
       user: {
@@ -172,7 +184,9 @@ if(!user.is_active){
         name: user.name,
         role: user.role,
         hospital_id: user.hospital_id
-      }
+      },
+      passwordChangeRequired,
+      passwordAgeDays: user.pw_age_days || 0
     });
 
 
@@ -266,10 +280,13 @@ exports.changePassword = async (req,res) => {
       return res.status(400).json({message: '현재 비밀번호가 올바르지 않습니다.'});
     }
     
-      // 새 비번 해시화 후 저장
+      // 새 비번 해시화 후 저장 (변경일 갱신 + 유예 초기화)
       const hashedPassword = await bcrypt.hash(newPassword, 10);
-      await pool.query('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, req.user.id]);
-    
+      await pool.query(
+        'UPDATE users SET password = ?, password_changed_at = NOW(), password_postpone_until = NULL WHERE id = ?',
+        [hashedPassword, req.user.id]
+      );
+
       res.json({message : '비밀번호가 변경되었습니다.'});
   } catch (error) {
     console.error('ChangePassword error: ', error);
@@ -699,6 +716,22 @@ exports.resetPassword = async (req, res) => {
 };
 
 // POST /api/auth/verify-password 비밀번호 확인
+// POST /api/auth/postpone-password - 90일 후에 변경하기
+exports.postponePassword = async (req, res) => {
+  try {
+    await pool.query(
+      `UPDATE users
+         SET password_postpone_until = DATE_ADD(NOW(), INTERVAL 90 DAY)
+       WHERE id = ?`,
+      [req.user.id]
+    );
+    res.json({ success: true, message: '90일 후에 다시 안내됩니다.' });
+  } catch (error) {
+    console.error('PostponePassword error:', error);
+    res.status(500).json({ success: false, message: '서버 오류' });
+  }
+};
+
 exports.verifyPassword = async (req, res) => {
   try {
     const { currentPassword } = req.body;
