@@ -5,6 +5,7 @@ import ReportViewer from '../views/user/page/ReportViewer.vue'
 
 // User Views
 const Login = () => import('@/views/user/Login.vue');
+const PasswordRequired = () => import('@/views/user/PasswordRequired.vue');
 const UserMain = () => import('@/views/user/UserMain.vue');
 const UserList = () => import('@/views/user/page/UserList.vue');
 const UserInfo = () => import('@/views/user/page/UserInfo.vue');
@@ -132,6 +133,12 @@ const routes = [
   name: 'Register',
   component: Register,
   meta: { requiresAuth: false },
+},
+{
+  path: '/password-required',
+  name: 'PasswordRequired',
+  component: PasswordRequired,
+  meta: { requiresAuth: true },
 },
 {
   path: '/reapply',

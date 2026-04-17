@@ -123,6 +123,20 @@ const handleLogin = async () => {
     const { data: userData } = await authAPI.getMe();
     auth.setUser(userData);
 
+    // 비밀번호 변경 필요 시 우선 이동 (계정/비번 90일 경과 & 유예기간 아님)
+    if (data.passwordChangeRequired) {
+      if (rememberUserId.value) {
+        localStorage.setItem('savedUserId', form.value.userId);
+      } else {
+        localStorage.removeItem('savedUserId');
+      }
+      router.push({
+        path: '/password-required',
+        query: { days: data.passwordAgeDays },
+      });
+      return;
+    }
+
     // 만료 크레딧 자동 처리
     try {
       await creditAPI.expireCheck();

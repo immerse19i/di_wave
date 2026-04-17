@@ -26,6 +26,8 @@ CREATE TABLE users (
     login_id VARCHAR(50) UNIQUE,
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
+    password_changed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    password_postpone_until DATETIME NULL,
     name VARCHAR(50),
     role ENUM('admin', 'hospital') DEFAULT 'hospital',
     is_active BOOLEAN DEFAULT TRUE,
