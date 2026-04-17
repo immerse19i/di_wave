@@ -58,12 +58,29 @@ exports.updateTermName = async (req, res) => {
     }
 
     // 같은 type의 모든 버전 이름도 함께 변경
-    const [current] = await pool.query('SELECT type FROM terms WHERE id = ?', [id]);
+    const [current] = await pool.query(
+      'SELECT type, name FROM terms WHERE id = ?',
+      [id]
+    );
     if (!current.length) {
       return res.status(404).json({ success: false, message: '약관을 찾을 수 없습니다.' });
     }
 
-    await pool.query('UPDATE terms SET name = ? WHERE type = ?', [name.trim(), current[0].type]);
+    const oldName = current[0].name || '';
+    const newName = name.trim();
+
+    await pool.query('UPDATE terms SET name = ? WHERE type = ?', [newName, current[0].type]);
+
+    // ★ 관리자 로그 (이름이 실제로 바뀐 경우만)
+    if (oldName !== newName) {
+      const logDetails = `약관명: [${oldName}] → [${newName}]`;
+      await pool.query(
+        `INSERT INTO admin_logs (target_type, target_id, category, details, operator, actor_type)
+         VALUES ('terms', ?, '이름 수정', ?, ?, 'admin')`,
+        [id, logDetails, req.user.name || req.user.login_id || 'admin']
+      );
+    }
+
     res.json({ success: true, message: '이름이 수정되었습니다.' });
   } catch (error) {
     console.error('updateTermName error:', error);
@@ -81,14 +98,14 @@ exports.uploadTermFile = async (req, res) => {
 
     // 현재 버전 조회
     const [current] = await pool.query(
-      'SELECT id, name, group_type, version FROM terms WHERE type = ? AND is_current = TRUE',
+      'SELECT id, name, group_type, version, file_name FROM terms WHERE type = ? AND is_current = TRUE',
       [type]
     );
     if (!current.length) {
       return res.status(404).json({ success: false, message: '약관 타입을 찾을 수 없습니다.' });
     }
 
-    const { name, group_type, version } = current[0];
+    const { name, group_type, version, file_name: oldFileName } = current[0];
     const newVersion = version + 1;
 const originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
     // 기존 현재 버전 해제
@@ -99,6 +116,14 @@ const originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8
       `INSERT INTO terms (type, group_type, name, file_name, file_path, version, is_current, is_public)
        VALUES (?, ?, ?, ?, ?, ?, TRUE, TRUE)`,
       [type, group_type, name, originalName, req.file.filename, newVersion]
+    );
+
+    // ★ 관리자 로그 (피그마 포맷: 파일명: [이전] → [이후])
+    const logDetails = `파일명: [${oldFileName || ''}] → [${originalName}]`;
+    await pool.query(
+      `INSERT INTO admin_logs (target_type, target_id, category, details, operator, actor_type)
+       VALUES ('terms', ?, 'pdf변경', ?, ?, 'admin')`,
+      [result.insertId, logDetails, req.user.name || req.user.login_id || 'admin']
     );
 
     res.json({
@@ -116,13 +141,43 @@ const originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8
 exports.toggleTermPublic = async (req, res) => {
   try {
     const { id } = req.params;
-    const [term] = await pool.query('SELECT is_public FROM terms WHERE id = ?', [id]);
+    const [term] = await pool.query(
+      'SELECT is_public, name, is_current, file_name FROM terms WHERE id = ?',
+      [id]
+    );
     if (!term.length) {
       return res.status(404).json({ success: false, message: '약관을 찾을 수 없습니다.' });
     }
 
-    const newValue = !term[0].is_public;
+    const oldValue = term[0].is_public;
+    const newValue = !oldValue;
     await pool.query('UPDATE terms SET is_public = ? WHERE id = ?', [newValue, id]);
+
+    // ★ 관리자 로그 (피그마 포맷)
+    const oldLabel = oldValue ? '공개' : '비공개';
+    const newLabel = newValue ? '공개' : '비공개';
+    const isCurrentItem = !!term[0].is_current;
+    const name = term[0].name || '';
+    const fileName = term[0].file_name || '';
+
+    // (항목) 현재 버전 토글: 대상 + 설정값
+    // (파일) 이전 버전 토글: 분류 + 파일명 + 설정값
+    const logDetails = isCurrentItem
+      ? `대상: [${name}]\n설정값: [${oldLabel}] → [${newLabel}]`
+      : `분류: [${name}]\n파일명: [${fileName}]\n설정값: [${oldLabel}] → [${newLabel}]`;
+    const scopeLabel = isCurrentItem ? '(항목)' : '(파일)';
+
+    await pool.query(
+      `INSERT INTO admin_logs (target_type, target_id, category, details, operator, actor_type)
+       VALUES ('terms', ?, ?, ?, ?, 'admin')`,
+      [
+        id,
+        `공개/비공개 설정 ${scopeLabel}`,
+        logDetails,
+        req.user.name || req.user.login_id || 'admin',
+      ]
+    );
+
     res.json({ success: true, data: { is_public: newValue } });
   } catch (error) {
     console.error('toggleTermPublic error:', error);

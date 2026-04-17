@@ -20,22 +20,22 @@
       <!-- 사이드바 -->
       <aside class="admin-sidebar">
         <nav>
-          <router-link
+          <a
             v-for="menu in menuList"
             :key="menu.path"
-            :to="menu.path"
             class="menu-item"
             :class="{ active: isActiveMenu(menu.path) }"
+            @click="handleMenuClick(menu.path)"
           >
             <img :src="menu.icon" :alt="menu.label" />
             <span>{{ menu.label }}</span>
-          </router-link>
+          </a>
         </nav>
       </aside>
 
       <!-- 콘텐츠 -->
       <main class="admin-content">
-        <router-view />
+        <router-view :key="$route.fullPath" />
       </main>
     </div>
   </div>
@@ -109,6 +109,15 @@ const handleLogout = async () => {
   }
   localStorage.removeItem('token');
   router.push('/admin/login');
+};
+
+const handleMenuClick = (path) => {
+  if (route.path === path) {
+    // 같은 메뉴 재클릭 → 타임스탬프 쿼리로 강제 리로드
+    router.replace({ path, query: { t: Date.now() } });
+  } else {
+    router.push(path);
+  }
 };
 </script>
 

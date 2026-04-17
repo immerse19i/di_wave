@@ -105,7 +105,7 @@
             <input
               type="file"
               ref="licenseInput"
-              accept=".pdf"
+              accept=".pdf,.png,.jpg,.jpeg"
               hidden
               @change="handleLicenseUpload"
             />
@@ -152,6 +152,9 @@
           </div>
         </div>
       </div>
+      <!-- 로딩 -->
+      <FadeLoader v-if="isStatusProcessing" />
+
       <!-- 계정상태변경 팝업 -->
       <div
         class="popup-overlay"
@@ -255,7 +258,7 @@
             </table>
           </div>
 
-          <div class="pagination" v-if="logTotalPages > 1">
+          <div class="ch-pagination" v-if="logTotalPages > 1">
             <button
               class="page-btn"
               :disabled="logPage <= 1"
@@ -565,6 +568,7 @@ import { adminAPI } from '@/api/admin';
 import { UseMessageStore } from '@/store/message';
 import DatePicker from '@/components/common/DatePicker.vue';
 import FilePreviewModal from '@/components/common/FilePreviewModal.vue';
+import FadeLoader from '@/components/common/FadeLoader.vue';
 
 const props = defineProps({ id: [String, Number] });
 const router = useRouter();
@@ -573,6 +577,7 @@ const message = UseMessageStore();
 // 상태변경 팝업
 const showStatusPopup = ref(false);
 const statusForm = ref({ status: 'active', reason: '' });
+const isStatusProcessing = ref(false);
 
 const account = ref(null);
 const form = ref({
@@ -763,6 +768,8 @@ const closeStatusPopup = () => {
   showStatusPopup.value = false;
 };
 const handleStatusChange = async () => {
+  if (isStatusProcessing.value) return;
+  isStatusProcessing.value = true;
   try {
     await adminAPI.changeAccountStatus(props.id, statusForm.value);
     // 로컬 상태 즉시 반영
@@ -777,6 +784,8 @@ const handleStatusChange = async () => {
     message.showAlert('계정상태가 변경되었습니다.');
   } catch (e) {
     message.showAlert('상태 변경에 실패했습니다.');
+  } finally {
+    isStatusProcessing.value = false;
   }
 };
 
@@ -1418,7 +1427,7 @@ const formatShortDate = (dateStr) => {
     border-radius: $radius-sm;
     @include font-14-medium;
     cursor: pointer;
-    min-width: 138px;
+    min-width: 136px;
   }
 
   .btn-cancel {
@@ -1428,7 +1437,7 @@ const formatShortDate = (dateStr) => {
   }
 
   .btn-confirm {
-    background: $main-color;
+    background: $main-gad;
     color: $white;
   }
 }
@@ -1436,10 +1445,10 @@ const formatShortDate = (dateStr) => {
 // 기록보기 팝업
 .log-popup-box {
   background: $dark-bg;
-  border: 1px solid $dark-line-gray;
+  // border: 1px solid $dark-line-gray;
   border-radius: $radius-md;
   padding: 32px 40px;
-  width: 900px;
+  width: 1004px;
   max-width: 90vw;
 }
 
@@ -1460,7 +1469,8 @@ const formatShortDate = (dateStr) => {
 .log-table {
   width: 100%;
   border-collapse: collapse;
-
+  border-radius: 8px 8px 0 0;
+  overflow: hidden;
   th,
   td {
     padding: 12px 8px;
@@ -1470,14 +1480,14 @@ const formatShortDate = (dateStr) => {
   }
 
   thead tr {
-    background: $main-gad;
+    background: $bg-op;
     th {
       @include font-14-bold;
     }
   }
 
   tbody tr:nth-child(odd) {
-    background: $bg-op;
+    // background: $bg-op;
   }
 
   .detail-cell {
@@ -1496,7 +1506,7 @@ const formatShortDate = (dateStr) => {
   display: block;
   margin: 20px auto 0;
   padding: 12px 60px;
-  background: $main-color;
+  background: $main-gad;
   color: $white;
   border-radius: $radius-sm;
   @include font-14-medium;
@@ -1507,11 +1517,26 @@ const formatShortDate = (dateStr) => {
 .credit-popup {
   min-width: 787px;
   max-width: 787px;
-  padding: 36px 40px;
+  padding: 32px 40px;
 
+  .popup-title {
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+  .popup-hospital {
+    font-size: 20px;
+    margin-bottom: 32px;
+  }
+
+  .reason-label {
+    margin-top: 32px;
+  }
   .reason-textarea {
     background: unset;
     border-radius: 8px;
+  }
+  .popup-buttons {
+    margin-top: 32px;
   }
 }
 
@@ -1811,10 +1836,10 @@ const formatShortDate = (dateStr) => {
   }
 
   .amount-plus {
-    color: #4caf50;
+    color: $dark-text;
   }
   .amount-minus {
-    color: $white;
+    color: $dark-text;
   }
 
   .receipt-icon {

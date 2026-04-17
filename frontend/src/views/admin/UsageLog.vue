@@ -38,13 +38,12 @@
       </div>
     </div>
 
-    <!-- 총 건수 -->
-    <div class="count-row">
-      <span>총 {{ total }}건</span>
-    </div>
-
     <!-- 테이블 -->
     <div class="table-wrap">
+      <!-- 총 건수 (테이블 박스 내부 우측 상단) -->
+      <div class="count-row">
+        <span>총 {{ total }}건</span>
+      </div>
       <table class="data-table">
         <thead>
           <tr>
@@ -61,7 +60,7 @@
             <td>{{ item.id }}</td>
             <td>{{ formatDate(item.created_at) }}</td>
             <td>{{ categoryLabel(item.target_type) }}</td>
-            <td>{{ item.category }}</td>
+            <td>{{ displayCategory(item) }}</td>
             <td>{{ item.operator }}</td>
             <td>
               <button class="btn-detail" @click="goDetail(item.id)">
@@ -122,15 +121,16 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 
 // 필터
+const today = new Date().toISOString().slice(0, 10);
 const periodType = ref('none');
-const startDate = ref('');
-const endDate = ref('');
+const startDate = ref(today);
+const endDate = ref(today);
 const searchText = ref('');
 
 // 카테고리 라벨 매핑
 const categoryLabel = (targetType) => {
   const map = {
-    account: '가입계정 목록',
+    account: '가입계정목록',
     approval: '승인관리',
     notice: '공지사항',
     popup: '안내팝업',
@@ -140,6 +140,23 @@ const categoryLabel = (targetType) => {
     credit: '크레딧',
   };
   return map[targetType] || targetType;
+};
+
+// 작업유형 치환
+const displayCategory = (item) => {
+  // 승인상태 변경 → '계정 승인' / '계정 반려'
+  if (item.category === '승인상태 변경') {
+    if (!item.details) return item.category;
+    const firstLine = item.details.split('\n')[0];
+    if (firstLine.includes('→') && firstLine.includes('[반려]'))
+      return '계정 반려';
+    if (item.details.includes('→ [승인]')) return '계정 승인';
+    return item.category;
+  }
+  // 기존 '크레딧 수동 관리' 레코드 호환 → '정보수정 (계정 정보 및 관리)'
+  if (item.category === '크레딧 수동 관리')
+    return '정보수정 (계정 정보 및 관리)';
+  return item.category || '';
 };
 
 // 날짜 포맷 (YY.MM.DD HH:MM:SS)
@@ -250,6 +267,7 @@ onUnmounted(() => {
 .filter-row {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   margin-bottom: 12px;
 }
@@ -326,14 +344,16 @@ onUnmounted(() => {
 // 검색
 .search-row {
   display: flex;
+  justify-content: center;
   gap: 12px;
   margin-bottom: 24px;
 
   .search-box {
-    flex: 1;
+    width: 590px;
+    max-width: 100%;
     display: flex;
     align-items: center;
-    padding: 8px 16px;
+    padding: 3px 12px;
     border-radius: $radius-sm;
     background: $bg-op;
     border: 1px solid $dark-line-gray;
@@ -363,7 +383,7 @@ onUnmounted(() => {
   .btn-search {
     color: $white;
     background: $main-gad;
-    min-width: 100px;
+    min-width: 136px;
     padding: 8px 16px;
     border-radius: $radius-sm;
     @include font-14-medium;
@@ -371,20 +391,20 @@ onUnmounted(() => {
   }
 }
 
-// 총 건수
-.count-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 8px;
-  @include font-14-regular;
-  color: $dark-text;
-}
-
 // 테이블
 .table-wrap {
   padding: 12px 16px;
   background: $table-bg;
   border-radius: 12px;
+
+  // 총 건수 (테이블 박스 내부 우측 상단)
+  .count-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+    @include font-14-regular;
+    color: $dark-text;
+  }
   .data-table {
     width: 100%;
     border-collapse: collapse;

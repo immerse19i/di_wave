@@ -2,9 +2,14 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
 export const useAuthStore = defineStore('auth', () => {
+  // 경로 기반 토큰 키 결정 (admin → token_a, user → token_u)
+  function getTokenKey() {
+    return window.location.pathname.startsWith('/admin') ? 'token_a' : 'token_u';
+  }
+
   // State
   const user = ref(null);
-  const token = ref(localStorage.getItem('token') || null);
+  const token = ref(localStorage.getItem(getTokenKey()) || null);
 
   // Getters
   const isLoggedIn = computed(() => !!token.value);
@@ -99,10 +104,10 @@ export const useAuthStore = defineStore('auth', () => {
   function setToken(tokenValue) {
     token.value = tokenValue;
     if (tokenValue) {
-      localStorage.setItem('token', tokenValue);
+      localStorage.setItem(getTokenKey(), tokenValue);
       startActivityTracking();// 추적 시작
     } else {
-      localStorage.removeItem('token');
+      localStorage.removeItem(getTokenKey());
       stopActivityTracking(); // 추적 중지
     }
   }
@@ -110,7 +115,7 @@ export const useAuthStore = defineStore('auth', () => {
   function logout() {
     user.value = null;
     token.value = null;
-    localStorage.removeItem('token');
+    localStorage.removeItem(getTokenKey());
     sessionStorage.removeItem('popupShown');
     stopActivityTracking(); // 추적 중지
   }

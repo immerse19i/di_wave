@@ -17,7 +17,7 @@
       </div>
       <div class="info-row">
         <span class="info-label">작업유형</span>
-        <span class="info-value">{{ log.category }}</span>
+        <span class="info-value">{{ displayCategory(log) }}</span>
       </div>
       <div class="info-row">
         <span class="info-label">카테고리</span>
@@ -30,7 +30,7 @@
     </div>
 
     <h3 class="section-title">기록 상세</h3>
-    <div class="detail-content" v-html="formatDetails(log.details)"></div>
+    <div class="detail-content">{{ log.details || '' }}</div>
   </div>
 </template>
 
@@ -43,9 +43,27 @@ const route = useRoute();
 const router = useRouter();
 const log = ref({});
 
+// 작업유형 치환
+const displayCategory = (l) => {
+  if (!l) return '';
+  // 승인상태 변경 → '계정 승인' / '계정 반려'
+  if (l.category === '승인상태 변경') {
+    if (!l.details) return l.category;
+    const firstLine = l.details.split('\n')[0];
+    if (firstLine.includes('→') && firstLine.includes('[반려]'))
+      return '계정 반려';
+    if (l.details.includes('→ [승인]')) return '계정 승인';
+    return l.category;
+  }
+  // 기존 '크레딧 수동 관리' 레코드 호환 → '정보수정 (계정 정보 및 관리)'
+  if (l.category === '크레딧 수동 관리')
+    return '정보수정 (계정 정보 및 관리)';
+  return l.category || '';
+};
+
 const categoryLabel = (targetType) => {
   const map = {
-    account: '가입계정 목록',
+    account: '가입계정목록',
     approval: '승인관리',
     notice: '공지사항',
     popup: '안내팝업',
@@ -116,7 +134,6 @@ onMounted(async () => {
   cursor: pointer;
   padding: 0;
   margin-bottom: 16px;
-  flex-direction: row-reverse;
   img {
     width: 12px;
     height: 12px;
@@ -166,5 +183,7 @@ onMounted(async () => {
   @include font-14-regular;
   line-height: 1.8;
   color: $white;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 </style>

@@ -65,12 +65,15 @@
         <!-- 이메일 -->
         <div class="form-group">
           <label>이메일</label>
-          <input
-            v-model="form.email"
-            placeholder="이메일을 입력해 주세요"
-            @input="validateEmail"
-          />
-          <p class="validation-msg" v-if="emailMessage">{{ emailMessage }}</p>
+          <div class="input-with-btn">
+            <input
+              v-model="form.email"
+              placeholder="이메일을 입력해 주세요"
+              @input="onEmailInput"
+            />
+            <button type="button" @click="checkDuplicateEmail">중복 확인</button>
+          </div>
+          <p class="validation-msg" v-if="emailMessage" :class="emailMsgType">{{ emailMessage }}</p>
         </div>
 
         <!-- 병원명 -->
@@ -176,6 +179,7 @@ const showPwConfirm = ref(false);
 const fileName = ref('');
 const selectedFile = ref(null);
 const isIdChecked = ref(false);
+const isEmailChecked = ref(false);
 const isProcessing = ref(false);
 
 // 유효성 메시지
@@ -184,6 +188,7 @@ const idMsgType = ref('');
 const pwMessage = ref('');
 const pwConfirmMessage = ref('');
 const emailMessage = ref('');
+const emailMsgType = ref('');
 const phoneMessage = ref('');
 const bizMessage = ref('');
 
@@ -213,6 +218,7 @@ const isFormValid = computed(() => {
     pwRegex.test(f.password) &&
     f.password === f.passwordConfirm &&
     emailRegex.test(f.email) &&
+    isEmailChecked.value &&
     f.hospitalName &&
     f.ceoName &&
     f.phone &&
@@ -295,14 +301,41 @@ function validatePasswordConfirm() {
   }
 }
 
-function validateEmail() {
+function onEmailInput() {
+  isEmailChecked.value = false;
   const email = form.value.email;
   if (!email) {
     emailMessage.value = '';
+    emailMsgType.value = '';
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     emailMessage.value = '올바른 이메일 주소를 입력해 주세요';
+    emailMsgType.value = 'error';
   } else {
-    emailMessage.value = '';
+    emailMessage.value = '중복 확인을 해주세요.';
+    emailMsgType.value = '';
+  }
+}
+
+async function checkDuplicateEmail() {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+    emailMessage.value = '올바른 이메일 주소를 입력해 주세요';
+    emailMsgType.value = 'error';
+    return;
+  }
+  try {
+    const res = await authAPI.checkEmail(form.value.email);
+    if (res.data.success) {
+      isEmailChecked.value = true;
+      emailMessage.value = '사용 가능한 이메일입니다.';
+      emailMsgType.value = 'success';
+    } else {
+      isEmailChecked.value = false;
+      emailMessage.value = res.data.message;
+      emailMsgType.value = 'error';
+    }
+  } catch (e) {
+    emailMessage.value = e.response?.data?.message || '이메일 확인에 실패했습니다.';
+    emailMsgType.value = 'error';
   }
 }
 

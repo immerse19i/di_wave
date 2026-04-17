@@ -33,9 +33,19 @@
             <span class="radio-custom"></span>
             문의일시
           </label>
-          <DatePicker v-model="startDate" :max-date="endDate" />
+          <DatePicker
+            v-model="startDate"
+            :max-date="endDate"
+            :disabled="dateMode !== 'date'"
+            :class="{ 'date-active': dateMode === 'date' }"
+          />
           <span class="date-separator">~</span>
-          <DatePicker v-model="endDate" :min-date="startDate" />
+          <DatePicker
+            v-model="endDate"
+            :min-date="startDate"
+            :disabled="dateMode !== 'date'"
+            :class="{ 'date-active': dateMode === 'date' }"
+          />
         </div>
       </div>
 
@@ -185,8 +195,9 @@ const fetchCounts = async () => {
 
 // ---- ② 날짜 필터 ----
 const dateMode = ref('none');
-const startDate = ref('');
-const endDate = ref('');
+const today = new Date().toISOString().slice(0, 10);
+const startDate = ref(today);
+const endDate = ref(today);
 
 watch(dateMode, (val) => {
   if (val === 'date' && !startDate.value) {
@@ -382,6 +393,10 @@ const onResize = () => {
 // ② 필터 영역
 .filter-area {
   margin-bottom: 16px;
+  padding: 16px 12px;
+  background-color: $table-bg;
+  border-radius: 12px;
+  margin-bottom: 24px;
 }
 
 .filter-row {
@@ -455,6 +470,14 @@ const onResize = () => {
   }
 }
 
+.date-filter :deep(.dp-input-wrap) {
+  width: 126px;
+}
+
+.date-active :deep(.dp-input-wrap:focus-within) {
+  border-color: $sub-color-2;
+}
+
 .date-separator {
   color: $dark-text;
 }
@@ -463,7 +486,7 @@ const onResize = () => {
 .search-row {
   display: flex;
   gap: 12px;
-  margin-bottom: 24px;
+  // margin-bottom: 24px;
 
   .search-box {
     flex: 1;
@@ -500,7 +523,7 @@ const onResize = () => {
   .btn-search {
     color: $white;
     background: $main-gad;
-    min-width: 100px;
+    min-width: 136px;
     padding: 8px 16px;
     border-radius: $radius-sm;
     @include font-14-medium;

@@ -153,6 +153,26 @@ exports.createNotice = async (req, res) => {
       }
     }
 
+    // ★ 관리자 로그 (피그마 포맷)
+    const statusLabel = { published: '공개', draft: '임시저장', private: '비공개' }[status] || status
+    const pinnedLabel = isPinned ? 'O' : 'X'
+    const contentText = (content || '')
+      .replace(/<img[^>]*>/gi, '****[첨부이미지]****')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>\s*<p[^>]*>/gi, '\n')
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .trim()
+    const actionLabel = status === 'draft' ? '임시저장' : '생성'
+    // 임시저장: [No. -] / 생성: [No. N]
+    const header = status === 'draft' ? `[No. -]` : `[No. ${noticeId}]`
+    const logDetails = `${header}\n\n제목: [${title || ''}]\n\n내용: [${contentText}]\n\n상태: [${statusLabel}]\n상단고정: [${pinnedLabel}]`
+    await conn.query(
+      `INSERT INTO admin_logs (target_type, target_id, category, details, operator, actor_type)
+       VALUES ('notice', ?, ?, ?, ?, 'admin')`,
+      [noticeId, actionLabel, logDetails, authorName]
+    )
+
     await conn.commit()
     res.json({ success: true, data: { id: noticeId } })
   } catch (error) {
@@ -174,15 +194,26 @@ exports.updateNotice = async (req, res) => {
     const { title, content, status, is_pinned, keep_attachments } = req.body
     const isPinned = is_pinned === 'true' || is_pinned === true ? 1 : 0
 
-    // 기존 공지 조회
-    const [existing] = await conn.query(`SELECT status, published_at FROM notices WHERE id = ?`, [id])
+    // 기존 공지 조회 (전체 필드 - 로그용)
+    const [existing] = await conn.query(
+      `SELECT title, content, status, is_pinned, published_at FROM notices WHERE id = ?`,
+      [id]
+    )
     if (existing.length === 0) {
       await conn.rollback()
       return res.status(404).json({ success: false, message: '공지사항을 찾을 수 없습니다' })
     }
+    const oldData = existing[0]
+
+    // 기존 첨부파일명 (로그용, UPDATE 전에 조회)
+    const [oldAttRows] = await conn.query(
+      `SELECT file_name FROM notice_attachments WHERE notice_id = ? ORDER BY sort_order ASC`,
+      [id]
+    )
+    const oldAttachmentNames = oldAttRows.map(r => r.file_name).join(', ')
 
     // published_at: 최초 게시 시에만 기록 (이미 게시된 적 있으면 유지)
-    let publishedAt = existing[0].published_at
+    let publishedAt = oldData.published_at
     if (!publishedAt && (status === 'published' || status === 'private')) {
       publishedAt = new Date()
     }
@@ -239,6 +270,65 @@ exports.updateNotice = async (req, res) => {
       [title, content || '', status || 'draft', isPinned, hasAttachment, publishedAt, id]
     )
 
+    // ★ 관리자 로그 (피그마 포맷: 변경된 항목만 변경 전/후 표시)
+    const stripContent = (html) =>
+      (html || '')
+        .replace(/<img[^>]*>/gi, '****[첨부이미지]****')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/p>\s*<p[^>]*>/gi, '\n')
+        .replace(/<[^>]*>/g, '')
+        .replace(/&nbsp;/g, ' ')
+        .trim()
+    const statusMap = { published: '공개', draft: '임시저장', private: '비공개' }
+    const oldStatusLabel = statusMap[oldData.status] || oldData.status
+    const newStatusLabel = statusMap[status] || status
+    const oldPinnedLabel = oldData.is_pinned ? 'O' : 'X'
+    const newPinnedLabel = isPinned ? 'O' : 'X'
+
+    // 변경 후 첨부파일명 조회
+    const [newAttRows] = await conn.query(
+      `SELECT file_name FROM notice_attachments WHERE notice_id = ? ORDER BY sort_order ASC`,
+      [id]
+    )
+    const newAttachmentNames = newAttRows.map(r => r.file_name).join(', ')
+
+    // 변경된 항목만 수집
+    const beforeLines = []
+    const afterLines = []
+
+    if ((oldData.title || '') !== (title || '')) {
+      beforeLines.push(`제목: [${oldData.title || ''}]`)
+      afterLines.push(`제목: [${title || ''}]`)
+    }
+    const oldContentStripped = stripContent(oldData.content)
+    const newContentStripped = stripContent(content)
+    if (oldContentStripped !== newContentStripped) {
+      beforeLines.push(`내용: [${oldContentStripped}]`)
+      afterLines.push(`내용: [${newContentStripped}]`)
+    }
+    if (oldStatusLabel !== newStatusLabel) {
+      beforeLines.push(`상태: [${oldStatusLabel}]`)
+      afterLines.push(`상태: [${newStatusLabel}]`)
+    }
+    if (oldPinnedLabel !== newPinnedLabel) {
+      beforeLines.push(`상단고정: [${oldPinnedLabel}]`)
+      afterLines.push(`상단고정: [${newPinnedLabel}]`)
+    }
+    if (oldAttachmentNames !== newAttachmentNames) {
+      beforeLines.push(`첨부파일명: [${oldAttachmentNames}]`)
+      afterLines.push(`첨부파일명: [${newAttachmentNames}]`)
+    }
+
+    // 변경된 항목이 있을 때만 로그 기록
+    if (beforeLines.length > 0) {
+      const logDetails = `[No. ${id}]\n\n변경 전\n\n${beforeLines.join('\n\n')}\n\n\n변경 후\n\n${afterLines.join('\n\n')}`
+      await conn.query(
+        `INSERT INTO admin_logs (target_type, target_id, category, details, operator, actor_type)
+         VALUES ('notice', ?, '수정', ?, ?, 'admin')`,
+        [id, logDetails, req.user.name || req.user.login_id || 'admin']
+      )
+    }
+
     await conn.commit()
     res.json({ success: true })
   } catch (error) {
@@ -254,9 +344,30 @@ exports.updateNotice = async (req, res) => {
 exports.deleteNotice = async (req, res) => {
   try {
     const { id } = req.params
-    await pool.query(
-      `UPDATE notices SET status = 'deleted', deleted_at = NOW() WHERE id = ?`, [id]
+
+    // 삭제 대상 공지 제목 조회 (로그용)
+    const [rows] = await pool.query(
+      `SELECT title FROM notices WHERE id = ?`,
+      [id]
     )
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: '공지사항을 찾을 수 없습니다' })
+    }
+    const noticeTitle = rows[0].title || ''
+
+    await pool.query(
+      `UPDATE notices SET status = 'deleted', deleted_at = NOW(), updated_at = updated_at WHERE id = ?`,
+      [id]
+    )
+
+    // ★ 관리자 로그 (피그마 포맷)
+    const logDetails = `[No. ${id}]\n\n제목: [${noticeTitle}]`
+    await pool.query(
+      `INSERT INTO admin_logs (target_type, target_id, category, details, operator, actor_type)
+       VALUES ('notice', ?, '삭제', ?, ?, 'admin')`,
+      [id, logDetails, req.user.name || req.user.login_id || 'admin']
+    )
+
     res.json({ success: true })
   } catch (error) {
     console.error('deleteNotice error:', error)

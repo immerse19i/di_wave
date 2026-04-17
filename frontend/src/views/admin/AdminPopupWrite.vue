@@ -97,12 +97,72 @@
     <div class="form-row">
       <label class="form-label row-label">게시기간</label>
       <div class="period-inputs">
-        <DatePicker v-model="form.display_start" :max-date="form.display_end" />
+        <DatePicker
+          v-model="form.display_start"
+          :max-date="form.display_end"
+          :disabled="form.is_always"
+        />
         <span class="date-sep">-</span>
-        <DatePicker v-model="form.display_end" :min-date="form.display_start" />
+        <DatePicker
+          v-model="form.display_end"
+          :min-date="form.display_start"
+          :disabled="form.is_always"
+        />
         <label class="checkbox-label">
           <input type="checkbox" v-model="form.is_always" /> 상시
         </label>
+      </div>
+    </div>
+
+    <!-- 미리보기 모달 -->
+    <div
+      v-if="showPreview"
+      class="preview-overlay"
+      @click.self="showPreview = false"
+    >
+      <div
+        class="preview-window"
+        :style="{
+          width: (form.popup_width || 500) + 'px',
+          maxHeight: (form.popup_height || 400) + 'px',
+          transform: `translate(${previewPos.x}px, ${previewPos.y}px)`,
+        }"
+      >
+        <!-- 타이틀바 -->
+        <div class="preview-titlebar" @mousedown="startPreviewDrag">
+          <span class="preview-title">{{ form.title || '(제목 없음)' }}</span>
+          <div class="titlebar-buttons">
+            <button class="titlebar-btn">
+              <span>&minus;</span>
+            </button>
+            <button class="titlebar-btn">
+              <span>&#9633;</span>
+            </button>
+            <button class="titlebar-btn close" @click="showPreview = false">
+              <span>&times;</span>
+            </button>
+          </div>
+        </div>
+        <!-- 본문 -->
+        <div
+          class="preview-body"
+          :style="{ maxHeight: (form.popup_height || 400) - 80 + 'px' }"
+        >
+          <div
+            class="preview-content"
+            v-html="
+              form.content ||
+              '<p style=&quot;color:#999;&quot;>내용이 없습니다.</p>'
+            "
+          ></div>
+        </div>
+        <!-- 하단 -->
+        <div class="preview-footer">
+          <label class="today-check">
+            <input type="checkbox" disabled />
+            <span>오늘 하루 보지 않기</span>
+          </label>
+        </div>
       </div>
     </div>
   </div>
@@ -289,25 +349,42 @@ const handleDraft = async () => {
 };
 
 // ---- 미리보기 ----
-const handlePreview = () => {
-  const w = form.value.popup_width || 500;
-  const h = form.value.popup_height || 400;
+const showPreview = ref(false);
+const previewPos = ref({ x: 0, y: 0 });
 
-  const win = window.open(
-    '',
-    '_blank',
-    `width=${w},height=${h},scrollbars=yes,resizable=no`,
-  );
-  if (!win) {
-    message.showAlert('팝업이 차단되었습니다. 브라우저 설정을 확인해주세요.');
-    return;
-  }
-  win.document.write(`<!DOCTYPE html><html><head>
-    <meta charset="utf-8">
-    <title>${form.value.title || '미리보기'}</title>
-    <style>body{margin:0;padding:16px;font-family:'Pretendard',sans-serif;background:#fff;color:#222;}</style>
-    </head><body>${form.value.content || '<p style="color:#999;">내용이 없습니다.</p>'}</body></html>`);
-  win.document.close();
+const handlePreview = () => {
+  previewPos.value = { x: 0, y: 0 }; // 열 때 위치 초기화
+  showPreview.value = true;
+};
+
+// 미리보기 드래그
+let previewDragState = null;
+
+const startPreviewDrag = (e) => {
+  if (e.target.closest('.titlebar-btn')) return;
+  e.preventDefault();
+  previewDragState = {
+    startX: e.clientX,
+    startY: e.clientY,
+    offsetX: previewPos.value.x,
+    offsetY: previewPos.value.y,
+  };
+  document.addEventListener('mousemove', onPreviewDrag);
+  document.addEventListener('mouseup', endPreviewDrag);
+};
+
+const onPreviewDrag = (e) => {
+  if (!previewDragState) return;
+  previewPos.value = {
+    x: previewDragState.offsetX + (e.clientX - previewDragState.startX),
+    y: previewDragState.offsetY + (e.clientY - previewDragState.startY),
+  };
+};
+
+const endPreviewDrag = () => {
+  previewDragState = null;
+  document.removeEventListener('mousemove', onPreviewDrag);
+  document.removeEventListener('mouseup', endPreviewDrag);
 };
 const stripHtml = (html) =>
   html
@@ -331,6 +408,7 @@ const handlePublish = async () => {
       const data = { ...form.value, status: 'published' };
       await adminAPI.createPopup(data);
     }
+    takeSnapshot(); // 이탈 가드 해제
     router.push('/admin/popups');
   } catch (e) {
     showStatusMsg('저장에 실패했습니다.', 'error', 0);
@@ -449,7 +527,7 @@ onUnmounted(() => {
     background: $main-gad;
   }
   .btn-publish {
-    background: $main-color;
+    background: $main-gad;
     &:hover {
       background: $sub-color;
     }
@@ -481,6 +559,10 @@ onUnmounted(() => {
     border-color: $main-color;
     outline: none;
   }
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 }
 
 // CKEditor
@@ -505,6 +587,34 @@ onUnmounted(() => {
     }
     .ck-dropdown__panel {
       background: $bg-op;
+      border-color: $dark-line-gray;
+    }
+    .ck-list {
+      background: $bg-op;
+    }
+    .ck-list .ck-list__item {
+      .ck-button {
+        color: $white;
+        background: transparent;
+        .ck-button__label {
+          color: $white;
+        }
+        &:hover {
+          background: rgba(255, 255, 255, 0.1);
+        }
+        &.ck-on {
+          background: $main-color;
+          color: $white;
+          .ck-button__label {
+            color: $white;
+          }
+        }
+      }
+    }
+    .ck-input,
+    .ck-input-text {
+      background: $dark-input;
+      color: $white;
       border-color: $dark-line-gray;
     }
     .ck-editor__editable {
@@ -552,6 +662,10 @@ onUnmounted(() => {
     &:focus {
       border-color: $main-color;
       outline: none;
+    }
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
     // 스피너 숨김
     &::-webkit-inner-spin-button,
@@ -621,8 +735,132 @@ onUnmounted(() => {
   gap: 6px;
   @include font-14-regular;
   cursor: pointer;
+  white-space: nowrap;
   input[type='checkbox'] {
     accent-color: $main-color;
+  }
+}
+
+// 미리보기 모달
+.preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.preview-window {
+  background: #414a58;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.preview-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #d3e3fd;
+  flex-shrink: 0;
+  cursor: move;
+  user-select: none;
+
+  .preview-title {
+    @include font-14-bold;
+    color: $black;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .titlebar-buttons {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .titlebar-btn {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: $black;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+
+    &:hover {
+      opacity: 0.7;
+    }
+
+    &.close:hover {
+      background: #e74c3c;
+      color: $white;
+      opacity: 1;
+    }
+  }
+}
+
+.preview-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: #414a58;
+  color: $white;
+
+  .preview-content {
+    @include font-14-regular;
+    line-height: 1.6;
+    word-break: break-word;
+
+    :deep(img) {
+      max-width: 100% !important;
+      height: auto !important;
+    }
+    :deep(figure.image) {
+      max-width: 100% !important;
+      margin: 8px 0;
+      img {
+        max-width: 100% !important;
+        height: auto !important;
+      }
+    }
+  }
+}
+
+.preview-footer {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: #414a58;
+
+  .today-check {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+
+    input[type='checkbox'] {
+      width: 14px;
+      height: 14px;
+      accent-color: $main-color;
+    }
+
+    span {
+      @include font-12-regular;
+      color: $dark-text;
+    }
   }
 }
 </style>

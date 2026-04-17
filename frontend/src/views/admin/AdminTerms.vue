@@ -101,26 +101,11 @@
         />
         <div class="modal-actions">
           <button class="btn-cancel" @click="closeNameModal">취소</button>
-          <button class="btn-confirm" @click="submitName">수정</button>
+          <button class="btn-confirm" @click="submitName">확인</button>
         </div>
       </div>
     </div>
 
-    <!-- 업로드 완료 팝업 -->
-    <div
-      class="modal-overlay"
-      v-if="showUploadPopup"
-      @click.self="showUploadPopup = false"
-    >
-      <div class="modal-box">
-        <p class="modal-message">업로드 완료되었습니다.</p>
-        <div class="modal-actions">
-          <button class="btn-confirm" @click="showUploadPopup = false">
-            확인
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -128,12 +113,13 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { termsAPI } from '@/api/terms';
+import { UseMessageStore } from '@/store/message';
 
 const router = useRouter();
+const message = UseMessageStore();
 
 const termsList = ref([]);
 const showNameModal = ref(false);
-const showUploadPopup = ref(false);
 const editTarget = ref(null);
 const editName = ref('');
 
@@ -182,11 +168,11 @@ const handleFileUpload = async (type, event) => {
   formData.append('file', file);
   try {
     await termsAPI.uploadFile(type, formData);
-    showUploadPopup.value = true;
+    message.showAlert('업로드 완료되었습니다.');
     await fetchTerms();
   } catch (e) {
     console.error('파일 업로드 실패:', e);
-    alert('업로드에 실패했습니다.');
+    message.showAlert('업로드에 실패했습니다.');
   }
   event.target.value = ''; // input 초기화
 };
@@ -382,30 +368,30 @@ onMounted(() => {
 }
 
 .modal-box {
-  background: $dark-input;
+  background: $dark-bg;
   border-radius: $radius-md;
-  padding: 32px;
-  min-width: 400px;
-
+  padding: 12px;
+  min-width: 564px;
+  text-align: center;
   .modal-title {
     @include font-16-bold;
     color: $white;
-    margin-bottom: 20px;
+    margin-bottom: 32px;
   }
 
   .modal-message {
     @include font-14-regular;
     color: $white;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 32px;
   }
 
   .modal-input {
     width: 100%;
-    padding: 10px 14px;
-    background: $dark-bg;
+    padding: 8px 8px;
+    background: none;
     border: 1px solid $dark-line-gray;
-    border-radius: $radius-sm;
+    border-radius: $radius-md;
     color: $white;
     @include font-14-regular;
     margin-bottom: 20px;
@@ -419,30 +405,31 @@ onMounted(() => {
   .modal-actions {
     display: flex;
     gap: 12px;
-    justify-content: flex-end;
+    justify-content: center;
 
     .btn-cancel {
       padding: 8px 24px;
-      background: none;
-      border: 1px solid $dark-line-gray;
+      background: $dark-gray-dark;
+      // border: 1px solid $dark-line-gray;
       color: $dark-text;
       border-radius: $radius-sm;
       @include font-14-medium;
       cursor: pointer;
+      min-width: 136px;
     }
 
     .btn-confirm {
       padding: 8px 24px;
-      background: $main-color;
+      background: $main-gad;
       color: $white;
       border: none;
       border-radius: $radius-sm;
       @include font-14-medium;
       cursor: pointer;
-
-      &:hover {
-        background: $sub-color;
-      }
+      min-width: 136px;
+      // &:hover {
+      //   background: $sub-color;
+      // }
     }
   }
 }

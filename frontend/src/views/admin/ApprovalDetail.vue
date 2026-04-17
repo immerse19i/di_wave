@@ -91,6 +91,9 @@
       @close="showPreview = false"
     />
 
+    <!-- 로딩 -->
+    <FadeLoader v-if="isProcessing" />
+
     <!-- ======== 반려 처리 모달 ======== -->
     <div
       class="modal-overlay"
@@ -141,7 +144,7 @@
             :disabled="!selectedReason || isProcessing"
             @click="handleReject"
           >
-            {{ isProcessing ? '처리중...' : '확인' }}
+            확인
           </button>
         </div>
       </div>
@@ -154,6 +157,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { adminAPI } from '@/api/admin';
 import { UseMessageStore } from '@/store/message';
 import FilePreviewModal from '@/components/common/FilePreviewModal.vue';
+import FadeLoader from '@/components/common/FadeLoader.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -239,11 +243,15 @@ const confirmApprove = () => {
 
 // 승인 처리
 const handleApprove = async () => {
+  if (isProcessing.value) return;
+  isProcessing.value = true;
   try {
     await adminAPI.approveHospital(route.params.id);
     router.push('/admin/approval');
   } catch (e) {
     message.showAlert('승인 처리 실패');
+  } finally {
+    isProcessing.value = false;
   }
 };
 
@@ -508,7 +516,7 @@ onMounted(() => {
 }
 
 .btn-modal-cancel {
-  flex: 1;
+  // flex: 1;
   padding: 12px 0;
   background: $dark-gray-dark;
   color: $dark-text;
@@ -525,9 +533,9 @@ onMounted(() => {
 }
 
 .btn-modal-confirm {
-  flex: 1;
+  // flex: 1;
   padding: 12px 0;
-  background: $main-color;
+  background: $main-gad;
   color: $white;
   border: none;
   border-radius: $radius-sm;
