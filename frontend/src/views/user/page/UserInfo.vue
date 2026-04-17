@@ -102,7 +102,7 @@ const pageTitle = computed(() => {
 
 .user-info-container {
   display: flex;
-  min-height: calc(100vh - 140px);
+  min-height: calc(100vh - 217px);
 }
 
 .sidebar {

@@ -22,7 +22,7 @@ const modal = useModalStore();
 
 <style lang="scss" scoped>
 .content {
-  min-height: calc(100vh - 140px);
+  min-height: calc(100vh - 217px);
   // background: $bg-op;
 }
 </style>
