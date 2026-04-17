@@ -16,6 +16,7 @@
           약관 및 정책
         </router-link>
         <div class="copy">© DiWAVE Inc. 2026 All Right Reserved</div>
+        <p>해당 서비스는 인공지능을 활용한 결과가 포함되어 있습니다.</p>
       </div>
     </div>
   </footer>
@@ -55,6 +56,11 @@ footer {
         color: $dark-input-gray;
         margin-bottom: 12px;
         text-decoration: underline;
+      }
+      p {
+        @include font-12-regular;
+        // font-size: 12px;
+        color: $dark-input-gray;
       }
     }
   }
