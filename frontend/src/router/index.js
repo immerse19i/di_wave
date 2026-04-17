@@ -34,6 +34,7 @@ const AccountDetail = () => import('@/views/admin/AccountDetail.vue')
 const AdminNotice = () => import('@/views/admin/AdminNotice.vue')
 const AdminPopup = () => import('@/views/admin/AdminPopup.vue')
 const AdminPopupWrite = () => import('@/views/admin/AdminPopupWrite.vue')
+const AdminPopupView = () => import('@/views/admin/AdminPopupView.vue')
 const AdminInfoEdit = () => import('@/views/admin/AdminInfoEdit.vue')
 const UsageLog = () => import('@/views/admin/UsageLog.vue')
 const UsageLogDetail = () => import('@/views/admin/UsageLogDetail.vue')
@@ -98,6 +99,7 @@ const routes = [
 { path: 'notices/:id', component: AdminNoticeWrite, props: true },
 { path: 'popups', component: AdminPopup },
 { path: 'popups/write', component: AdminPopupWrite },
+{ path: 'popups/:id/view', component: AdminPopupView, props: true },
 { path: 'popups/:id', component: AdminPopupWrite, props: true },
 { path: 'info', component: AdminInfoEdit },
 { path: 'logs', component: UsageLog },

@@ -100,6 +100,7 @@
             :key="item.id"
             class="data-row"
             :class="{ 'row-deleted': item.status === 'deleted' }"
+            @click="handleRowClick(item)"
           >
             <td>{{ item.status === 'draft' ? '-' : item.id }}</td>
             <td>{{ item.status === 'draft' ? 'O' : '' }}</td>
@@ -119,15 +120,19 @@
                 {{ activeLabel(item.is_active) }}
               </span>
             </td>
-            <td class="td-edit" @click.stop="goToEdit(item)">
+            <td class="td-edit">
               <button class="btn-edit-icon">
                 <img src="/assets/icons/edit.svg" alt="수정" class="icon-img" />
               </button>
             </td>
-            <td class="td-delete">
-              <button class="btn-delete-icon" @click.stop="handleDelete(item)">
+            <td class="td-delete" @click.stop>
+              <button
+                v-if="item.status !== 'deleted'"
+                class="btn-delete-icon"
+                @click.stop="handleDelete(item)"
+              >
                 <img
-                  src="/assets/icons/delete_icon.svg"
+                  src="/assets/icons/trash_icon.svg"
                   alt="삭제"
                   class="icon-img"
                 />
@@ -296,6 +301,15 @@ const formatShortDate = (dt) => {
 // ---- 이동 ----
 const goToCreate = () => router.push('/admin/popups/write');
 const goToEdit = (item) => router.push(`/admin/popups/${item.id}`);
+
+// 행 클릭 — deleted는 조회, 그 외는 수정으로 이동
+const handleRowClick = (item) => {
+  if (item.status === 'deleted') {
+    router.push(`/admin/popups/${item.id}/view`);
+  } else {
+    router.push(`/admin/popups/${item.id}`);
+  }
+};
 
 // ---- 삭제 ----
 const handleDelete = (item) => {
@@ -478,6 +492,7 @@ const onResize = () => {
     }
 
     .data-row {
+      cursor: pointer;
       &:hover {
         background-color: rgba(255, 255, 255, 0.08);
       }
@@ -496,10 +511,12 @@ const onResize = () => {
     }
 
     .active-badge.active-active {
-      color: $main-color;
+      @include font-12-regular;
+      // color: $main-color;
     }
     .active-badge.active-deleted {
-      color: #e57373;
+      @include font-12-regular;
+      // color: #e57373;
     }
 
     .td-edit,

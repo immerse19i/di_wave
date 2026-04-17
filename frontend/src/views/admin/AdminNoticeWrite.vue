@@ -835,6 +835,34 @@ const goBack = () => {
       background: $bg-op;
       border-color: $dark-line-gray;
     }
+    .ck-list {
+      background: $bg-op;
+    }
+    .ck-list .ck-list__item {
+      .ck-button {
+        color: $white;
+        background: transparent;
+        .ck-button__label {
+          color: $white;
+        }
+        &:hover {
+          background: rgba(255, 255, 255, 0.1);
+        }
+        &.ck-on {
+          background: $main-color;
+          color: $white;
+          .ck-button__label {
+            color: $white;
+          }
+        }
+      }
+    }
+    .ck-input,
+    .ck-input-text {
+      background: $dark-input;
+      color: $white;
+      border-color: $dark-line-gray;
+    }
 
     // 본문 편집 영역
     .ck-editor__editable {

@@ -125,6 +125,11 @@ const applyInput = (e) => {
   padding: 0 !important;
 }
 
+// 최상위 래퍼 width:100% 제거 → flex 컨테이너에서 자연 너비만 차지
+.dp__main {
+  width: auto !important;
+}
+
 // 메뉴 (캘린더 드롭다운) 스타일
 .dp-custom-menu {
   border-radius: $radius-md !important;

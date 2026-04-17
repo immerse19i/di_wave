@@ -325,6 +325,31 @@ exports.answerInquiry = async (req, res) => {
       }
     }
 
+    // ★ 관리자 로그 (피그마 포맷)
+    const oldStatusLabel = { pending: '대기', draft: '임시저장', answered: '답변완료', closed: '종료' }[inquiry.status] || inquiry.status
+    const newStatusLabel = status === 'answered' ? '답변완료' : '임시저장'
+    const actionLabel = status === 'answered' ? '문의답변' : '임시저장'
+    const contentText = (answer || '')
+      .replace(/<img[^>]*>/gi, '****[첨부이미지]****')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>\s*<p[^>]*>/gi, '\n')
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .trim()
+    // 답변 첨부파일명
+    const [logAttachments] = await conn.query(
+      `SELECT file_name FROM inquiry_attachments WHERE inquiry_id = ? AND type = 'answer' ORDER BY sort_order ASC`,
+      [id]
+    )
+    const fileNames = logAttachments.map(f => f.file_name).join(', ')
+    const attachmentLine = fileNames ? `\n\n첨부파일명: [${fileNames}]` : ''
+    const logDetails = `[No. ${id}]\n\n상태: [${oldStatusLabel}] → [${newStatusLabel}]\n\n제목: [${inquiry.title || ''}]\n\n내용:\n[${contentText}]${attachmentLine}`
+    await conn.query(
+      `INSERT INTO admin_logs (target_type, target_id, category, details, operator, actor_type)
+       VALUES ('inquiry', ?, ?, ?, ?, 'admin')`,
+      [id, actionLabel, logDetails, req.user.name || req.user.login_id || 'admin']
+    )
+
     await conn.commit()
 
     // 답변완료 시 이메일 발송

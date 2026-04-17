@@ -748,6 +748,32 @@ const downloadViewerFile = () => {
   background: $dark-input !important;
   border-color: $dark-line-gray !important;
 }
+:deep(.ck-list) {
+  background: $dark-input !important;
+}
+:deep(.ck-list .ck-list__item .ck-button) {
+  color: $white !important;
+  background: transparent !important;
+}
+:deep(.ck-list .ck-list__item .ck-button .ck-button__label) {
+  color: $white !important;
+}
+:deep(.ck-list .ck-list__item .ck-button:hover) {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+:deep(.ck-list .ck-list__item .ck-button.ck-on) {
+  background: $main-color !important;
+  color: $white !important;
+}
+:deep(.ck-list .ck-list__item .ck-button.ck-on .ck-button__label) {
+  color: $white !important;
+}
+:deep(.ck-input),
+:deep(.ck-input-text) {
+  background: $dark-input !important;
+  color: $white !important;
+  border-color: $dark-line-gray !important;
+}
 
 // ⑤ 파일 업로드
 .file-upload-area {

@@ -8,10 +8,11 @@
         width: popup.popup_width + 'px',
         maxHeight: popup.popup_height + 'px',
         zIndex: 500 + index,
+        transform: `translate(${positions[popup.id]?.x || 0}px, ${positions[popup.id]?.y || 0}px)`,
       }"
     >
       <!-- 타이틀바 -->
-      <div class="popup-titlebar">
+      <div class="popup-titlebar" @mousedown="startDrag($event, popup.id)">
         <span class="popup-title">{{ popup.title }}</span>
         <div class="titlebar-buttons">
           <button class="titlebar-btn minimize" @click="closePopup(popup.id, false)">
@@ -43,11 +44,45 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import { adminAPI } from '@/api/admin';
 
 const popups = ref([]);
 const closedIds = ref([]);
+const positions = reactive({}); // { [popupId]: { x, y } }
+
+// ---- 드래그 ----
+let dragState = null;
+
+function startDrag(e, popupId) {
+  // 타이틀바 버튼 클릭은 드래그 제외
+  if (e.target.closest('.titlebar-btn')) return;
+  e.preventDefault();
+  const pos = positions[popupId] || { x: 0, y: 0 };
+  dragState = {
+    popupId,
+    startX: e.clientX,
+    startY: e.clientY,
+    offsetX: pos.x,
+    offsetY: pos.y,
+  };
+  document.addEventListener('mousemove', onDrag);
+  document.addEventListener('mouseup', endDrag);
+}
+
+function onDrag(e) {
+  if (!dragState) return;
+  positions[dragState.popupId] = {
+    x: dragState.offsetX + (e.clientX - dragState.startX),
+    y: dragState.offsetY + (e.clientY - dragState.startY),
+  };
+}
+
+function endDrag() {
+  dragState = null;
+  document.removeEventListener('mousemove', onDrag);
+  document.removeEventListener('mouseup', endDrag);
+}
 
 // 오늘 날짜 키
 const todayKey = new Date().toISOString().slice(0, 10);
@@ -138,6 +173,8 @@ onMounted(async () => {
   padding: 8px 12px;
   background: #D3E3FD;
   flex-shrink: 0;
+  cursor: move;
+  user-select: none;
 }
 
 .popup-title {
@@ -192,8 +229,16 @@ onMounted(async () => {
     word-break: break-word;
 
     :deep(img) {
-      max-width: 100%;
-      height: auto;
+      max-width: 100% !important;
+      height: auto !important;
+    }
+    :deep(figure.image) {
+      max-width: 100% !important;
+      margin: 8px 0;
+      img {
+        max-width: 100% !important;
+        height: auto !important;
+      }
     }
   }
 }

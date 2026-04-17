@@ -215,10 +215,17 @@ exports.approveHospital = async (req, res) => {
   try {
     const { id } = req.params;
 
-// ★ 이전 상태 조회 후 로그
-const [beforeStatus] = await pool.query('SELECT status FROM hospitals WHERE id = ?', [id]);
-const oldLabel = { pending: '대기', rejected: '반려' }[beforeStatus[0].status] || beforeStatus[0].status;
-
+// ★ 이전 상태 + 병원명/로그인ID 조회 (로그용)
+const [beforeInfo] = await pool.query(
+  `SELECT h.status, h.name AS hospital_name, u.login_id
+   FROM hospitals h
+   LEFT JOIN users u ON u.hospital_id = h.id AND u.role = 'hospital'
+   WHERE h.id = ?`,
+  [id]
+);
+const oldLabel = { pending: '승인대기', rejected: '반려' }[beforeInfo[0].status] || beforeInfo[0].status;
+const hospitalName = beforeInfo[0].hospital_name || '-';
+const hospitalLoginId = beforeInfo[0].login_id || '-';
 
 
 
@@ -273,7 +280,12 @@ Copyright © DiWAVE Inc. All rights reserved.
 await pool.query(
   `INSERT INTO admin_logs (hospital_id, target_type, target_id, category, details, operator, actor_type)
    VALUES (?, 'approval', ?, '승인상태 변경', ?, ?, 'admin')`,
-  [id, id, `[${oldLabel}] → [승인]`, req.user.name || 'admin']
+  [
+    id,
+    id,
+    `'${hospitalName}'\nID: '${hospitalLoginId}'\n[${oldLabel}] → [승인]`,
+    req.user.name || 'admin',
+  ]
 );
     res.json({ success: true, message: '승인 처리되었습니다.' });
   } catch (error) {
@@ -287,8 +299,16 @@ exports.rejectHospital = async (req, res) => {
   try {
     const { id } = req.params;
     const { reason, comment } = req.body;
-const [beforeStatus] = await pool.query('SELECT status FROM hospitals WHERE id = ?', [id]);
-const oldLabel = { pending: '대기', rejected: '반려' }[beforeStatus[0].status] || beforeStatus[0].status;
+const [beforeInfo] = await pool.query(
+  `SELECT h.status, h.name AS hospital_name, u.login_id
+   FROM hospitals h
+   LEFT JOIN users u ON u.hospital_id = h.id AND u.role = 'hospital'
+   WHERE h.id = ?`,
+  [id]
+);
+const oldLabel = { pending: '승인대기', rejected: '반려' }[beforeInfo[0].status] || beforeInfo[0].status;
+const hospitalName = beforeInfo[0].hospital_name || '-';
+const hospitalLoginId = beforeInfo[0].login_id || '-';
 
     await pool.query('UPDATE hospitals SET status = ? WHERE id = ?', ['rejected', id]);
 await pool.query('UPDATE users SET is_active = FALSE WHERE hospital_id = ? AND role = ?', [id, 'hospital']);
@@ -360,7 +380,12 @@ csadmin@diwave.io<br/>
 await pool.query(
   `INSERT INTO admin_logs (hospital_id, target_type, target_id, category, details, operator, actor_type)
    VALUES (?, 'approval', ?, '승인상태 변경', ?, ?, 'admin')`,
-  [id, id, `승인결과 : ${oldLabel} → 반려 / 사유 : [${comment || reason}]`, req.user.name || 'admin']
+  [
+    id,
+    id,
+    `'${hospitalName}' [${oldLabel}] → ${hospitalName} [반려]\nID: '${hospitalLoginId}'\n\n반려사유: [${reason || ''}]\n관리자 코멘트: [${comment || ''}]`,
+    req.user.name || 'admin',
+  ]
 );
 
     res.json({ success: true, message: '반려 처리되었습니다.' });
@@ -495,7 +520,8 @@ exports.updateAccountInfo = async (req, res) => {
 
     // ★ 변경 전 데이터 조회 (기존 UPDATE 위에 추가)
     const [before] = await pool.query(
-      `SELECT h.name, h.ceo_name, h.phone, h.address, h.address_detail, h.business_number, u.email
+      `SELECT h.name, h.ceo_name, h.phone, h.address, h.address_detail, h.business_number,
+              u.email, u.login_id
        FROM hospitals h
        LEFT JOIN users u ON u.hospital_id = h.id AND u.role = 'hospital'
        WHERE h.id = ?`, [id]
@@ -513,19 +539,24 @@ exports.updateAccountInfo = async (req, res) => {
       [email, id]
     );
 
-    // ★ 변경 내역 로그
-    const beforeLines = [];
-    const afterLines = [];
-    if (old.name !== name) { beforeLines.push(`병원명 : '${old.name}'`); afterLines.push(`병원명 : '${name}'`); }
-    if (old.ceo_name !== ceo_name) { beforeLines.push(`대표자명 : '${old.ceo_name || ''}'`); afterLines.push(`대표자명 : '${ceo_name}'`); }
-    if (old.phone !== phone) { beforeLines.push(`연락처 : '${old.phone || ''}'`); afterLines.push(`연락처 : '${phone}'`); }
-    if (old.email !== email) { beforeLines.push(`이메일주소 : '${old.email || ''}'`); afterLines.push(`이메일주소 : '${email}'`); }
-    if (old.address !== address) { beforeLines.push(`병원주소 : '${old.address || ''}'`); afterLines.push(`병원주소 : '${address}'`); }
-    if (old.address_detail !== address_detail) { beforeLines.push(`상세주소 : '${old.address_detail || ''}'`); afterLines.push(`상세주소 : '${address_detail}'`); }
-    if (old.business_number !== business_number) { beforeLines.push(`사업자번호 : '${old.business_number || ''}'`); afterLines.push(`사업자번호 : '${business_number}'`); }
+    // ★ 변경 내역 로그 (피그마 포맷: 대상/ID 헤더 + 빈 줄 + 필드별 전/후 전이)
+    const diffLines = [];
+    const pushDiff = (label, oldVal, newVal) => {
+      if ((oldVal || '') !== (newVal || '')) {
+        diffLines.push(`${label} : [${oldVal || ''}] → [${newVal || ''}]`);
+      }
+    };
+    pushDiff('병원명', old.name, name);
+    pushDiff('연락처', old.phone, phone);
+    pushDiff('대표자명', old.ceo_name, ceo_name);
+    pushDiff('이메일주소', old.email, email);
+    pushDiff('병원주소', old.address, address);
+    pushDiff('상세주소', old.address_detail, address_detail);
+    pushDiff('사업자번호', old.business_number, business_number);
 
-    if (beforeLines.length > 0) {
-      const details = `변경 전\n${beforeLines.join('\n')}\n변경 후\n${afterLines.join('\n')}`;
+    if (diffLines.length > 0) {
+      const header = `대상 병원: '${old.name || ''}'\nID: '${old.login_id || ''}'`;
+      const details = `${header}\n\n${diffLines.join('\n')}`;
       await pool.query(
         `INSERT INTO admin_logs (hospital_id, target_type, target_id, category, details, operator, actor_type)
          VALUES (?, 'account', ?, '정보수정 (기본정보)', ?, ?, 'admin')`,
@@ -575,23 +606,32 @@ exports.uploadBusinessLicense = async (req, res) => {
       return res.status(400).json({ success: false, message: '파일이 없습니다.' });
     }
 
-    // ★ 변경 전 파일명 
-    const [oldRows] = await pool.query('SELECT business_license_path FROM hospitals WHERE id = ?', [id]);
+    // ★ 변경 전 파일명 + 병원명/ID 조회 (로그용)
+    const [oldRows] = await pool.query(
+      `SELECT h.business_license_path, h.name AS hospital_name, u.login_id
+       FROM hospitals h
+       LEFT JOIN users u ON u.hospital_id = h.id AND u.role = 'hospital'
+       WHERE h.id = ?`,
+      [id]
+    );
     const oldName = oldRows[0]?.business_license_path?.split('/').pop() || '-';
+    const hospitalName = oldRows[0]?.hospital_name || '-';
+    const hospitalLoginId = oldRows[0]?.login_id || '-';
 
 
     const filePath = `/uploads/business/${req.file.filename}`;
     await pool.query('UPDATE hospitals SET business_license_path = ? WHERE id = ?', [filePath, id]);
-    
 
-        // ★ 로그
+
+    // ★ 로그 (피그마 포맷: 대상 병원/ID 헤더 + 빈 줄 + 항목 : [이전] → [이후])
     const newName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
+    const logDetails = `대상 병원: '${hospitalName}'\nID: '${hospitalLoginId}'\n\n사업자등록증 : ${oldName} → ${newName}`;
     await pool.query(
       `INSERT INTO admin_logs (hospital_id, target_type, target_id, category, details, operator, actor_type)
        VALUES (?, 'account', ?, '정보수정 (계정 정보 및 관리)', ?, ?, 'admin')`,
-      [id, id, `사업자등록증 : ${oldName} → ${newName}`, req.user.name || 'admin']
+      [id, id, logDetails, req.user.name || 'admin']
     );
-    
+
     res.json({ success: true, data: { path: filePath } });
   } catch (error) {
     console.error('UploadBusinessLicense error:', error);
@@ -804,12 +844,27 @@ exports.adjustCredit = async (req, res) => {
        type === 'charge' ? parsedAmount : null]
     );
 
-    // admin_logs 기록
+    // admin_logs 기록 (피그마 포맷: 정보수정 (계정 정보 및 관리))
     const typeLabel = type === 'charge' ? '지급' : '차감';
+    const [hospInfo] = await conn.query(
+      `SELECT h.name AS hospital_name, u.login_id
+       FROM hospitals h
+       LEFT JOIN users u ON u.hospital_id = h.id AND u.role = 'hospital'
+       WHERE h.id = ?`,
+      [id]
+    );
+    const hospitalName = hospInfo[0]?.hospital_name || '-';
+    const hospitalLoginId = hospInfo[0]?.login_id || '-';
+    const creditDetails =
+      `대상 병원: '${hospitalName}'\n` +
+      `ID: '${hospitalLoginId}'\n\n` +
+      `크레딧 ${typeLabel} : ${parsedAmount}\n` +
+      `잔여량: ${newBalance}\n` +
+      `사유: ${reason || ''}`;
     await conn.query(
       `INSERT INTO admin_logs (hospital_id, target_type, target_id, category, details, operator, actor_type)
-       VALUES (?, 'account', ?, '크레딧 수동 관리', ?, ?, 'admin')`,
-      [id, id, `${typeLabel} : ${parsedAmount} / 사유 : [${reason}]`, req.user.name || 'admin']
+       VALUES (?, 'account', ?, '정보수정 (계정 정보 및 관리)', ?, ?, 'admin')`,
+      [id, id, creditDetails, req.user.name || 'admin']
     );
 
     await conn.commit();
