@@ -25,46 +25,70 @@
       <button class="btn-create" @click="goToCreate">생성</button>
     </div>
 
-    <!-- ④ 총 건수 -->
-    <div class="count-row">
-      <span class="total-count">총 {{ total }}건</span>
-    </div>
-
     <!-- ⑤⑥ 테이블 -->
     <div class="table-area">
+      <!-- ④ 총 건수 -->
+      <div class="count-row">
+        <span class="total-count">총 {{ total }}건</span>
+      </div>
       <table class="data-table">
         <thead>
           <tr>
             <th class="col-no">No</th>
             <th class="col-draft">임시저장</th>
             <th class="col-title sortable" @click="toggleSort('title')">
-              제목 <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              제목
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th
               class="col-period sortable"
               @click="toggleSort('display_start')"
             >
               팝업 게시기간
-              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th class="col-author sortable" @click="toggleSort('author_name')">
               작성자
-              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th
               class="col-published sortable"
               @click="toggleSort('published_at')"
             >
               게시일시
-              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th class="col-updated sortable" @click="toggleSort('updated_at')">
               최근수정일시
-              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th class="col-active sortable" @click="toggleSort('is_active')">
               현재 게시여부
-              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              <img
+                class="sort-icon"
+                src="/assets/icons/updown_icon.svg"
+                alt=""
+              />
             </th>
             <th class="col-edit">수정</th>
             <th class="col-delete">삭제</th>
@@ -76,6 +100,7 @@
             :key="item.id"
             class="data-row"
             :class="{ 'row-deleted': item.status === 'deleted' }"
+            @click="handleRowClick(item)"
           >
             <td>{{ item.status === 'draft' ? '-' : item.id }}</td>
             <td>{{ item.status === 'draft' ? 'O' : '' }}</td>
@@ -95,15 +120,19 @@
                 {{ activeLabel(item.is_active) }}
               </span>
             </td>
-            <td class="td-edit" @click.stop="goToEdit(item)">
+            <td class="td-edit">
               <button class="btn-edit-icon">
                 <img src="/assets/icons/edit.svg" alt="수정" class="icon-img" />
               </button>
             </td>
-            <td class="td-delete">
-              <button class="btn-delete-icon" @click.stop="handleDelete(item)">
+            <td class="td-delete" @click.stop>
+              <button
+                v-if="item.status !== 'deleted'"
+                class="btn-delete-icon"
+                @click.stop="handleDelete(item)"
+              >
                 <img
-                  src="/assets/icons/delete_icon.svg"
+                  src="/assets/icons/trash_icon.svg"
                   alt="삭제"
                   class="icon-img"
                 />
@@ -273,6 +302,15 @@ const formatShortDate = (dt) => {
 const goToCreate = () => router.push('/admin/popups/write');
 const goToEdit = (item) => router.push(`/admin/popups/${item.id}`);
 
+// 행 클릭 — deleted는 조회, 그 외는 수정으로 이동
+const handleRowClick = (item) => {
+  if (item.status === 'deleted') {
+    router.push(`/admin/popups/${item.id}/view`);
+  } else {
+    router.push(`/admin/popups/${item.id}`);
+  }
+};
+
 // ---- 삭제 ----
 const handleDelete = (item) => {
   if (item.status === 'deleted') return;
@@ -338,7 +376,7 @@ const onResize = () => {
     display: flex;
     align-items: center;
     padding: 4px 16px;
-    padding-left: 4px;
+    padding-left: 12px;
     border-radius: $radius-sm;
     background: $bg-op;
     border: 1px solid $dark-line-gray;
@@ -370,6 +408,7 @@ const onResize = () => {
     background: $main-gad;
     min-width: 136px;
     padding: 7.5px 16px;
+    min-height: 32px;
     border-radius: $radius-sm;
     @include font-14-medium;
     cursor: pointer;
@@ -384,8 +423,10 @@ const onResize = () => {
 }
 .btn-create {
   padding: 8px 28px;
-  background: $main-color;
+  background: $main-gad;
   color: $white;
+  min-height: 32px;
+  min-width: 136px;
   border: none;
   border-radius: $radius-sm;
   @include font-14-medium;
@@ -402,7 +443,7 @@ const onResize = () => {
   margin-bottom: 8px;
 }
 .total-count {
-  @include font-14-regular;
+  @include font-14-bold;
   color: $dark-text;
 }
 
@@ -451,6 +492,7 @@ const onResize = () => {
     }
 
     .data-row {
+      cursor: pointer;
       &:hover {
         background-color: rgba(255, 255, 255, 0.08);
       }
@@ -469,10 +511,12 @@ const onResize = () => {
     }
 
     .active-badge.active-active {
-      color: $main-color;
+      @include font-12-regular;
+      // color: $main-color;
     }
     .active-badge.active-deleted {
-      color: #e57373;
+      @include font-12-regular;
+      // color: #e57373;
     }
 
     .td-edit,

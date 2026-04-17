@@ -132,7 +132,7 @@ function generateReportHTML(data) {
   const diffMo = absD % 12;
   const diffText = (diffY > 0 ? `${diffY}세 ` : '') + `${String(diffMo).padStart(2, '0')}개월`;
   const ageDiffText = `뼈나이가 ${diffText} ${diff >= 0 ? '많습니다' : '적습니다'}.`;
-  const arrowRotate = boneM > chronoM ? 'rotate(180deg)' : 'none';
+  const arrowRotate = chronoM > boneM ? 'rotate(180deg)' : 'none';
   // 파일 ID & 표시값
   const displayName = maskName(analysis.patient_name);
   const displayHospital = maskHospital(hospitalName);
@@ -581,11 +581,11 @@ function generateReportHTML(data) {
       <div class="chart-with-desc">
         <canvas id="chart3" width="340" height="286"></canvas>
         <div class="chart-right">
+          ${lineLegendHTML}
           <div class="chart-desc-box">
             <strong>현재 키 기반 예측 키</strong>
             질병관리청 성장도표를 기반으로 현재의 성장 속도가 성인이 될 때까지 유지될 경우를 예측한 결과입니다.
           </div>
-          ${lineLegendHTML}
         </div>
       </div>
       <div class="chart-legend">
@@ -612,11 +612,11 @@ function generateReportHTML(data) {
       <div class="chart-with-desc">
         <canvas id="chart4a" width="340" height="286"></canvas>
         <div class="chart-right">
+          ${lineLegendHTML}
           <div class="chart-desc-box">
             <strong>유전 기반 예측 키</strong>
             부모의 신장을 바탕으로 산출된 자녀의 유전적 기대 신장(Mid-Parental Height)입니다.
           </div>
-          ${lineLegendHTML}
         </div>
       </div>
       <div class="chart-legend">
@@ -631,11 +631,11 @@ function generateReportHTML(data) {
       <div class="chart-with-desc">
         <canvas id="chart4b" width="340" height="286"></canvas>
         <div class="chart-right">
+          ${lineLegendHTML}
           <div class="chart-desc-box">
             <strong>뼈나이 기반 예측 키</strong>
             AI가 판독한 뼈나이 값과 현재 키를 사용하여 추정한 값입니다.
           </div>
-          ${lineLegendHTML}
         </div>
       </div>
       <div class="chart-legend">
@@ -660,11 +660,11 @@ function generateReportHTML(data) {
       <div class="chart-with-desc">
         <canvas id="chart5" width="340" height="286"></canvas>
         <div class="chart-right">
+          ${lineLegendHTML}
           <div class="chart-desc-box">
             <strong>최종 예측 키</strong>
             표준 성장 곡선 기반 예측 키에 유전적 요인 및 골연령 성숙도를 반영하여 보정한 최종 예측키 입니다.
           </div>
-          ${lineLegendHTML}
         </div>
       </div>
       <div class="chart-legend">
@@ -695,6 +695,12 @@ function generateReportHTML(data) {
       var xLabel = options.xLabel;
       var ctx = canvas.getContext('2d');
       var W = canvas.width, H = canvas.height;
+      var dpr = 2;
+      canvas.width = W * dpr;
+      canvas.height = H * dpr;
+      canvas.style.width = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.scale(dpr, dpr);
       var margin = { top: 20, right: 10, bottom: 40, left: 50 };
       var plotW = W - margin.left - margin.right;
       var plotH = H - margin.top - margin.bottom;
@@ -730,12 +736,6 @@ function generateReportHTML(data) {
           i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
         });
         ctx.stroke(); ctx.setLineDash([]);
-        var last = filtered[filtered.length - 1];
-        if (last) {
-          ctx.fillStyle = is50 ? '#4A90D9' : '#999';
-          ctx.font = is50 ? 'bold 10px Pretendard' : '9px Pretendard';
-          ctx.fillText(pLabels[key], toX(last.month) + 3, toY(last[key]) + 3);
-        }
       });
 
       ctx.strokeStyle = '#666'; ctx.lineWidth = 1;

@@ -7,7 +7,6 @@ const config = require('../config/config');
 
 // 상수 정의 
 const MAX_LOGIN_ATTEMPTS = 5;
-const LOCK_TIME = 10 * 60 * 1000;
 
 // 메일 전송 설정
 const transporter = nodemailer.createTransport({
@@ -117,8 +116,8 @@ if(!user.is_active){
       if(attempts >= MAX_LOGIN_ATTEMPTS){
     // 5회 실패 >> 계정잠금
   await pool.query(
-    'UPDATE users SET login_attempts = ?, locked_until = ? WHERE id = ?',
-    [attempts, new Date(Date.now() + LOCK_TIME), user.id]
+    'UPDATE users SET login_attempts = ?, locked_until = DATE_ADD(NOW(), INTERVAL 10 MINUTE) WHERE id = ?',
+    [attempts, user.id]
   );
 
   // 계정 잠금 시 시스템 로그
@@ -334,12 +333,11 @@ exports.sendCode = async (req, res) => {
   try {
     const { email, type } = req.body;
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expires = new Date(Date.now() + 10 * 60 * 1000);
 
     await pool.query('DELETE FROM email_verifications WHERE email = ? AND type = ?', [email, type]);
     await pool.query(
-      'INSERT INTO email_verifications (email, code, type, expires_at) VALUES (?, ?, ?, ?)',
-      [email, code, type, expires]
+      'INSERT INTO email_verifications (email, code, type, expires_at) VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE))',
+      [email, code, type]
     );
 
     await transporter.sendMail({
@@ -552,12 +550,11 @@ exports.findId = async (req, res) => {
 
     // 인증번호 생성 및 발송 (기존 sendCode 로직 재활용)
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expires = new Date(Date.now() + 10 * 60 * 1000); // 10분
 
     await pool.query('DELETE FROM email_verifications WHERE email = ? AND type = ?', [email, 'find_id']);
     await pool.query(
-      'INSERT INTO email_verifications (email, code, type, expires_at) VALUES (?, ?, ?, ?)',
-      [email, code, 'find_id', expires]
+      'INSERT INTO email_verifications (email, code, type, expires_at) VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE))',
+      [email, code, 'find_id']
     );
 
     await transporter.sendMail({
@@ -616,12 +613,11 @@ exports.findPassword = async (req, res) => {
 
     // 인증번호 생성 및 발송
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expires = new Date(Date.now() + 10 * 60 * 1000);
 
     await pool.query('DELETE FROM email_verifications WHERE email = ? AND type = ?', [email, 'find_password']);
     await pool.query(
-      'INSERT INTO email_verifications (email, code, type, expires_at) VALUES (?, ?, ?, ?)',
-      [email, code, 'find_password', expires]
+      'INSERT INTO email_verifications (email, code, type, expires_at) VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE))',
+      [email, code, 'find_password']
     );
 
     await transporter.sendMail({

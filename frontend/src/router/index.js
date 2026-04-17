@@ -34,6 +34,7 @@ const AccountDetail = () => import('@/views/admin/AccountDetail.vue')
 const AdminNotice = () => import('@/views/admin/AdminNotice.vue')
 const AdminPopup = () => import('@/views/admin/AdminPopup.vue')
 const AdminPopupWrite = () => import('@/views/admin/AdminPopupWrite.vue')
+const AdminPopupView = () => import('@/views/admin/AdminPopupView.vue')
 const AdminInfoEdit = () => import('@/views/admin/AdminInfoEdit.vue')
 const UsageLog = () => import('@/views/admin/UsageLog.vue')
 const UsageLogDetail = () => import('@/views/admin/UsageLogDetail.vue')
@@ -98,6 +99,7 @@ const routes = [
 { path: 'notices/:id', component: AdminNoticeWrite, props: true },
 { path: 'popups', component: AdminPopup },
 { path: 'popups/write', component: AdminPopupWrite },
+{ path: 'popups/:id/view', component: AdminPopupView, props: true },
 { path: 'popups/:id', component: AdminPopupWrite, props: true },
 { path: 'info', component: AdminInfoEdit },
 { path: 'logs', component: UsageLog },
@@ -153,9 +155,22 @@ const router = createRouter({
 
 
 
+// 경로 기반 토큰 키 결정
+function getTokenKey(path) {
+  return path.startsWith('/admin') ? 'token_a' : 'token_u';
+}
+
 // 라우터 가드 - 인증 체크 + user 데이터 자동 복원
 router.beforeEach(async (to, from, next) => {
   const auth = useAuthStore()
+
+  // 경로에 맞는 토큰으로 갱신
+  const tokenKey = getTokenKey(to.path);
+  const storedToken = localStorage.getItem(tokenKey);
+  if (auth.token !== storedToken) {
+    auth.token = storedToken;
+    auth.user = null; // 토큰 변경 시 user 재조회 필요
+  }
 
   // 인증 불필요 페이지는 통과
   if (to.meta.requiresAuth === false) {

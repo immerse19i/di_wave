@@ -63,14 +63,11 @@ exports.confirmPayment = async (req, res) => {
     )
 
     // credit_transactions 기록 (만료 시스템 필드 포함)
-    const expiresAt = new Date()
-    expiresAt.setFullYear(expiresAt.getFullYear() + 1) // 결제 충전 = 1년 유효
-
     await conn.query(
       `INSERT INTO credit_transactions
        (hospital_id, type, amount, balance_after, description, payment_id, expires_at, source, remaining_amount)
-       VALUES (?, 'charge', ?, ?, ?, ?, ?, 'payment', ?)`,
-      [hospitalId, creditAmount, credit[0].balance, `크레딧 ${creditAmount}건 충전`, paymentResult.insertId, expiresAt, creditAmount]
+       VALUES (?, 'charge', ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 1 YEAR), 'payment', ?)`,
+      [hospitalId, creditAmount, credit[0].balance, `크레딧 ${creditAmount}건 충전`, paymentResult.insertId, creditAmount]
     )
 
     await conn.commit()
@@ -222,17 +219,14 @@ exports.handleWebhook = async (req, res) => {
     )
 
     // credit_transactions 기록
-    const expiresAt = new Date()
-    expiresAt.setFullYear(expiresAt.getFullYear() + 1)
-
     await conn.query(
       `INSERT INTO credit_transactions
        (hospital_id, type, amount, balance_after, description, payment_id, expires_at, source, remaining_amount)
-       VALUES (?, 'charge', ?, ?, ?, ?, ?, 'payment', ?)`,
+       VALUES (?, 'charge', ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 1 YEAR), 'payment', ?)`,
       [
         payment.hospital_id, payment.credit_amount, credit[0].balance,
         `크레딧 ${payment.credit_amount}건 충전 (무통장입금)`,
-        payment.id, expiresAt, payment.credit_amount
+        payment.id, payment.credit_amount
       ]
     )
 

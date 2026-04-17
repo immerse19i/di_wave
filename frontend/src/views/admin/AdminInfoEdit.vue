@@ -151,8 +151,8 @@ const loadInfo = async () => {
 
 // 저장
 const handleSave = async () => {
-  if (!form.value.title.trim() || !stripHtml(form.value.content)) {
-    showStatusMsg('제목, 내용을 입력해 주세요', 'error', 5000);
+  if (!stripHtml(form.value.content)) {
+    showStatusMsg('내용을 입력해 주세요', 'error', 5000);
     return;
   }
   try {
@@ -266,6 +266,34 @@ onMounted(() => {
     }
     .ck-dropdown__panel {
       background: $bg-op;
+      border-color: $dark-line-gray;
+    }
+    .ck-list {
+      background: $bg-op;
+    }
+    .ck-list .ck-list__item {
+      .ck-button {
+        color: $white;
+        background: transparent;
+        .ck-button__label {
+          color: $white;
+        }
+        &:hover {
+          background: rgba(255, 255, 255, 0.1);
+        }
+        &.ck-on {
+          background: $main-color;
+          color: $white;
+          .ck-button__label {
+            color: $white;
+          }
+        }
+      }
+    }
+    .ck-input,
+    .ck-input-text {
+      background: $dark-input;
+      color: $white;
       border-color: $dark-line-gray;
     }
     .ck-editor__editable {

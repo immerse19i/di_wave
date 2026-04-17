@@ -92,7 +92,9 @@
                 alt="thumb"
               />
               <div v-else class="attach-icon-box">
-                <span class="attach-file-name">{{ file.file_name }}</span>
+                <span class="attach-file-name">{{
+                  truncateFilename(file.file_name)
+                }}</span>
               </div>
               <span v-if="isImageFile(file.file_type)" class="attach-name">{{
                 file.file_name
@@ -130,7 +132,12 @@
                 class="file-card"
               >
                 <button class="file-remove" @click="removeExisting(file.id)">
-                  &times;
+                  <img
+                    src="/assets/icons/delete_icon.svg"
+                    alt="delete"
+                    width="16"
+                    height="16"
+                  />
                 </button>
                 <img
                   v-if="isImageFile(file.file_type)"
@@ -150,7 +157,12 @@
                 class="file-card"
               >
                 <button class="file-remove" @click="removeNew(idx)">
-                  &times;
+                  <img
+                    src="/assets/icons/delete_icon.svg"
+                    alt="delete"
+                    width="16"
+                    height="16"
+                  />
                 </button>
                 <img
                   v-if="item.preview"
@@ -203,16 +215,24 @@
     >
       <div class="viewer-header">
         <button class="viewer-btn" @click="zoomOut">
-          <img src="/assets/icons/search.svg" alt="zoom-out" /> -
+          <img src="/assets/icons/zoom_out.svg" alt="zoom-out" />
         </button>
         <span class="viewer-zoom">{{ Math.round(zoomLevel * 100) }}%</span>
         <button class="viewer-btn" @click="zoomIn">
-          <img src="/assets/icons/search.svg" alt="zoom-in" /> +
+          <img src="/assets/icons/zoom_in.svg" alt="zoom-in" />
         </button>
-        <button class="viewer-btn" @click="downloadViewerFile">다운로드</button>
+        <button class="viewer-btn" @click="downloadViewerFile">
+          <img
+            src="/assets/icons/download_icon.svg"
+            alt="download"
+            width="16"
+            height="16"
+          />
+          다운로드
+        </button>
         <button class="viewer-close" @click="closeViewer">&times;</button>
       </div>
-      <div class="viewer-body">
+      <div class="viewer-body" @click.self="closeViewer">
         <img
           :src="viewerSrc"
           :style="{ transform: `scale(${zoomLevel})` }"
@@ -221,6 +241,9 @@
         />
       </div>
     </div>
+
+    <!-- 로딩 -->
+    <FadeLoader v-if="isProcessing" />
   </div>
 </template>
 
@@ -229,6 +252,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter, useRoute, onBeforeRouteLeave } from 'vue-router';
 import { inquiryAPI } from '@/api/inquiry';
 import { UseMessageStore } from '@/store/message';
+import FadeLoader from '@/components/common/FadeLoader.vue';
 import { Ckeditor as CkeditorComponent } from '@ckeditor/ckeditor5-vue';
 import {
   ClassicEditor,
@@ -301,6 +325,7 @@ const message = UseMessageStore();
 const props = defineProps({ id: [String, Number] });
 
 // ---- 데이터 ----
+const isProcessing = ref(false);
 const inquiry = ref(null);
 const answerContent = ref('');
 const existingFiles = ref([]);
@@ -475,6 +500,7 @@ const buildFormData = (status) => {
 
 // ---- 임시저장 ----
 const saveDraft = async () => {
+  isProcessing.value = true;
   try {
     await inquiryAPI.saveAnswer(props.id, buildFormData('draft'));
     showStatusMsg('임시저장되었습니다.', 'success', 5000);
@@ -488,6 +514,8 @@ const saveDraft = async () => {
     updateOriginal();
   } catch (e) {
     message.showAlert('임시저장에 실패했습니다.');
+  } finally {
+    isProcessing.value = false;
   }
 };
 
@@ -501,6 +529,7 @@ const submitAnswer = () => {
   message.showConfirm(
     '답변을 작성하시겠습니까?\n완료한 후엔 수정할 수 없습니다.',
     async () => {
+      isProcessing.value = true;
       try {
         await inquiryAPI.saveAnswer(props.id, buildFormData('answered'));
 
@@ -511,6 +540,8 @@ const submitAnswer = () => {
         message.showAlert('답변이 완료되었습니다.');
       } catch (e) {
         message.showAlert('답변 완료에 실패했습니다.');
+      } finally {
+        isProcessing.value = false;
       }
     },
   );
@@ -583,7 +614,7 @@ const downloadViewerFile = () => {
 }
 
 .detail-area {
-  max-width: 900px;
+  // max-width: 900px;
 }
 
 // ① 뒤로가기
@@ -614,7 +645,7 @@ const downloadViewerFile = () => {
 }
 .inquiry-meta {
   @include font-14-regular;
-  color: $dark-text;
+  color: $dark-input-gray;
   margin-bottom: 20px;
   .meta-divider {
     margin: 0 8px;
@@ -684,7 +715,7 @@ const downloadViewerFile = () => {
 }
 .answer-date {
   @include font-14-regular;
-  color: $dark-text;
+  color: $dark-input-gray;
   margin-bottom: 16px;
 }
 .answer-content {
@@ -715,6 +746,32 @@ const downloadViewerFile = () => {
 }
 :deep(.ck-dropdown__panel) {
   background: $dark-input !important;
+  border-color: $dark-line-gray !important;
+}
+:deep(.ck-list) {
+  background: $dark-input !important;
+}
+:deep(.ck-list .ck-list__item .ck-button) {
+  color: $white !important;
+  background: transparent !important;
+}
+:deep(.ck-list .ck-list__item .ck-button .ck-button__label) {
+  color: $white !important;
+}
+:deep(.ck-list .ck-list__item .ck-button:hover) {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+:deep(.ck-list .ck-list__item .ck-button.ck-on) {
+  background: $main-color !important;
+  color: $white !important;
+}
+:deep(.ck-list .ck-list__item .ck-button.ck-on .ck-button__label) {
+  color: $white !important;
+}
+:deep(.ck-input),
+:deep(.ck-input-text) {
+  background: $dark-input !important;
+  color: $white !important;
   border-color: $dark-line-gray !important;
 }
 
@@ -801,7 +858,12 @@ const downloadViewerFile = () => {
 
 // 답변 첨부 (읽기전용)
 .attach-icon-box {
-  padding: 12px 16px;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
   background: $bg-op;
   border: 1px dashed $dark-line-gray;
   border-radius: $radius-sm;
@@ -809,6 +871,9 @@ const downloadViewerFile = () => {
 .attach-file-name {
   @include font-12-regular;
   color: $dark-text;
+  max-width: 84px;
+  text-align: center;
+  word-break: break-all;
 }
 
 // ⑥⑦⑧ 하단 버튼
@@ -830,10 +895,11 @@ const downloadViewerFile = () => {
 }
 .btn-draft {
   padding: 10px 32px;
-  border: 1px solid $dark-line-gray;
-  background: none;
+  // border: 1px solid $dark-line-gray;
+  background: $main-gad;
   color: $white;
   border-radius: $radius-sm;
+  min-width: 136px;
   @include font-14-medium;
   cursor: pointer;
   &:hover {
@@ -841,6 +907,7 @@ const downloadViewerFile = () => {
   }
 }
 .btn-submit {
+  min-width: 136px;
   padding: 10px 32px;
   background: $main-gad;
   border: none;
@@ -868,8 +935,9 @@ const downloadViewerFile = () => {
 .viewer-header {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 16px;
+  height: 70px;
   padding: 12px 24px;
   background: rgba(0, 0, 0, 0.5);
 }
@@ -886,9 +954,8 @@ const downloadViewerFile = () => {
     opacity: 0.8;
   }
   img {
-    width: 14px;
-    height: 14px;
-    filter: invert(1);
+    width: 24px;
+    height: 24px;
   }
 }
 .viewer-zoom {
@@ -898,8 +965,8 @@ const downloadViewerFile = () => {
   text-align: center;
 }
 .viewer-close {
-  position: absolute;
-  right: 24px;
+  // position: absolute;
+  // right: 24px;
   background: none;
   border: none;
   color: $white;
