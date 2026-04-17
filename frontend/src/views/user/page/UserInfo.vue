@@ -61,13 +61,14 @@
         <router-view />
       </main>
     </div>
-    <UserFooter />
+    <LoginFooter />
   </div>
 </template>
 
 <script setup>
 import Header from '@/components/common/Header.vue';
-import UserFooter from '../../../components/common/UserFooter.vue';
+import LoginFooter from '../../../components/common/LoginFooter.vue';
+// import UserFooter from '../../../components/common/UserFooter.vue';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
