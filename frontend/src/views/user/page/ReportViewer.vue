@@ -351,6 +351,9 @@
               50점은 평균적인 성숙 속도를 의미합니다.
             </p>
           </div>
+          <p class="pdf-desc">
+            ※해당 결과는 인공지능을 활용해 생성된 결과가 포함되어 있습니다.
+          </p>
         </div>
 
         <!-- ===== 3페이지: 체중/BMI/비만도 + 현재키 기반 예측 키 ===== -->
@@ -1931,6 +1934,13 @@ onUnmounted(() => {
     font-size: 10px;
     display: inline-block;
   }
+}
+
+.pdf-desc {
+  max-width: calc(100% - 52px);
+  margin: 6px auto 0;
+  font-size: 8px;
+  color: $text-gray-2;
 }
 
 // ===== 3페이지: 건강 게이지 =====
