@@ -266,7 +266,7 @@ await pool.query('UPDATE users SET is_active = TRUE WHERE hospital_id = ? AND ro
 
             
 
-    <a href="http://osteoage.ai/login" target="_blank" style="width:415px; display:flex; align-items:center; justify-content:center; background: linear-gradient(180deg, #F8F8F8 0%, #E0E0E0 100%); display:block; margin-bottom:20px; padding :22px">
+    <a href="http://osteoage.ai/login" target="_blank" style="width:415px; display:block; text-align:center; background: linear-gradient(180deg, #F8F8F8 0%, #E0E0E0 100%); display:block; margin-bottom:20px; padding :22px">
         <img src="http://osteoage.ai/assets/logo/osteo_age_logo.png" alt="osteo_logo" style="margin:auto; display:inline-block;"/>
     </a>
             <p style="font-size:12px; line-height:1.4;">
