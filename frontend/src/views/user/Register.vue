@@ -1,4 +1,5 @@
 <template>
+  <FadeLoader v-if="isSendingCode" />
   <div class="page_header">
     <div class="logo" @click="router.push('/login')" style="cursor: pointer">
       <img :src="logoSrc" alt="OsteoAge" />
@@ -238,6 +239,7 @@ import { useRouter } from 'vue-router';
 import { authAPI } from '@/api/auth';
 import { termsAPI } from '@/api/terms';
 import { UseMessageStore } from '@/store/message';
+import FadeLoader from '@/components/common/FadeLoader.vue';
 const message = UseMessageStore();
 const router = useRouter();
 
@@ -270,6 +272,7 @@ const isEmailChecked = ref(false);
 //인증번호 부분
 // 인증번호 재전송
 const isCodeSent = ref(false);
+const isSendingCode = ref(false);
 const cooldown = ref(0);
 let cooldownTimer = null;
 
@@ -482,6 +485,7 @@ async function sendVerificationCode() {
   }
 
   try {
+    isSendingCode.value = true;
     await authAPI.sendCode({ email: form.value.email, type: 'register' });
     isCodeSent.value = true;
     emailMessage.value = '인증번호를 전송하였습니다. 10분내로 입력해 주세요.';
@@ -497,6 +501,8 @@ async function sendVerificationCode() {
     emailMessage.value =
       error.response?.data?.message || '인증번호 전송에 실패했습니다.';
     emailMessageType.value = 'error';
+  } finally {
+    isSendingCode.value = false;
   }
 }
 
