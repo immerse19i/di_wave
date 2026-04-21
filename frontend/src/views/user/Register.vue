@@ -13,7 +13,7 @@
       </div>
 
       <!-- Step 1: 계정 정보 -->
-      <form v-if="step === 1" class="register-form" @submit.prevent="goToStep2">
+      <form v-if="step === 2" class="register-form" @submit.prevent="goToStep2">
         <!-- ID -->
         <div class="form-group">
           <label>ID</label>
@@ -179,6 +179,7 @@
             <input
               :value="fileName"
               readonly
+              class="business_input"
               placeholder="png,jpg,jpeg,pdf, 최대10mb"
               @click="$refs.fileInput.click()"
               style="cursor: pointer"
@@ -333,7 +334,8 @@ function handlePopState(e) {
 
 // 전체동의
 const agreeAll = computed({
-  get: () => signupTerms.value.length > 0 && signupTerms.value.every((t) => t.checked),
+  get: () =>
+    signupTerms.value.length > 0 && signupTerms.value.every((t) => t.checked),
   set: (val) => {
     signupTerms.value.forEach((t) => (t.checked = val));
   },
@@ -711,9 +713,9 @@ onBeforeUnmount(() => {
     }
 
     input {
-      min-height: 48px;
+      min-height: 41px;
       width: 100%;
-      padding: $spacing-md $spacing-lg;
+      padding: $spacing-sm 12px;
       background-color: $dark-input;
       border: 1px solid $dark-line-gray;
       border-radius: $radius-md;
@@ -729,8 +731,20 @@ onBeforeUnmount(() => {
       }
 
       &:read-only {
-        background-color: darken($dark-input, 5%);
+        background-color: unset;
+        color: $dark-line-gray;
+        border-color: $dark-gray-dark;
         cursor: default;
+      }
+
+      &.business_input {
+        min-height: 30px;
+        padding: $spacing-xs 12px;
+        background-color: $dark-input;
+        color: $white;
+        border: none;
+        // border-color: $dark-gray-dark;
+        cursor: pointer;
       }
     }
     .validation-text {
@@ -777,6 +791,13 @@ onBeforeUnmount(() => {
           background: $dark-line-gray;
           color: $gray;
         }
+      }
+    }
+
+    &:has(.business_input) {
+      button {
+        min-width: 136px;
+        padding: $spacing-xs 12px;
       }
     }
   }
