@@ -14,7 +14,7 @@
       </div>
 
       <!-- Step 1: 계정 정보 -->
-      <form v-if="step === 2" class="register-form" @submit.prevent="goToStep2">
+      <form v-if="step === 1" class="register-form" @submit.prevent="goToStep2">
         <!-- ID -->
         <div class="form-group">
           <label>ID</label>
@@ -75,7 +75,13 @@
               placeholder="이메일을 입력해 주세요"
               @input="validateEmail"
             />
-            <button type="button" @click="checkDuplicateEmail">중복확인</button>
+            <button
+              class="duplicate_btn"
+              type="button"
+              @click="checkDuplicateEmail"
+            >
+              중복확인
+            </button>
             <button
               type="button"
               @click="sendVerificationCode"
@@ -784,6 +790,9 @@ onBeforeUnmount(() => {
       white-space: nowrap;
       transition: all $transition-fast;
 
+      &.duplicate_btn {
+        min-width: 100px;
+      }
       &:hover {
         background-color: $main-color;
         color: $white;
