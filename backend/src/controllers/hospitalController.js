@@ -101,7 +101,7 @@ exports.createAccount = async (req, res) => {
             </p>
 
 
-    <a href="http://osteoage.ai/login" target="_blank" style="width:415px; display:flex; align-items:center; justify-content:center; background: linear-gradient(180deg, #F8F8F8 0%, #E0E0E0 100%); display:block; margin-bottom:20px; padding :22px">
+    <a href="http://osteoage.ai/login" target="_blank" style="width:415px; display:block; text-align:center; background: linear-gradient(180deg, #F8F8F8 0%, #E0E0E0 100%); display:block; margin-bottom:20px; padding :22px">
         <img src="http://osteoage.ai/assets/logo/osteo_age_logo.png" alt="osteo_logo" style="margin:auto; display:inline-block;"/>
     </a>
             <p style="font-size:12px; line-height:1.4;">
@@ -365,7 +365,7 @@ OsteoAge를 이용해 주셔서 감사합니다.<br/>
 승인 결과가 ‘반려’인 경우 아래  웹에 접속하여 로그인 후 보완서류를 다시 첨부해 주시기 바랍니다.
     </p>
 
-    <a href="http://osteoage.ai/login" target="_blank" style="width:415px; background: linear-gradient(180deg, #F8F8F8 0%, #E0E0E0 100%);padding:22px; display:flex;align-items:center; justify-content:center; text-align:center; ">
+    <a href="http://osteoage.ai/login" target="_blank" style="width:415px; display:block; text-align:center; background: linear-gradient(180deg, #F8F8F8 0%, #E0E0E0 100%); display:block; margin-bottom:20px; padding :22px">
         <img src="http://osteoage.ai/assets/logo/osteo_age_logo.png" alt="osteo_logo" style="margin:auto; display:inline-block;"/>
     </a>
 
