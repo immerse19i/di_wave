@@ -252,6 +252,9 @@ await pool.query('UPDATE users SET is_active = TRUE WHERE hospital_id = ? AND ro
         subject: '[OsteoAge] 가입 승인이 완료되었습니다. 지금 바로 이용해 보세요!',
         html: `
           <div style="max-width:600px; font-family:'Inter',Arial,sans-serif; color:#353535;">
+          <img src="http://osteoage.ai/assets/logo/di_wave_logo_color.png" alt="DiwaveLogo" style="width:101px; margin-top:16px;" />
+    <div style="padding:16px; width:100%;background:#2AA2A5; font-family:'Inter',Arial,sans-serif; font-size:16px; line-height:1.4; font-weight:400; color:#f8f9fa">OsteoAge 회원가입 승인 결과 안내</div>
+    
             <p style="font-size:14px; line-height:1.6; margin-bottom:20px;">
               <strong>${rows[0].name}</strong>님.<br/>
               OsteoAge 서비스 가입 승인이 완료되었습니다.
@@ -262,14 +265,15 @@ await pool.query('UPDATE users SET is_active = TRUE WHERE hospital_id = ? AND ro
             </p>
 
             
-    <a href="http://osteoage.ai/login" target="_blank" style="width:415px; background: linear-gradient(180deg, #F8F8F8 0%, #E0E0E0 100%); display:block; margin-bottom:20px;">
-        <img src="http://osteoage.ai/assets/logo/osteo_age_logo.png" alt="osteo_logo"/>
+
+    <a href="http://osteoage.ai/login" target="_blank" style="width:415px; display:flex; align-items:center; justify-content:center; background: linear-gradient(180deg, #F8F8F8 0%, #E0E0E0 100%); display:block; margin-bottom:20px; padding :22px">
+        <img src="http://osteoage.ai/assets/logo/osteo_age_logo.png" alt="osteo_logo" style="margin:auto; display:inline-block;"/>
     </a>
             <p style="font-size:12px; line-height:1.4;">
 본 메일은 발송 전용으로 회신이 불가능합니다.<br/>
 추가 문의 사항은 서비스 내 [문의하기] 게시판을 이용해 주세요.<br/>
 Copyright © DiWAVE Inc. All rights reserved.
-            </p>
+            </p><br/><br/>
             <p style="font-size:12px; color:#353535; margin-top:24px;">
 디웨이브주식회사<br/>
 02-2088-8728 [문의가능시간 : 10:00~17:00 (토 · 일 · 공휴일 휴무)]
