@@ -24,8 +24,12 @@
             <img src="/assets/icons/zoom_in.svg" alt="+" />
           </button>
         </div>
-        <button class="btn-print" @click="handlePrint">인쇄</button>
+        <button class="btn-print" @click="handlePrint">
+          <img src="/assets/icons/print_icon.svg" alt="인쇄" />
+          인쇄
+        </button>
         <button class="btn-download" @click="handleDownload">
+          <img src="/assets/icons/download_icon.svg" alt="다운로드" />
           리포트 다운로드
         </button>
       </div>
@@ -1462,13 +1466,22 @@ onUnmounted(() => {
   }
   .btn-print,
   .btn-download {
-    padding: 6px 16px;
-    border: 1px solid #666;
+    @include font-14-bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 16px;
+    border: 1px solid $main-color;
     border-radius: 4px;
     background: none;
     color: #fff;
     cursor: pointer;
     font-size: 13px;
+    img {
+      width: 24px;
+      height: 24px;
+      filter: brightness(0) invert(1);
+    }
     &:hover {
       background: #444;
     }

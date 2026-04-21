@@ -85,20 +85,34 @@
         <thead>
           <tr>
             <th class="sortable" @click="toggleSort('login_id')">
-              ID <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              ID
+              <SortIcon
+                :direction="sortFieldVal === 'login_id' ? sortOrderVal : ''"
+              />
             </th>
             <th class="sortable" @click="toggleSort('name')">
-              병원명 <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              병원명
+              <SortIcon
+                :direction="sortFieldVal === 'name' ? sortOrderVal : ''"
+              />
             </th>
             <th class="sortable" @click="toggleSort('email')">
-              이메일 <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              이메일
+              <SortIcon
+                :direction="sortFieldVal === 'email' ? sortOrderVal : ''"
+              />
             </th>
             <th class="sortable" @click="toggleSort('phone')">
-              전화 <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              전화
+              <SortIcon
+                :direction="sortFieldVal === 'phone' ? sortOrderVal : ''"
+              />
             </th>
             <th class="sortable" @click="toggleSort('created_at')">
               가입일
-              <img class="sort-icon" src="/assets/icons/updown_icon.svg" alt="" />
+              <SortIcon
+                :direction="sortFieldVal === 'created_at' ? sortOrderVal : ''"
+              />
             </th>
             <th>상태</th>
             <th>상세보기</th>
@@ -186,6 +200,7 @@ import { useRouter } from 'vue-router';
 import { adminAPI } from '@/api/admin';
 import { UseMessageStore } from '@/store/message';
 import DatePicker from '@/components/common/DatePicker.vue';
+import SortIcon from '@/components/common/SortIcon.vue';
 
 const router = useRouter();
 const message = UseMessageStore();
@@ -292,23 +307,12 @@ const handleSearch = () => {
 };
 
 const toggleSort = (field) => {
-  const count = (sortClickCount.value[field] || 0) + 1;
-  Object.keys(sortClickCount.value).forEach((key) => {
-    if (key !== field) sortClickCount.value[key] = 0;
-  });
-  if (count === 1) {
+  if (sortFieldVal.value !== field) {
     sortFieldVal.value = field;
     sortOrderVal.value = field === 'created_at' ? 'DESC' : 'ASC';
-  } else if (count === 2) {
-    sortFieldVal.value = field;
-    sortOrderVal.value = field === 'created_at' ? 'ASC' : 'DESC';
   } else {
-    sortFieldVal.value = '';
-    sortOrderVal.value = '';
-    sortClickCount.value[field] = 0;
-    return;
+    sortOrderVal.value = sortOrderVal.value === 'ASC' ? 'DESC' : 'ASC';
   }
-  sortClickCount.value[field] = count;
   fetchList();
 };
 

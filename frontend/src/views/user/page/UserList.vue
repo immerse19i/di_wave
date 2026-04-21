@@ -37,33 +37,27 @@
           <tr>
             <th class="sortable" @click="toggleSort('patient_code')">
               환자ID
-              <img
-                class="sort-icon"
-                src="/assets/icons/updown_icon.svg"
-                alt=""
+              <SortIcon
+                :direction="sortField === 'patient_code' ? sortOrder : ''"
               />
             </th>
             <th class="sortable" @click="toggleSort('patient_name')">
               환자명
-              <img
-                class="sort-icon"
-                src="/assets/icons/updown_icon.svg"
-                alt=""
+              <SortIcon
+                :direction="sortField === 'patient_name' ? sortOrder : ''"
               />
             </th>
             <th>생년월일</th>
             <th>성별</th>
             <th class="sortable" @click="toggleSort('analysis_date')">
               분석일
-              <img
-                class="sort-icon"
-                src="/assets/icons/updown_icon.svg"
-                alt=""
+              <SortIcon
+                :direction="sortField === 'analysis_date' ? sortOrder : ''"
               />
             </th>
             <th>나이</th>
             <th>뼈나이</th>
-            <th>예측키</th>
+            <th>현재키</th>
             <th>몸무게</th>
             <th>담당주치의</th>
             <th>Report</th>
@@ -158,6 +152,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useModalStore } from '@/store/modal';
 import { analysisAPI } from '@/api/analysis';
+import SortIcon from '@/components/common/SortIcon.vue';
 
 const router = useRouter();
 const modal = useModalStore();
@@ -195,8 +190,11 @@ const fetchList = async () => {
       sortField: sortField.value,
       sortOrder: sortOrder.value,
     });
+
     analysisList.value = res.data.data;
     pagination.value = { ...pagination.value, ...res.data.pagination };
+
+    console.log('목록 조회 성공:', res.data);
   } catch (error) {
     console.error('목록 조회 오류:', error);
   }
@@ -209,30 +207,16 @@ const handleSearch = () => {
   fetchList();
 };
 
-// 정렬 (3단계 순환)
+// 정렬 (ASC ↔ DESC 토글)
 const toggleSort = (field) => {
-  const count = (sortClickCount.value[field] || 0) + 1;
-
-  // 다른 필드 클릭 시 초기화
-  Object.keys(sortClickCount.value).forEach((key) => {
-    if (key !== field) sortClickCount.value[key] = 0;
-  });
-
-  if (count === 1) {
+  if (sortField.value !== field) {
+    // 다른 필드 클릭 시 → 해당 필드 기본 방향으로 시작
     sortField.value = field;
     sortOrder.value = field === 'created_at' ? 'DESC' : 'ASC';
-  } else if (count === 2) {
-    sortField.value = field;
-    sortOrder.value = field === 'created_at' ? 'ASC' : 'DESC';
   } else {
-    sortField.value = '';
-    sortOrder.value = '';
-    sortClickCount.value[field] = 0;
-    fetchList();
-    return;
+    // 같은 필드 클릭 시 → 방향만 토글
+    sortOrder.value = sortOrder.value === 'ASC' ? 'DESC' : 'ASC';
   }
-
-  sortClickCount.value[field] = count;
   fetchList();
 };
 
