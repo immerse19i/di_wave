@@ -95,6 +95,14 @@
         </button>
       </div>
     </div>
+
+    <!-- 사업자등록증 미리보기 모달 -->
+    <FilePreviewModal
+      :visible="showPreview"
+      :fileUrl="licenseFileUrl"
+      :fileName="licenseFileName"
+      @close="showPreview = false"
+    />
   </div>
 </template>
 
@@ -103,6 +111,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { authAPI } from '@/api/auth';
 import { onBeforeRouteLeave } from 'vue-router';
 import { UseMessageStore } from '@/store/message';
+import FilePreviewModal from '@/components/common/FilePreviewModal.vue';
 
 const message = UseMessageStore();
 const errorMessage = ref('');
@@ -248,9 +257,20 @@ const extractFileName = (path) => {
 };
 
 // 사업자등록증 미리보기
+const showPreview = ref(false);
+const licenseFileName = computed(() =>
+  form.value.business_license_path
+    ? extractFileName(form.value.business_license_path)
+    : '',
+);
+const licenseFileUrl = computed(() =>
+  form.value.business_license_path
+    ? '/' + form.value.business_license_path
+    : '',
+);
 const previewLicense = () => {
   if (form.value.business_license_path) {
-    window.open('/' + form.value.business_license_path, '_blank');
+    showPreview.value = true;
   }
 };
 
