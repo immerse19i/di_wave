@@ -218,7 +218,7 @@ const handleLogin = async () => {
     } else if (code === 'REJECTED') {
       const rejectedToken = error.response?.data?.token;
       if (rejectedToken) {
-        localStorage.setItem('token', rejectedToken);
+        localStorage.setItem('token_u', rejectedToken);
       }
       message.showAlert(
         '가입이 반려되었습니다.\n사유 확인 후 재신청이 가능합니다.',
