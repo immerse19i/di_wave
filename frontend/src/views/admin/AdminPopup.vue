@@ -38,29 +38,21 @@
             <th class="col-draft">임시저장</th>
             <th class="col-title sortable" @click="toggleSort('title')">
               제목
-              <img
-                class="sort-icon"
-                src="/assets/icons/updown_icon.svg"
-                alt=""
-              />
+              <SortIcon :direction="sortField === 'title' ? sortOrder : ''" />
             </th>
             <th
               class="col-period sortable"
               @click="toggleSort('display_start')"
             >
               팝업 게시기간
-              <img
-                class="sort-icon"
-                src="/assets/icons/updown_icon.svg"
-                alt=""
+              <SortIcon
+                :direction="sortField === 'display_start' ? sortOrder : ''"
               />
             </th>
             <th class="col-author sortable" @click="toggleSort('author_name')">
               작성자
-              <img
-                class="sort-icon"
-                src="/assets/icons/updown_icon.svg"
-                alt=""
+              <SortIcon
+                :direction="sortField === 'author_name' ? sortOrder : ''"
               />
             </th>
             <th
@@ -68,26 +60,20 @@
               @click="toggleSort('published_at')"
             >
               게시일시
-              <img
-                class="sort-icon"
-                src="/assets/icons/updown_icon.svg"
-                alt=""
+              <SortIcon
+                :direction="sortField === 'published_at' ? sortOrder : ''"
               />
             </th>
             <th class="col-updated sortable" @click="toggleSort('updated_at')">
               최근수정일시
-              <img
-                class="sort-icon"
-                src="/assets/icons/updown_icon.svg"
-                alt=""
+              <SortIcon
+                :direction="sortField === 'updated_at' ? sortOrder : ''"
               />
             </th>
             <th class="col-active sortable" @click="toggleSort('is_active')">
               현재 게시여부
-              <img
-                class="sort-icon"
-                src="/assets/icons/updown_icon.svg"
-                alt=""
+              <SortIcon
+                :direction="sortField === 'is_active' ? sortOrder : ''"
               />
             </th>
             <th class="col-edit">수정</th>
@@ -181,6 +167,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { adminAPI } from '@/api/admin';
 import { UseMessageStore } from '@/store/message';
+import SortIcon from '@/components/common/SortIcon.vue';
 
 const router = useRouter();
 const message = UseMessageStore();
@@ -194,11 +181,7 @@ const sortOrder = ref('');
 
 const toggleSort = (field) => {
   if (sortField.value === field) {
-    if (sortOrder.value === 'asc') sortOrder.value = 'desc';
-    else if (sortOrder.value === 'desc') {
-      sortField.value = '';
-      sortOrder.value = '';
-    } else sortOrder.value = 'asc';
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
   } else {
     sortField.value = field;
     sortOrder.value = 'asc';

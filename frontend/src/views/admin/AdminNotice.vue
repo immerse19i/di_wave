@@ -92,43 +92,29 @@
             <th class="col-draft">임시저장</th>
             <th class="col-title sortable" @click="toggleSort('title')">
               제목
-              <img
-                class="sort-icon"
-                src="/assets/icons/updown_icon.svg"
-                alt=""
-              />
+              <SortIcon :direction="sortField === 'title' ? sortOrder : ''" />
             </th>
             <th class="col-attach">첨부</th>
             <th class="col-pinned sortable" @click="toggleSort('is_pinned')">
               상단고정여부
-              <img
-                class="sort-icon"
-                src="/assets/icons/updown_icon.svg"
-                alt=""
+              <SortIcon
+                :direction="sortField === 'is_pinned' ? sortOrder : ''"
               />
             </th>
             <th class="col-status sortable" @click="toggleSort('status')">
               상태
-              <img
-                class="sort-icon"
-                src="/assets/icons/updown_icon.svg"
-                alt=""
-              />
+              <SortIcon :direction="sortField === 'status' ? sortOrder : ''" />
             </th>
             <th class="col-date sortable" @click="toggleSort('created_at')">
               작성일
-              <img
-                class="sort-icon"
-                src="/assets/icons/updown_icon.svg"
-                alt=""
+              <SortIcon
+                :direction="sortField === 'created_at' ? sortOrder : ''"
               />
             </th>
             <th class="col-author sortable" @click="toggleSort('author_name')">
               작성자
-              <img
-                class="sort-icon"
-                src="/assets/icons/updown_icon.svg"
-                alt=""
+              <SortIcon
+                :direction="sortField === 'author_name' ? sortOrder : ''"
               />
             </th>
             <th class="col-delete">삭제</th>
@@ -209,6 +195,7 @@ import { useRouter } from 'vue-router';
 import { adminAPI } from '@/api/admin';
 import { UseMessageStore } from '@/store/message';
 import DatePicker from '@/components/common/DatePicker.vue';
+import SortIcon from '@/components/common/SortIcon.vue';
 
 const router = useRouter();
 const message = UseMessageStore();
@@ -270,11 +257,7 @@ const sortOrder = ref('');
 
 const toggleSort = (field) => {
   if (sortField.value === field) {
-    if (sortOrder.value === 'asc') sortOrder.value = 'desc';
-    else if (sortOrder.value === 'desc') {
-      sortField.value = '';
-      sortOrder.value = '';
-    } else sortOrder.value = 'asc';
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
   } else {
     sortField.value = field;
     sortOrder.value = 'asc';
