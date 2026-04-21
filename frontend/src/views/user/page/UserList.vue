@@ -63,7 +63,7 @@
             </th>
             <th>나이</th>
             <th>뼈나이</th>
-            <th>예측키</th>
+            <th>현재키</th>
             <th>몸무게</th>
             <th>담당주치의</th>
             <th>Report</th>
@@ -195,8 +195,11 @@ const fetchList = async () => {
       sortField: sortField.value,
       sortOrder: sortOrder.value,
     });
+
     analysisList.value = res.data.data;
     pagination.value = { ...pagination.value, ...res.data.pagination };
+
+    console.log('목록 조회 성공:', res.data);
   } catch (error) {
     console.error('목록 조회 오류:', error);
   }

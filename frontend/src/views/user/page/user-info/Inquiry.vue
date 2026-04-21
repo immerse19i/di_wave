@@ -164,7 +164,7 @@ const submitInquiry = async () => {
   }
 
   message.showConfirm(
-    '문의내용은 제출 후에는 수정할 수 없습니다. 계속하시겠습니까?',
+    '문의내용은 제출 후 수정할 수 없습니다. 계속하시겠습니까?',
     async () => {
       if (isSubmitting.value) return;
       isSubmitting.value = true;
