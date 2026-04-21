@@ -175,7 +175,7 @@ defineExpose({ step });
 
 <style lang="scss" scoped>
 .find-id {
-  width: 650px;
+  width: 610px;
   padding: 20px 0;
 }
 

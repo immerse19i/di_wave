@@ -87,6 +87,10 @@ exports.createAccount = async (req, res) => {
         subject: '[OsteoAge] 가입 승인이 완료되었습니다. 지금 바로 이용해 보세요!',
         html: `
           <div style="max-width:600px; font-family:'Inter',Arial,sans-serif; color:#353535;">
+<img src="http://osteoage.ai/assets/logo/di_wave_logo_color.png" alt="DiwaveLogo" style="width:101px; margin-top:16px;" />
+    <div style="padding:16px; width:100%;background:#2AA2A5; font-family:'Inter',Arial,sans-serif; font-size:16px; line-height:1.4; font-weight:400; color:#f8f9fa">OsteoAge 회원가입 승인 결과 안내</div>
+    
+
             <p style="font-size:14px; line-height:1.6; margin-bottom:20px;">
               <strong>${hospitalName}</strong>님.<br/>
               OsteoAge 서비스 가입 승인이 완료되었습니다.
@@ -98,7 +102,7 @@ exports.createAccount = async (req, res) => {
 
 
     <a href="http://osteoage.ai/login" target="_blank" style="width:415px; display:flex; align-items:center; justify-content:center; background: linear-gradient(180deg, #F8F8F8 0%, #E0E0E0 100%); display:block; margin-bottom:20px; padding :22px">
-        <img src="http://osteoage.ai/assets/logo/osteo_age_logo.png" alt="osteo_logo"/>
+        <img src="http://osteoage.ai/assets/logo/osteo_age_logo.png" alt="osteo_logo" style="margin:auto; display:inline-block;"/>
     </a>
             <p style="font-size:12px; line-height:1.4;">
 본 메일은 발송 전용으로 회신이 불가능합니다.<br/>
@@ -330,7 +334,7 @@ await pool.query('UPDATE users SET is_active = FALSE WHERE hospital_id = ? AND r
         html: `
   <div style="max-width:800px; font-family:'Inter',Arial,sans-serif; color:#353535;">
     <img src="http://osteoage.ai/assets/logo/di_wave_logo_color.png" alt="DiwaveLogo" style="width:101px; margin-top:16px;" />
-    <div style="padding:16px; width:100%;background:#2AA2A5; font-family:'Inter',Arial,sans-serif; font-size:16px; line-height:1.4; font-weight:500; color:#f8f9fa">OsteoAge 회원가입 승인 결과 안내</div>
+    <div style="padding:16px; width:100%;background:#2AA2A5; font-family:'Inter',Arial,sans-serif; font-size:16px; line-height:1.4; font-weight:400; color:#f8f9fa">OsteoAge 회원가입 승인 결과 안내</div>
     <p style="font-size:14px; line-height:1.6;">
 OsteoAge를 이용해 주셔서 감사합니다.<br/>
 가입 승인 결과를 안내드립니다.
@@ -346,7 +350,7 @@ OsteoAge를 이용해 주셔서 감사합니다.<br/>
       </tr>
       <tr style="border-bottom:1px solid #DEE2E8;">
         <td style="padding:8px 12px; color:#344767; text-align:center; background:#F0F2F5; border:1px solid #ddd; font-weight:bold; width:168px; font-size:14px; line-height:1.4;">승인결과</td>
-        <td style="font-size:14px; color:#353535; padding:8px 12px; border:1px solid #ddd; font-weight:bold;">${reason}</td>
+        <td style="font-size:14px; color:#353535; padding:8px 12px; border:1px solid #ddd; font-weight:bold;">반려 (${reason || '기타'})</td>
       </tr>
       <tr style="border-bottom:1px solid #C7CCD0;">
         <td style="padding:8px 12px; color:#344767; text-align:center; background:#F0F2F5; border:1px solid #ddd; font-weight:bold; width:168px; font-size:14px; line-height:1.4;">Comment</td>
@@ -358,7 +362,7 @@ OsteoAge를 이용해 주셔서 감사합니다.<br/>
     </p>
 
     <a href="http://osteoage.ai/login" target="_blank" style="width:415px; background: linear-gradient(180deg, #F8F8F8 0%, #E0E0E0 100%);padding:22px; display:flex;align-items:center; justify-content:center; text-align:center; ">
-        <img src="http://osteoage.ai/assets/logo/osteo_age_logo.png" alt="osteo_logo"/>
+        <img src="http://osteoage.ai/assets/logo/osteo_age_logo.png" alt="osteo_logo" style="margin:auto; display:inline-block;"/>
     </a>
 
     <p style="font-size:12px; color:#353535; margin-bottom:20px;">

@@ -44,18 +44,12 @@
           <tr>
             <th class="sortable" @click="toggleSort('name')">
               병원명
-              <img
-                class="sort-icon"
-                src="/assets/icons/updown_icon.svg"
-                alt=""
-              />
+              <SortIcon :direction="sortField === 'name' ? sortOrder : ''" />
             </th>
             <th class="sortable" @click="toggleSort('created_at')">
               신청일
-              <img
-                class="sort-icon"
-                src="/assets/icons/updown_icon.svg"
-                alt=""
+              <SortIcon
+                :direction="sortField === 'created_at' ? sortOrder : ''"
               />
             </th>
             <th>상태</th>
@@ -131,6 +125,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { adminAPI } from '@/api/admin';
+import SortIcon from '@/components/common/SortIcon.vue';
 const router = useRouter();
 
 // 탭
@@ -204,24 +199,12 @@ const handleSearch = () => {
 };
 
 const toggleSort = (field) => {
-  const count = (sortClickCount.value[field] || 0) + 1;
-  Object.keys(sortClickCount.value).forEach((key) => {
-    if (key !== field) sortClickCount.value[key] = 0;
-  });
-
-  if (count === 1) {
+  if (sortField.value !== field) {
     sortField.value = field;
     sortOrder.value = field === 'created_at' ? 'DESC' : 'ASC';
-  } else if (count === 2) {
-    sortField.value = field;
-    sortOrder.value = field === 'created_at' ? 'ASC' : 'DESC';
   } else {
-    sortField.value = '';
-    sortOrder.value = '';
-    sortClickCount.value[field] = 0;
-    return;
+    sortOrder.value = sortOrder.value === 'ASC' ? 'DESC' : 'ASC';
   }
-  sortClickCount.value[field] = count;
   fetchList();
 };
 

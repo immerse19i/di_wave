@@ -1,4 +1,5 @@
 <template>
+  <FadeLoader v-if="isSendingCode" />
   <div class="page_header">
     <div class="logo" @click="router.push('/login')" style="cursor: pointer">
       <img :src="logoSrc" alt="OsteoAge" />
@@ -74,7 +75,13 @@
               placeholder="이메일을 입력해 주세요"
               @input="validateEmail"
             />
-            <button type="button" @click="checkDuplicateEmail">중복확인</button>
+            <button
+              class="duplicate_btn"
+              type="button"
+              @click="checkDuplicateEmail"
+            >
+              중복확인
+            </button>
             <button
               type="button"
               @click="sendVerificationCode"
@@ -179,6 +186,7 @@
             <input
               :value="fileName"
               readonly
+              class="business_input"
               placeholder="png,jpg,jpeg,pdf, 최대10mb"
               @click="$refs.fileInput.click()"
               style="cursor: pointer"
@@ -237,6 +245,7 @@ import { useRouter } from 'vue-router';
 import { authAPI } from '@/api/auth';
 import { termsAPI } from '@/api/terms';
 import { UseMessageStore } from '@/store/message';
+import FadeLoader from '@/components/common/FadeLoader.vue';
 const message = UseMessageStore();
 const router = useRouter();
 
@@ -269,6 +278,7 @@ const isEmailChecked = ref(false);
 //인증번호 부분
 // 인증번호 재전송
 const isCodeSent = ref(false);
+const isSendingCode = ref(false);
 const cooldown = ref(0);
 let cooldownTimer = null;
 
@@ -333,7 +343,8 @@ function handlePopState(e) {
 
 // 전체동의
 const agreeAll = computed({
-  get: () => signupTerms.value.length > 0 && signupTerms.value.every((t) => t.checked),
+  get: () =>
+    signupTerms.value.length > 0 && signupTerms.value.every((t) => t.checked),
   set: (val) => {
     signupTerms.value.forEach((t) => (t.checked = val));
   },
@@ -480,6 +491,7 @@ async function sendVerificationCode() {
   }
 
   try {
+    isSendingCode.value = true;
     await authAPI.sendCode({ email: form.value.email, type: 'register' });
     isCodeSent.value = true;
     emailMessage.value = '인증번호를 전송하였습니다. 10분내로 입력해 주세요.';
@@ -495,6 +507,8 @@ async function sendVerificationCode() {
     emailMessage.value =
       error.response?.data?.message || '인증번호 전송에 실패했습니다.';
     emailMessageType.value = 'error';
+  } finally {
+    isSendingCode.value = false;
   }
 }
 
@@ -711,9 +725,9 @@ onBeforeUnmount(() => {
     }
 
     input {
-      min-height: 48px;
+      min-height: 41px;
       width: 100%;
-      padding: $spacing-md $spacing-lg;
+      padding: $spacing-sm 12px;
       background-color: $dark-input;
       border: 1px solid $dark-line-gray;
       border-radius: $radius-md;
@@ -729,8 +743,20 @@ onBeforeUnmount(() => {
       }
 
       &:read-only {
-        background-color: darken($dark-input, 5%);
+        background-color: unset;
+        color: $dark-line-gray;
+        border-color: $dark-gray-dark;
         cursor: default;
+      }
+
+      &.business_input {
+        min-height: 30px;
+        padding: $spacing-xs 12px;
+        background-color: $dark-input;
+        color: $white;
+        border: none;
+        // border-color: $dark-gray-dark;
+        cursor: pointer;
       }
     }
     .validation-text {
@@ -764,6 +790,9 @@ onBeforeUnmount(() => {
       white-space: nowrap;
       transition: all $transition-fast;
 
+      &.duplicate_btn {
+        min-width: 100px;
+      }
       &:hover {
         background-color: $main-color;
         color: $white;
@@ -777,6 +806,13 @@ onBeforeUnmount(() => {
           background: $dark-line-gray;
           color: $gray;
         }
+      }
+    }
+
+    &:has(.business_input) {
+      button {
+        min-width: 136px;
+        padding: $spacing-xs 12px;
       }
     }
   }
