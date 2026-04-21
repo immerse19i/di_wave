@@ -101,8 +101,8 @@ exports.createAccount = async (req, res) => {
             </p>
 
 
-    <div style="width:415px; text-align:center; background: linear-gradient(180deg, #F8F8F8 0%, #E0E0E0 100%); margin-bottom:20px; padding:22px;">
-      <a href="http://osteoage.ai/login" target="_blank" style="display:inline-block; text-decoration:none;">
+    <div style="width:415px; background: linear-gradient(180deg, #F8F8F8 0%, #E0E0E0 100%); margin-bottom:20px;">
+      <a href="http://osteoage.ai/login" target="_blank" style="display:block; text-align:center; padding:22px; text-decoration:none;">
         <img src="http://osteoage.ai/assets/logo/osteo_age_logo.png" alt="osteo_logo" style="display:inline-block;"/>
       </a>
     </div>
@@ -268,8 +268,8 @@ await pool.query('UPDATE users SET is_active = TRUE WHERE hospital_id = ? AND ro
 
             
 
-    <div style="width:415px; text-align:center; background: linear-gradient(180deg, #F8F8F8 0%, #E0E0E0 100%); margin-bottom:20px; padding:22px;">
-      <a href="http://osteoage.ai/login" target="_blank" style="display:inline-block; text-decoration:none;">
+    <div style="width:415px; background: linear-gradient(180deg, #F8F8F8 0%, #E0E0E0 100%); margin-bottom:20px;">
+      <a href="http://osteoage.ai/login" target="_blank" style="display:block; text-align:center; padding:22px; text-decoration:none;">
         <img src="http://osteoage.ai/assets/logo/osteo_age_logo.png" alt="osteo_logo" style="display:inline-block;"/>
       </a>
     </div>
@@ -369,8 +369,8 @@ OsteoAge를 이용해 주셔서 감사합니다.<br/>
 승인 결과가 ‘반려’인 경우 아래  웹에 접속하여 로그인 후 보완서류를 다시 첨부해 주시기 바랍니다.
     </p>
 
-    <div style="width:415px; text-align:center; background: linear-gradient(180deg, #F8F8F8 0%, #E0E0E0 100%); margin-bottom:20px; padding:22px;">
-      <a href="http://osteoage.ai/login" target="_blank" style="display:inline-block; text-decoration:none;">
+    <div style="width:415px; background: linear-gradient(180deg, #F8F8F8 0%, #E0E0E0 100%); margin-bottom:20px;">
+      <a href="http://osteoage.ai/login" target="_blank" style="display:block; text-align:center; padding:22px; text-decoration:none;">
         <img src="http://osteoage.ai/assets/logo/osteo_age_logo.png" alt="osteo_logo" style="display:inline-block;"/>
       </a>
     </div>
