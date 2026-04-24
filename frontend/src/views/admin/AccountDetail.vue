@@ -486,8 +486,9 @@
                     v-if="item.payment_id"
                     class="receipt-icon"
                     title="영수증"
-                    >🧾</span
                   >
+                    <img src="/assets/icons/receipt_icon.svg" alt="영수증" />
+                  </span>
                 </td>
               </tr>
               <tr v-if="chList.length === 0">
@@ -1844,7 +1845,14 @@ const formatShortDate = (dateStr) => {
 
   .receipt-icon {
     cursor: pointer;
-    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 18px;
+      height: 18px;
+    }
   }
 
   .empty-message {
