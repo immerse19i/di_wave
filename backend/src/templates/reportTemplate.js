@@ -517,9 +517,9 @@ function generateReportHTML(data) {
 
     <div class="age-score-section">
       <div class="age-row">
-        <span>만나이 <strong>${age.years}세 ${String(age.months).padStart(2, '0')}개월</strong></span>
+        <span>만나이 &nbsp;<strong>${age.years}세 ${String(age.months).padStart(2, '0')}개월</strong></span>
         <span class="age-arrow"><img src="${baseUrl}/report-assets/arrow_left.svg" style="width:22px;transform:${arrowRotate}" /></span>
-        <span>뼈 나이(AI) <strong>${analysis.bone_age_years}세 ${String(analysis.bone_age_months || 0).padStart(2, '0')}개월</strong></span>
+        <span>뼈 나이(AI) &nbsp;<strong>${analysis.bone_age_years}세 ${String(analysis.bone_age_months || 0).padStart(2, '0')}개월</strong></span>
         <span class="age-diff">${ageDiffText}</span>
       </div>
       <div class="score-row">
