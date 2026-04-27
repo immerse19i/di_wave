@@ -47,9 +47,19 @@
           <span class="radio-custom"></span>
           가입일
         </label>
-        <DatePicker v-model="startDate" :max-date="endDate" :disabled="dateMode !== 'date'" :class="{ 'date-active': dateMode === 'date' }" />
+        <DatePicker
+          v-model="startDate"
+          :max-date="endDate"
+          :disabled="dateMode !== 'date'"
+          :class="{ 'date-active': dateMode === 'date' }"
+        />
         <span class="date-separator">~</span>
-        <DatePicker v-model="endDate" :min-date="startDate" :disabled="dateMode !== 'date'" :class="{ 'date-active': dateMode === 'date' }" />
+        <DatePicker
+          v-model="endDate"
+          :min-date="startDate"
+          :disabled="dateMode !== 'date'"
+          :class="{ 'date-active': dateMode === 'date' }"
+        />
       </div>
     </div>
 
@@ -296,8 +306,13 @@ const handleSearch = () => {
   const keyword = searchKeyword.value.trim();
   if (keyword.length > 0) {
     const isNumber = /^\d+$/.test(keyword.replace(/-/g, ''));
-    if ((isNumber && keyword.replace(/-/g, '').length < 4) || (!isNumber && keyword.length < 2)) {
-      message.showAlert('최소 입력 글자수를 확인해 주세요.\n(병원명 2자이상, 사업자번호 4자리이상)');
+    if (
+      (isNumber && keyword.replace(/-/g, '').length < 4) ||
+      (!isNumber && keyword.length < 2)
+    ) {
+      message.showAlert(
+        '최소 입력 글자수를 확인해 주세요.\n(병원명 2자이상, 사업자번호 4자리이상)',
+      );
       return;
     }
   }
@@ -341,7 +356,7 @@ onMounted(() => fetchList());
 
 <style lang="scss" scoped>
 .page-wrap {
-  padding: 32px 42px;
+  padding: 32px 24px;
   color: $white;
 }
 
