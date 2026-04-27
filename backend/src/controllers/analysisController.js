@@ -178,8 +178,8 @@ exports.getAnalyses = async (req, res) => {
         const limit = parseInt(req.query.limit) || 20;
         const offset = (page - 1) * limit;
         const search = req.query.search || '';
-        const sortField = req.query.sortField || 'created_at';
-        const sortOrder = req.query.sortOrder || 'DESC';
+const sortField = req.query.sortField || 'analysis_date';
+const sortOrder = req.query.sortOrder || 'DESC';
 
         // 허용된 정렬 필드만 허용 (SQL Injection 방지)
         const allowedSortFields = {
@@ -192,8 +192,13 @@ exports.getAnalyses = async (req, res) => {
         const dbSortOrder = sortOrder === 'ASC' ? 'ASC' : 'DESC';
 
         // 동일 값 시 2차/3차 정렬
-        const orderClause = `${dbSortField} ${dbSortOrder}, p.name ASC, p.birth_date ASC, a.created_at DESC`;
+        // analysis_date 정렬일 때만 NULL을 마지막으로 보내고, created_at으로 fallback
+const isAnalysisDate = dbSortField === 'a.analysis_date';
+const orderClause = isAnalysisDate
+  ? `a.analysis_date IS NULL ASC, a.analysis_date ${dbSortOrder}, a.created_at DESC, p.name ASC`
+  : `${dbSortField} ${dbSortOrder}, p.name ASC, p.birth_date ASC, a.created_at DESC`;
 
+  
         // 검색 조건
         let whereClause = 'a.hospital_id = ?';
         const params = [hospitalId];
