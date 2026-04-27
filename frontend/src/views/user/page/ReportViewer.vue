@@ -1832,7 +1832,7 @@ onUnmounted(() => {
     span {
       @include font-12-regular;
       // font-size: 10px;
-      color: #353535;
+      color: $black;
       white-space: nowrap;
     }
   }

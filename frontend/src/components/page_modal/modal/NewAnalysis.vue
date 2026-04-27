@@ -117,31 +117,40 @@
           </div>
 
           <!-- 생년월일 -->
+          <!-- 생년월일 -->
           <div class="form-row">
             <label> <span class="required">*</span>생년월일 </label>
             <div class="birth-inputs">
               <input
+                ref="yearRef"
                 type="text"
                 v-model="form.birthYear"
-                placeholder=""
+                inputmode="numeric"
+                maxlength="4"
                 class="input-year"
-                @input="onNumericInput($event, 'birthYear')"
+                @input="onBirthInput($event, 'birthYear')"
               />
               <span class="unit">년</span>
               <input
+                ref="monthRef"
                 type="text"
                 v-model="form.birthMonth"
-                placeholder=""
+                inputmode="numeric"
+                maxlength="2"
                 class="input-month"
-                @input="onNumericInput($event, 'birthMonth')"
+                @input="onBirthInput($event, 'birthMonth')"
+                @keydown="onBirthKeydown($event, yearRef)"
               />
               <span class="unit">월</span>
               <input
+                ref="dayRef"
                 type="text"
                 v-model="form.birthDay"
-                @input="onNumericInput($event, 'birthDay')"
-                placeholder=""
+                inputmode="numeric"
+                maxlength="2"
                 class="input-day"
+                @input="onBirthInput($event, 'birthDay')"
+                @keydown="onBirthKeydown($event, monthRef)"
               />
               <span class="unit">일</span>
             </div>
@@ -281,6 +290,11 @@ const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'svg', 'dcm'];
 const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
 const isDragOver = ref(false);
 
+// 생년월일 input DOM 참조
+const yearRef = ref(null);
+const monthRef = ref(null);
+const dayRef = ref(null);
+
 const handleDrop = (event) => {
   isDragOver.value = false;
   const file = event.dataTransfer.files[0];
@@ -368,6 +382,27 @@ const onNumericInput = (event, field) => {
     form.value[field] = filtered;
     event.target.value = filtered;
     message.showAlert('숫자만 입력 가능합니다.');
+  }
+};
+
+// 생년월일 전용 입력 처리 (숫자만 + 자동 포커스 이동)
+const onBirthInput = (event, field) => {
+  // 숫자만 남기기 (생년월일은 소수점 불필요)
+  const filtered = event.target.value.replace(/[^0-9]/g, '');
+  form.value[field] = filtered;
+
+  // 다 채워지면 다음 칸으로 포커스 이동
+  if (field === 'birthYear' && filtered.length === 4) {
+    monthRef.value?.focus();
+  } else if (field === 'birthMonth' && filtered.length === 2) {
+    dayRef.value?.focus();
+  }
+};
+
+// 빈 칸에서 백스페이스 누르면 이전 칸으로
+const onBirthKeydown = (event, prevRef) => {
+  if (event.key === 'Backspace' && event.target.value === '') {
+    prevRef.value?.focus();
   }
 };
 
