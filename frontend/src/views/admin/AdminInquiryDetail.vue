@@ -544,6 +544,8 @@ const submitAnswer = () => {
         isProcessing.value = false;
       }
     },
+    null,
+    { title: '답변 작성', confirmText: '확인', cancelText: '취소' },
   );
 };
 
