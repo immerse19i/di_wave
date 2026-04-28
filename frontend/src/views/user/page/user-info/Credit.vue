@@ -119,11 +119,15 @@
 
       <!-- 페이지네이션 -->
       <div class="pagination">
-        <button @click="goPage(1)" :disabled="currentPage === 1">
-          &laquo;
+        <button class="arrow" @click="goPage(1)" :disabled="currentPage === 1">
+          <img src="/assets/icons/arrow_first.svg" alt="first" />
         </button>
-        <button @click="goPage(currentPage - 1)" :disabled="currentPage === 1">
-          &lt;
+        <button
+          class="arrow"
+          @click="goPage(currentPage - 1)"
+          :disabled="currentPage === 1"
+        >
+          <img src="/assets/icons/arrow_prev.svg" alt="prev" />
         </button>
         <button
           v-for="page in pageRange"
@@ -134,16 +138,18 @@
           {{ page }}
         </button>
         <button
+          class="arrow"
           @click="goPage(currentPage + 1)"
           :disabled="currentPage === totalPages"
         >
-          &gt;
+          <img src="/assets/icons/arrow_next.svg" alt="next" />
         </button>
         <button
+          class="arrow"
           @click="goPage(totalPages)"
           :disabled="currentPage === totalPages"
         >
-          &raquo;
+          <img src="/assets/icons/arrow_last.svg" alt="last" />
         </button>
       </div>
     </div>
@@ -784,8 +790,9 @@ onMounted(() => {
     button {
       @include font-14-regular;
       color: $white;
-      width: 32px;
-      height: 32px;
+      min-width: 28px;
+      height: 28px;
+      padding: 0;
       border-radius: $radius-sm;
       display: flex;
       align-items: center;
@@ -798,6 +805,13 @@ onMounted(() => {
 
       &:hover:not(.active):not(:disabled) {
         background: rgba(255, 255, 255, 0.1);
+      }
+
+      &.arrow {
+        img {
+          width: 28px;
+          height: 28px;
+        }
       }
 
       &:disabled {
@@ -912,8 +926,8 @@ onMounted(() => {
     margin-bottom: 24px;
 
     button {
-      min-width: 32px;
-      height: 32px;
+      min-width: 28px;
+      height: 28px;
       background: none;
       color: $white;
       border: none;
@@ -937,8 +951,8 @@ onMounted(() => {
         justify-content: center;
 
         img {
-          width: 16px;
-          height: 16px;
+          width: 28px;
+          height: 28px;
         }
       }
     }

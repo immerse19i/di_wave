@@ -648,9 +648,9 @@ const onResize = () => {
   margin-top: 24px;
 
   button {
-    min-width: 32px;
-    height: 32px;
-    padding: 0 8px;
+    min-width: 28px;
+    height: 28px;
+    padding: 0;
     background: none;
     color: $dark-text;
     border: none;
@@ -672,8 +672,8 @@ const onResize = () => {
     }
 
     img {
-      width: 12px;
-      height: 12px;
+      width: 28px;
+      height: 28px;
     }
   }
 }

@@ -439,9 +439,9 @@ onMounted(() => {
   margin-top: 24px;
 
   .page-btn {
-    min-width: 32px;
-    height: 32px;
-    padding: 0 8px;
+    min-width: 28px;
+    height: 28px;
+    padding: 0;
     background: none;
     color: $dark-text;
     border: none;
@@ -456,8 +456,8 @@ onMounted(() => {
       justify-content: center;
 
       img {
-        width: 16px;
-        height: 16px;
+        width: 28px;
+        height: 28px;
       }
     }
 

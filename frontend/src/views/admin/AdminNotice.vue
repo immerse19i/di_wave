@@ -162,9 +162,15 @@
 
     <!-- ⑧ 페이지네이션 -->
     <div class="pagination" v-if="totalPages > 0">
-      <button @click="goPage(1)" :disabled="currentPage === 1">«</button>
-      <button @click="goPage(currentPage - 1)" :disabled="currentPage === 1">
-        ‹
+      <button class="arrow" @click="goPage(1)" :disabled="currentPage === 1">
+        <img src="/assets/icons/arrow_first.svg" alt="first" />
+      </button>
+      <button
+        class="arrow"
+        @click="goPage(currentPage - 1)"
+        :disabled="currentPage === 1"
+      >
+        <img src="/assets/icons/arrow_prev.svg" alt="prev" />
       </button>
       <button
         v-for="p in pageRange"
@@ -175,16 +181,18 @@
         {{ p }}
       </button>
       <button
+        class="arrow"
         @click="goPage(currentPage + 1)"
         :disabled="currentPage === totalPages"
       >
-        ›
+        <img src="/assets/icons/arrow_next.svg" alt="next" />
       </button>
       <button
+        class="arrow"
         @click="goPage(totalPages)"
         :disabled="currentPage === totalPages"
       >
-        »
+        <img src="/assets/icons/arrow_last.svg" alt="last" />
       </button>
     </div>
   </div>
@@ -779,9 +787,9 @@ const onResize = () => {
   margin-top: 24px;
 
   button {
-    min-width: 32px;
-    height: 32px;
-    padding: 0 8px;
+    min-width: 28px;
+    height: 28px;
+    padding: 0;
     background: none;
     color: $dark-text;
     border: none;
@@ -796,6 +804,16 @@ const onResize = () => {
       background: $main-color;
       color: $white;
       @include font-12-bold;
+    }
+    &.arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      img {
+        width: 28px;
+        height: 28px;
+      }
     }
     &:disabled {
       opacity: 0.3;

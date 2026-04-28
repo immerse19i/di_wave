@@ -260,18 +260,18 @@
 
           <div class="ch-pagination" v-if="logTotalPages > 1">
             <button
-              class="page-btn"
+              class="page-btn arrow"
               :disabled="logPage <= 1"
               @click="logPage = 1"
             >
-              &laquo;
+              <img src="/assets/icons/arrow_first.svg" alt="first" />
             </button>
             <button
-              class="page-btn"
+              class="page-btn arrow"
               :disabled="logPage <= 1"
               @click="logPage--"
             >
-              &lt;
+              <img src="/assets/icons/arrow_prev.svg" alt="prev" />
             </button>
             <button
               v-for="p in logVisiblePages"
@@ -282,18 +282,18 @@
               {{ p }}
             </button>
             <button
-              class="page-btn"
+              class="page-btn arrow"
               :disabled="logPage >= logTotalPages"
               @click="logPage++"
             >
-              &gt;
+              <img src="/assets/icons/arrow_next.svg" alt="next" />
             </button>
             <button
-              class="page-btn"
+              class="page-btn arrow"
               :disabled="logPage >= logTotalPages"
               @click="logPage = logTotalPages"
             >
-              &raquo;
+              <img src="/assets/icons/arrow_last.svg" alt="last" />
             </button>
           </div>
 
@@ -1869,9 +1869,9 @@ const formatShortDate = (dateStr) => {
   margin-top: 16px;
 
   .page-btn {
-    min-width: 32px;
-    height: 32px;
-    padding: 0 8px;
+    min-width: 28px;
+    height: 28px;
+    padding: 0;
     background: none;
     color: $dark-text;
     border: none;
@@ -1884,8 +1884,8 @@ const formatShortDate = (dateStr) => {
       align-items: center;
       justify-content: center;
       img {
-        width: 16px;
-        height: 16px;
+        width: 28px;
+        height: 28px;
       }
     }
 

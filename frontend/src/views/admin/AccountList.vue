@@ -169,14 +169,14 @@
         :disabled="pagination.page <= 1"
         @click="goToPage(1)"
       >
-        &laquo;
+        <img src="/assets/icons/arrow_first.svg" alt="first" />
       </button>
       <button
         class="page-btn arrow"
         :disabled="pagination.page <= 1"
         @click="goToPage(pagination.page - 1)"
       >
-        &lt;
+        <img src="/assets/icons/arrow_prev.svg" alt="prev" />
       </button>
       <button
         v-for="pageNum in visiblePages"
@@ -191,14 +191,14 @@
         :disabled="pagination.page >= pagination.totalPages"
         @click="goToPage(pagination.page + 1)"
       >
-        &gt;
+        <img src="/assets/icons/arrow_next.svg" alt="next" />
       </button>
       <button
         class="page-btn arrow"
         :disabled="pagination.page >= pagination.totalPages"
         @click="goToPage(pagination.totalPages)"
       >
-        &raquo;
+        <img src="/assets/icons/arrow_last.svg" alt="last" />
       </button>
     </div>
   </div>
@@ -652,9 +652,9 @@ onMounted(() => fetchList());
   margin-top: 24px;
 
   .page-btn {
-    min-width: 32px;
-    height: 32px;
-    padding: 0 8px;
+    min-width: 28px;
+    height: 28px;
+    padding: 0;
     background: none;
     color: $dark-text;
     border: none;
@@ -671,7 +671,14 @@ onMounted(() => fetchList());
       @include font-12-bold;
     }
     &.arrow {
-      @include font-14-bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      img {
+        width: 28px;
+        height: 28px;
+      }
     }
     &:disabled {
       opacity: 0.3;
