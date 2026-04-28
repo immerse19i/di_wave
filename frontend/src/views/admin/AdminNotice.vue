@@ -389,7 +389,7 @@ const handleDelete = (item) => {
       }
     },
     null,
-    { title: '공지사항 삭제', confirmText: '확인', cancelText: '취소' }
+    { title: '공지사항 삭제', confirmText: '확인', cancelText: '취소' },
   );
 };
 
@@ -410,7 +410,7 @@ const onResize = () => {
 </script>
 <style lang="scss" scoped>
 .page-wrap {
-  padding: 32px 42px;
+  padding: 32px 24px;
   color: $white;
 }
 

@@ -56,8 +56,7 @@ const displayCategory = (l) => {
     return l.category;
   }
   // 기존 '크레딧 수동 관리' 레코드 호환 → '정보수정 (계정 정보 및 관리)'
-  if (l.category === '크레딧 수동 관리')
-    return '정보수정 (계정 정보 및 관리)';
+  if (l.category === '크레딧 수동 관리') return '정보수정 (계정 정보 및 관리)';
   return l.category || '';
 };
 
@@ -107,7 +106,7 @@ onMounted(async () => {
 </script>
 <style lang="scss" scoped>
 .page-wrap {
-  padding: 32px 42px;
+  padding: 32px 24px;
   color: $white;
 }
 

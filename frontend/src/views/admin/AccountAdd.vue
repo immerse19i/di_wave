@@ -25,7 +25,9 @@
             />
             <button type="button" @click="checkDuplicateId">중복 확인</button>
           </div>
-          <p class="validation-msg" v-if="idMessage" :class="idMsgType">{{ idMessage }}</p>
+          <p class="validation-msg" v-if="idMessage" :class="idMsgType">
+            {{ idMessage }}
+          </p>
         </div>
 
         <!-- 비밀번호 -->
@@ -39,7 +41,13 @@
               @input="validatePassword"
             />
             <button type="button" @click="showPw = !showPw">
-              <img :src="showPw ? '/assets/icons/eye_show.svg' : '/assets/icons/eye_hide.svg'" />
+              <img
+                :src="
+                  showPw
+                    ? '/assets/icons/eye_show.svg'
+                    : '/assets/icons/eye_hide.svg'
+                "
+              />
             </button>
           </div>
           <p class="validation-msg" v-if="pwMessage">{{ pwMessage }}</p>
@@ -56,10 +64,18 @@
               @input="validatePasswordConfirm"
             />
             <button type="button" @click="showPwConfirm = !showPwConfirm">
-              <img :src="showPwConfirm ? '/assets/icons/eye_show.svg' : '/assets/icons/eye_hide.svg'" />
+              <img
+                :src="
+                  showPwConfirm
+                    ? '/assets/icons/eye_show.svg'
+                    : '/assets/icons/eye_hide.svg'
+                "
+              />
             </button>
           </div>
-          <p class="validation-msg" v-if="pwConfirmMessage">{{ pwConfirmMessage }}</p>
+          <p class="validation-msg" v-if="pwConfirmMessage">
+            {{ pwConfirmMessage }}
+          </p>
         </div>
 
         <!-- 이메일 -->
@@ -71,9 +87,13 @@
               placeholder="이메일을 입력해 주세요"
               @input="onEmailInput"
             />
-            <button type="button" @click="checkDuplicateEmail">중복 확인</button>
+            <button type="button" @click="checkDuplicateEmail">
+              중복 확인
+            </button>
           </div>
-          <p class="validation-msg" v-if="emailMessage" :class="emailMsgType">{{ emailMessage }}</p>
+          <p class="validation-msg" v-if="emailMessage" :class="emailMsgType">
+            {{ emailMessage }}
+          </p>
         </div>
 
         <!-- 병원명 -->
@@ -143,7 +163,9 @@
               @click="$refs.fileInput.click()"
               style="cursor: pointer"
             />
-            <button type="button" @click="$refs.fileInput.click()">파일첨부</button>
+            <button type="button" @click="$refs.fileInput.click()">
+              파일첨부
+            </button>
             <input
               type="file"
               ref="fileInput"
@@ -155,7 +177,11 @@
         </div>
 
         <!-- 하단 버튼 -->
-        <button type="submit" class="btn-submit" :disabled="!isFormValid || isProcessing">
+        <button
+          type="submit"
+          class="btn-submit"
+          :disabled="!isFormValid || isProcessing"
+        >
           {{ isFormValid ? '생성' : '정보를 모두 입력해 주세요' }}
         </button>
       </form>
@@ -209,7 +235,8 @@ const form = ref({
 const isFormValid = computed(() => {
   const f = form.value;
   const idRegex = /^[a-zA-Z0-9]{6,12}$/;
-  const pwRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[a-zA-Z\d!@#$%^&*(),.?":{}|<>]{8,15}$/;
+  const pwRegex =
+    /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[a-zA-Z\d!@#$%^&*(),.?":{}|<>]{8,15}$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   return (
@@ -232,9 +259,16 @@ const isFormValid = computed(() => {
 const isDirty = computed(() => {
   const f = form.value;
   return (
-    f.loginId || f.password || f.email || f.hospitalName ||
-    f.ceoName || f.phone || f.address || f.addressDetail ||
-    f.businessNumber || selectedFile.value
+    f.loginId ||
+    f.password ||
+    f.email ||
+    f.hospitalName ||
+    f.ceoName ||
+    f.phone ||
+    f.address ||
+    f.addressDetail ||
+    f.businessNumber ||
+    selectedFile.value
   );
 });
 
@@ -280,7 +314,8 @@ async function checkDuplicateId() {
 
 function validatePassword() {
   const pw = form.value.password;
-  const regex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[a-zA-Z\d!@#$%^&*(),.?":{}|<>]{8,15}$/;
+  const regex =
+    /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[a-zA-Z\d!@#$%^&*(),.?":{}|<>]{8,15}$/;
   if (!pw) {
     pwMessage.value = '';
   } else if (!regex.test(pw)) {
@@ -334,7 +369,8 @@ async function checkDuplicateEmail() {
       emailMsgType.value = 'error';
     }
   } catch (e) {
-    emailMessage.value = e.response?.data?.message || '이메일 확인에 실패했습니다.';
+    emailMessage.value =
+      e.response?.data?.message || '이메일 확인에 실패했습니다.';
     emailMsgType.value = 'error';
   }
 }
@@ -435,7 +471,10 @@ onBeforeRouteLeave((to, from, next) => {
   } else {
     message.showConfirm(
       '입력한 내용이 있습니다.\n페이지를 나가시겠습니까?',
-      () => { skipGuard.value = true; next(); },
+      () => {
+        skipGuard.value = true;
+        next();
+      },
       () => next(false),
     );
   }
@@ -449,12 +488,14 @@ function handleBeforeUnload(e) {
 }
 
 onMounted(() => window.addEventListener('beforeunload', handleBeforeUnload));
-onBeforeUnmount(() => window.removeEventListener('beforeunload', handleBeforeUnload));
+onBeforeUnmount(() =>
+  window.removeEventListener('beforeunload', handleBeforeUnload),
+);
 </script>
 
 <style lang="scss" scoped>
 .page-wrap {
-  padding: 32px 42px;
+  padding: 32px 24px;
   color: $white;
 }
 
@@ -463,8 +504,13 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', handleBeforeUnl
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
-  .page-title { @include font-20-bold; }
-  .breadcrumb { @include font-12-regular; color: $dark-text; }
+  .page-title {
+    @include font-20-bold;
+  }
+  .breadcrumb {
+    @include font-12-regular;
+    color: $dark-text;
+  }
 }
 
 .btn-back {
@@ -478,8 +524,13 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', handleBeforeUnl
   cursor: pointer;
   padding: 0;
   margin-bottom: 16px;
-  img { width: 12px; height: 12px; }
-  &:hover { color: $white; }
+  img {
+    width: 12px;
+    height: 12px;
+  }
+  &:hover {
+    color: $white;
+  }
 }
 
 .section-title {
@@ -510,8 +561,12 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', handleBeforeUnl
       color: $white;
       @include font-14-regular;
 
-      &::placeholder { color: $dark-input-gray; }
-      &:focus { border-color: $sub-color-2; }
+      &::placeholder {
+        color: $dark-input-gray;
+      }
+      &:focus {
+        border-color: $sub-color-2;
+      }
       &:read-only {
         background-color: darken($dark-input, 5%);
         cursor: default;
@@ -523,15 +578,21 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', handleBeforeUnl
     margin-top: 4px;
     @include font-12-regular;
     color: $red;
-    &.success { color: $validation-sucess; }
-    &.error { color: $red; }
+    &.success {
+      color: $validation-sucess;
+    }
+    &.error {
+      color: $red;
+    }
   }
 
   .input-with-btn {
     display: flex;
     gap: $spacing-md;
 
-    input { flex: 1; }
+    input {
+      flex: 1;
+    }
 
     button {
       min-width: 136px;
@@ -543,14 +604,18 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', handleBeforeUnl
       @include font-14-medium;
       white-space: nowrap;
       cursor: pointer;
-      &:hover { background-color: $main-color; }
+      &:hover {
+        background-color: $main-color;
+      }
     }
   }
 
   .input-password {
     position: relative;
 
-    input { padding-right: 50px; }
+    input {
+      padding-right: 50px;
+    }
 
     button {
       position: absolute;
@@ -565,8 +630,14 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', handleBeforeUnl
       border: none;
       cursor: pointer;
 
-      img { width: 24px; height: 24px; opacity: 0.6; }
-      &:hover img { opacity: 1; }
+      img {
+        width: 24px;
+        height: 24px;
+        opacity: 0.6;
+      }
+      &:hover img {
+        opacity: 1;
+      }
     }
   }
 }
@@ -582,7 +653,9 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', handleBeforeUnl
   @include font-14-medium;
   cursor: pointer;
 
-  &:hover:not(:disabled) { background: $sub-color; }
+  &:hover:not(:disabled) {
+    background: $sub-color;
+  }
 
   &:disabled {
     background: $dark-line-gray;

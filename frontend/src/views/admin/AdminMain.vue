@@ -190,7 +190,7 @@ const handleMenuClick = (path) => {
     @include font-14-medium;
     text-decoration: none;
     transition: all $transition-fast;
-
+    cursor: pointer;
     img {
       width: 24px;
       height: 24px;

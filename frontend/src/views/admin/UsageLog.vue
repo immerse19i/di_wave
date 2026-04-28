@@ -241,7 +241,7 @@ onUnmounted(() => {
 </script>
 <style lang="scss" scoped>
 .page-wrap {
-  padding: 32px 42px;
+  padding: 32px 24px;
   color: $white;
 }
 
