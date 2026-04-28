@@ -378,7 +378,7 @@ exports.answerInquiry = async (req, res) => {
             <div style="max-width:600px; margin:0 auto; font-family:'Inter','Noto Sans KR',Arial,sans-serif; color:#353535;">
           <img src="http://osteoage.ai/assets/logo/di_wave_logo_color.png" alt="DiwaveLogo" style="width:101px; margin-top:16px;" />  
           
-          <div style="padding:16px;width:100%; font-family:'Inter',Arial,sans-serif; font-size:16px; line-height:1.4; font-weight:500; color:#f8f9fa ">OsteoAge 문의 답변 안내</div>
+          <div style="background:#2AA2A5;padding:16px;width:100%; font-family:'Inter',Arial,sans-serif; font-size:16px; line-height:1.4; font-weight:500; color:#f8f9fa; margin-bottom:20px;">OsteoAge 문의 답변 안내</div>
 
               <!-- 답변 본문 -->
               <div style="padding:0 0 24px; line-height:1.8; font-size:14px;">
