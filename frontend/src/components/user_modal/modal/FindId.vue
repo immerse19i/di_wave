@@ -256,6 +256,7 @@ defineExpose({ step });
 
 .btn-submit {
   width: 100%;
+  min-height: 32px;
   padding: $spacing-md;
   background-color: $main-color;
   color: $white;

@@ -707,6 +707,7 @@ onMounted(() => {
         @include font-14-medium;
         padding: 8px 20px;
         min-width: 136px;
+        min-height: 32px;
         background: $main-gad;
         color: $white;
         border-radius: $radius-sm;
@@ -987,6 +988,7 @@ onMounted(() => {
     border-radius: $radius-sm;
     @include font-14-medium;
     cursor: pointer;
+    min-height: 32px;
 
     &:hover {
       background: $sub-color;
@@ -1080,6 +1082,7 @@ onMounted(() => {
       border-radius: $radius-sm;
       @include font-14-medium;
       cursor: pointer;
+      min-height: 32px;
 
       &:hover {
         background: $sub-color;

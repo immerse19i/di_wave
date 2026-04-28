@@ -426,6 +426,7 @@ onMounted(() => {
       @include font-14-medium;
       cursor: pointer;
       min-width: 136px;
+      min-height: 32px;
       // &:hover {
       //   background: $sub-color;
       // }

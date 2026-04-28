@@ -392,6 +392,7 @@ onUnmounted(() => {
     color: $white;
     background: $main-gad;
     min-width: 136px;
+    min-height: 32px;
     padding: 8px 16px;
     border-radius: $radius-sm;
     @include font-14-medium;

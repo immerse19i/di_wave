@@ -525,9 +525,11 @@ onUnmounted(() => {
   }
   .btn-preview {
     background: $main-gad;
+    min-height: 32px;
   }
   .btn-publish {
     background: $main-gad;
+    min-height: 32px;
     &:hover {
       background: $sub-color;
     }

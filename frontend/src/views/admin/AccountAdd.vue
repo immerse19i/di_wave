@@ -596,6 +596,7 @@ onBeforeUnmount(() =>
 
     button {
       min-width: 136px;
+      min-height: 32px;
       padding: $spacing-md;
       background: $main-gad;
       border: none;
@@ -644,6 +645,7 @@ onBeforeUnmount(() =>
 
 .btn-submit {
   width: 100%;
+  min-height: 32px;
   padding: 14px;
   margin-top: 32px;
   background: $main-color;

@@ -707,6 +707,7 @@ const checkCreditAndSubmit = async () => {
 
   .btn-select-image {
     width: 136px;
+    min-height: 32px;
     padding: 12px;
     margin: auto;
     background: $main-gad;
@@ -970,6 +971,7 @@ const checkCreditAndSubmit = async () => {
   .btn-submit {
     background: $main-gad;
     color: $white;
+    min-height: 32px;
   }
 }
 </style>

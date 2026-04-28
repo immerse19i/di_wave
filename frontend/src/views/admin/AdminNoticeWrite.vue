@@ -687,6 +687,7 @@ const goBack = () => {
 .btn-draft,
 .btn-publish {
   min-width: 136px;
+  min-height: 32px;
   padding: 7.5px;
   border: none;
   border-radius: 4px;

@@ -373,6 +373,7 @@ onUnmounted(() => {
 .btn-save {
   background: $main-color;
   color: $white;
+  min-height: 32px;
 
   &:hover {
     background: $sub-color;

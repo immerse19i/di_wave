@@ -900,6 +900,7 @@ const downloadViewerFile = () => {
   color: $white;
   border-radius: $radius-sm;
   min-width: 136px;
+  min-height: 32px;
   @include font-14-medium;
   cursor: pointer;
   &:hover {
@@ -908,6 +909,7 @@ const downloadViewerFile = () => {
 }
 .btn-submit {
   min-width: 136px;
+  min-height: 32px;
   padding: 10px 32px;
   background: $main-gad;
   border: none;

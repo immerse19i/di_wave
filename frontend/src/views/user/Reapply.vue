@@ -404,6 +404,7 @@ onMounted(() => fetchInfo());
 
     button {
       min-width: 136px;
+      min-height: 32px;
       padding: $spacing-md;
       background: $main-gad;
       border: none;
@@ -421,6 +422,7 @@ onMounted(() => fetchInfo());
 
 .btn-submit {
   width: 100%;
+  min-height: 32px;
   padding: 14px;
   margin-top: 32px;
   background: $main-color;

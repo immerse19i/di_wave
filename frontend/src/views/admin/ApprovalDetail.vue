@@ -422,6 +422,7 @@ onMounted(() => {
   border-radius: $radius-sm;
   @include font-14-medium;
   cursor: pointer;
+  min-height: 32px;
 
   &:hover {
     background: $sub-color;
@@ -452,6 +453,7 @@ onMounted(() => {
 
 .btn-approve {
   min-width: 140px;
+  min-height: 32px;
   padding: 12px 40px;
   background: $main-color;
   color: $white;
@@ -542,6 +544,7 @@ onMounted(() => {
   @include font-14-medium;
   cursor: pointer;
   min-width: 136px;
+  min-height: 32px;
 
   &:hover {
     background: $sub-color;

@@ -236,6 +236,7 @@ input[type='password'] {
     @include font-14-medium;
     cursor: pointer;
     transition: background $transition-fast;
+    min-height: 32px;
 
     &:hover {
       background: $sub-color;

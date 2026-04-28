@@ -1214,6 +1214,7 @@ const formatShortDate = (dateStr) => {
   .btn-save {
     padding: 7.5px 32px;
     min-width: 132px;
+    min-height: 32px;
     background: $main-gad;
     color: $white;
     border-radius: $radius-sm;
@@ -1269,6 +1270,7 @@ const formatShortDate = (dateStr) => {
   cursor: pointer;
 
   min-width: 96px;
+  min-height: 32px;
   &:hover:not(:disabled):not(.preview) {
     border-color: $main-color;
   }
@@ -1299,6 +1301,7 @@ const formatShortDate = (dateStr) => {
   background: $main-color;
   color: $white;
   min-width: 96px;
+  min-height: 32px;
   border-radius: $radius-sm;
   @include font-14-medium;
   cursor: pointer;
@@ -1440,6 +1443,7 @@ const formatShortDate = (dateStr) => {
   .btn-confirm {
     background: $main-gad;
     color: $white;
+    min-height: 32px;
   }
 }
 
@@ -1512,6 +1516,7 @@ const formatShortDate = (dateStr) => {
   border-radius: $radius-sm;
   @include font-14-medium;
   cursor: pointer;
+  min-height: 32px;
 }
 
 // 크레딧 수동 관리 팝업

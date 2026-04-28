@@ -534,6 +534,7 @@ onMounted(() => fetchList());
     color: $white;
     background: $main-gad;
     min-width: 100px;
+    min-height: 32px;
     padding: 8px 16px;
     border-radius: $radius-sm;
     @include font-14-medium;
@@ -558,6 +559,7 @@ onMounted(() => fetchList());
   .btn-add {
     padding: 7px 20px;
     min-width: 100px;
+    min-height: 32px;
     background: $main-gad;
     color: $white;
     border-radius: $radius-sm;

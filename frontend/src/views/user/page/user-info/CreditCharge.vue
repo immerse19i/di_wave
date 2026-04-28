@@ -712,6 +712,7 @@ const goToCreditMain = () => {
     border-radius: $radius-sm;
     @include font-14-medium;
     cursor: pointer;
+    min-height: 32px;
 
     &:hover {
       background: $sub-color;

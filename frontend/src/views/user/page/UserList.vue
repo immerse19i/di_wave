@@ -341,6 +341,7 @@ onMounted(() => {
       color: $white;
       background: $main-gad;
       min-width: 136px;
+      min-height: 32px;
       padding: 7.5px;
       border-radius: $radius-sm;
     }

@@ -606,6 +606,7 @@ onMounted(() => {
 
   .btn-select-image {
     width: 136px;
+    min-height: 32px;
     padding: 12px;
     margin: auto;
     background: $main-gad;
@@ -868,6 +869,7 @@ onMounted(() => {
   .btn-submit {
     background: $main-gad;
     color: $white;
+    min-height: 32px;
   }
 }
 </style>

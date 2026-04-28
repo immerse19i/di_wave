@@ -1218,6 +1218,7 @@ watch(
     align-items: center;
     padding-right: 8px;
     cursor: pointer;
+    min-height: 32px;
 
     img {
       width: 20px;
@@ -1469,6 +1470,7 @@ watch(
     background: $main-gad;
     color: $white;
     min-width: 71px;
+    min-height: 32px;
     padding: 6px 16px;
     border-radius: $radius-sm;
     border: 1px solid transparent;
@@ -1757,6 +1759,7 @@ watch(
 .btn-report {
   width: 100%;
   max-width: 400px;
+  min-height: 32px;
   margin: 16px auto 0;
   display: block;
   padding: 14px;
